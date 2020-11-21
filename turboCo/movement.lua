@@ -96,12 +96,15 @@ function visit_path(path, block_callback)
         return
     end
 
+    local current_x, current_y, current_z = gps.locate()
     local map = {}
+    map[coord(current_x, current_y, current_z)] = 1
 
     while #path > 0 do
         local next = table.remove(path, 1)
         x, y, z = split_coord(next)
         print("Visiting "..x..", "..y..", "..z)
+        map[coord(x, y, z)] = 1
     end
 end
 

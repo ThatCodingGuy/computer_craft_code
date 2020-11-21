@@ -8,13 +8,13 @@ end
 
 local function safeSubstring(str, startIndex, endIndex)
   local length = string.len(str)
+  if startIndex >= length then
+    return ""
+  end
   if endIndex > length then
     endIndex = -1
   end
-  if start >= length then
-    return ""
-  end
-  return string.sub(str, start, endIndex)
+  return string.sub(str, startIndex, endIndex)
 end
 
 --Assuming that you have only one monitor peripheral, returns the only one

@@ -1,5 +1,11 @@
 for i = 0, 100 do
     turtle.refuel(2)
+    dropAllButOne(1)
+    dropAllButOne(2)
+    dropAllButOne(3)
+    dropAllButOne(4)
+    dropAllButOne(5)
+
     for y = 0, 50 do
         turtle.dig()
         turtle.forward()
@@ -18,11 +24,6 @@ for i = 0, 100 do
     turtle.forward()
     turtle.turnRight()
 
-    dropAllButOne(1)
-    dropAllButOne(2)
-    dropAllButOne(3)
-    dropAllButOne(4)
-    dropAllButOne(5)
 end
 
 function dropAllButOne(slot)

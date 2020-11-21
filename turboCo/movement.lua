@@ -74,6 +74,7 @@ function scan_area(width, depth, block_callback)
     -- +depth forward, -depth backwards
     -- block_callback is called with block data whenever a collision occurs.
 
+    print("Here")
     local direction = figure_out_facing()
     print(direction) 
     if not direction then

@@ -20,7 +20,7 @@ function updateRobot()
     {
         url = "https://turboco-app.azurewebsites.net/api/robots/" .. os.getComputerLabel(),
         method = "PUT",
-        body = "{ \"x\": \"" .. x .. "\", \"y\": \"" .. y .. "\", \"z\": \"" .. z .. "\" }",
+        body = "{ \"x\": " .. x .. ", \"y\": " .. y .. ", \"z\": " .. z .. " }",
         headers =
         {
             ["Content-Type"] = "application/json",

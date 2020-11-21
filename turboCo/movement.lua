@@ -22,11 +22,11 @@ function figure_out_facing()
 
         if success then 
             if new_position_x > start_position_x then
-                return EAST
+                return WEST
             end
 
             if new_position_x < start_position_x then
-                return WEST
+                return EAST
             end
 
             if new_position_z > start_position_z then

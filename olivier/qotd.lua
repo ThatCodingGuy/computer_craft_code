@@ -12,6 +12,11 @@ function getQuoteOfTheDay()
   end
 end
 
+function setMonitorScale(screen)
+  local width,height = screen.getSize()
+  monitor.setScale()
+end
+
 local quote = getQuoteOfTheDay()
 local screen = monitor.getInstance()
 monitor.clear(screen)
@@ -21,8 +26,8 @@ monitor.writeCenterLn(screen, quote['title'])
 monitor.ln(screen)
 monitor.writeLn(screen, quote['content'])
 monitor.ln(screen)
-monitor.writeLeft(screen, "Author: " .. quote['author'])
-monitor.writeRight(screen, "Date: " .. quote['date'])
+monitor.writeLeftLn(screen, "Author: " .. quote['author'])
+monitor.writeLeftLn(screen, "Date: " .. quote['date'])
 
 
 

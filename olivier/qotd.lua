@@ -7,12 +7,8 @@ function getQuoteOfTheDay()
   if responseStr ~= nil then
      local responseObject = json.decode(responseStr)
      if responseObject ~= nil then
-      responseStr.close()
       return responseObject['quote']
      end
-  end
-  if responseStr ~= nil then
-   responseStr.close()
   end
 end
 

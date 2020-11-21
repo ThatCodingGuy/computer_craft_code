@@ -11,7 +11,7 @@ SOUTH = "SOUTH"
 
 function figure_out_facing() do 
     local start_position_x, start_position_y, start_position_z = gps.locate()
-    if not start_position do
+    if not start_position then
         print("GPS not connected.")
         return nil
     end
@@ -20,20 +20,20 @@ function figure_out_facing() do
         local success = turtle.forward()
         local new_position_x, new_position_y, new_position_z = gps.locate()
 
-        if success do 
-            if new_position_x > start_position_x do
+        if success then 
+            if new_position_x > start_position_x then
                 return EAST
             end
 
-            if new_position_x < start_position_x do
+            if new_position_x < start_position_x then
                 return WEST
             end
 
-            if new_position_y > start_position_y do
+            if new_position_y > start_position_y then
                 return NORTH
             end
 
-            if new_position_y < start_position_y do
+            if new_position_y < start_position_y then
                 return SOUTH
             end
         end

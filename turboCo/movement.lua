@@ -15,7 +15,15 @@ local BLOCK = 3
 
 
 function coord(x, y, z) 
-    return tostring(x).."_"..tostring(y).."_"..tostring(z)
+    local p = {}
+    table.insert(p, x)
+    table.insert(p, y)
+    table.insert(p, z)
+    return p
+end
+
+function split_coord(coord)
+    return coord[1], coord[2], coord[3]
 end
 
 function figure_out_facing()
@@ -76,6 +84,27 @@ function figure_out_facing()
     return
 end
 
+function visit_path(path, block_callback)
+    -- This function visits all points on a path.
+    -- They must all be connected, and ordered in a way 
+    -- where each cell is visitable going only through
+    -- previously visited cells.
+    
+    local direction = figure_out_facing()
+    if not direction then
+        print("Could not determine facing")
+        return
+    end
+
+    local map = {}
+
+    while #table > 0 do
+        local next = table.remove(path, 0)
+        x, y, z = split_coord(next)
+        print("Visiting "..x..", "..y..", "..z)
+    end
+end
+
 
 function scan_area(width, depth, block_callback)
     -- +width to the right, -width to the left
@@ -130,15 +159,14 @@ function scan_area(width, depth, block_callback)
         z_offset = -1
     end
     
-    local area = {}
+    local path = {}
     for x = start_x, final_x, x_offset do
         for z = start_z, final_z, z_offset do
-            table.insert(area, coord(x, start_y, z))
+            table.insert(path, coord(x, start_y, z))
         end
     end
 
-    print(area[0])
-    print(area[1])
+    visit_path(path, block_callback)
 
     return final_x, final_z
 

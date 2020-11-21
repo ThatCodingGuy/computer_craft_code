@@ -23,4 +23,5 @@ end
 function clear(screen)
   screen.clear()
   screen.setCursorPos(1,1)
+end
 

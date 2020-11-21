@@ -22,6 +22,11 @@ function getInstance()
   return peripheral.find("monitor")
 end
 
+--Sets cursor to the beggining of the next line
+function ln(screen)
+  setCursorToNextLine(screen)
+end
+
 --Write so that the text wraps to the next line
 function write(screen, text)
   local width,height = screen.getSize()

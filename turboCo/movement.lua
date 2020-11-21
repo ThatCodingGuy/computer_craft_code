@@ -9,7 +9,7 @@ WEST = "WEST"
 NORTH = "NORTH"
 SOUTH = "SOUTH"
 
-function figure_out_facing() do 
+function figure_out_facing()
     local start_position_x, start_position_y, start_position_z = gps.locate()
     if not start_position then
         print("GPS not connected.")

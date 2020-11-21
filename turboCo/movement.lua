@@ -114,7 +114,8 @@ function scan_area(width, depth, block_callback)
 
     local final_x = start_x + x_total
     local final_z = start_y + z_total
-    print("Scanning from "..start_x..","..start_z.." to "..x_total..","..z_total)
+    print("Scanning from "..start_x..","..start_z.." to "..final_x..","..final_z)
     
+    return final_x, final_z
 
 end

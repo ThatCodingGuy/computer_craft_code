@@ -3,7 +3,28 @@ function dropAllButOne(slot)
     turtle.drop(turtle.getItemCount() - 1)
 end
 
-for i = 0, 100 do
+function force()
+    while turtle.inspect() do
+        turtle.dig()
+    end
+    turtle.forward()
+end
+
+function forceUp()
+    while turtle.inspectUp() do
+        turtle.digUp()
+    end
+    turtle.up()
+end
+
+function forceDown()
+    while turtle.inspectDown() do
+        turtle.digDown()
+    end
+    turtle.down()
+end
+
+function cleanup()
     turtle.refuel(2)
     dropAllButOne(2)
     dropAllButOne(3)
@@ -11,23 +32,21 @@ for i = 0, 100 do
     dropAllButOne(5)
     dropAllButOne(6)
     turtle.select(1)
+end
 
+for i = 0, 100 do
+    cleanup()
     for y = 0, 50 do
-        turtle.dig()
-        turtle.forward()
+        force()
     end
-    turtle.digUp()
-    turtle.up()
+    forceUp()
     turtle.turnLeft()
     turtle.turnLeft()
     for y = 0, 50 do
-        turtle.dig()
-        turtle.forward()
+        force()
     end
-    turtle.down()
+    forceDown()
     turtle.turnRight()
-    turtle.dig()
-    turtle.forward()
+    force()
     turtle.turnRight()
-
 end

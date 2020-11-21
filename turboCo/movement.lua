@@ -133,11 +133,12 @@ function scan_area(width, depth, block_callback)
     local area = {}
     for x = start_x, final_x, x_offset do
         for z = start_z, final_z, z_offset do
-            area[coord(x, start_y, z)] = UNVISITED
+            table.insert(area, coord(x, start_y, z))
         end
     end
 
-    for key,value in pairs(area) do print(key,value) end
+    print(area[0])
+    print(area[1])
 
     return final_x, final_z
 

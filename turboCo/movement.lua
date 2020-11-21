@@ -99,7 +99,7 @@ function visit_path(path, block_callback)
     local map = {}
 
     while #table > 0 do
-        local next = table.remove(path, 0)
+        local next = table.remove(path, 1)
         x, y, z = split_coord(next)
         print("Visiting "..x..", "..y..", "..z)
     end
@@ -162,7 +162,7 @@ function scan_area(width, depth, block_callback)
     local path = {}
     for x = start_x, final_x, x_offset do
         for z = start_z, final_z, z_offset do
-            table.insert(path, coord(x, start_y, z))
+            table.insert(path, 1,  coord(x, start_y, z))
         end
     end
 

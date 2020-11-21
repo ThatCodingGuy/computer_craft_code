@@ -137,7 +137,8 @@ function scan_area(width, depth, block_callback)
         end
     end
 
-    print(area)    
+    for key,value in pairs(area) do print(key,value) end
+
     return final_x, final_z
 
 end

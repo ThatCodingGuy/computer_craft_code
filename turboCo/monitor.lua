@@ -11,11 +11,12 @@ end
 --Writes centered text for a monitor of any size, then enter a new line
 function writeCenterLn(screen, text)
   local width,height = screen.getSize()
+  local x,y = screen.getCursorPos()
   local textSize = string.len(text)
   local emptySpace = width - textSize
   if emptySpace > 1 then
     startingX = (emptySpace / 2) + 1
-    screen.setCursorPos(startingX, height)
+    screen.setCursorPos(startingX, y)
   end
   writeLn(screen, text)
 end

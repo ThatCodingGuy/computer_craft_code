@@ -9,3 +9,16 @@ function alert(message)
         }
     }
 end
+
+function updateRobot(robotLabel, x, y, z)
+    http.request
+    {
+        url = "https://turboco-app.azurewebsites.net/api/robots/" .. robotLabel,
+        method = "PUT",
+        body = "{ \"x\": \"" .. x .. "\", \"y\": \"" .. y .. "\", \"z\": \"" .. z .. "\" }",
+        headers =
+        {
+            ["Content-Type"] = "application/json",
+        }
+    }
+end

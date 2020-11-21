@@ -30,6 +30,7 @@ function write(screen, text)
     print("string.len(remainingText): " .. string.len(remainingText))
     local x,y = screen.getCursorPos()
     local remainingX = width - x + 1
+    print("remainingX: " .. remainingX)
     remainingLineText = safeSubstring(remainingText, 1, remainingX)
     print("remainingLineText: " .. remainingLineText)
     screen.write(remainingLineText)

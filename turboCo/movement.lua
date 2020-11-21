@@ -98,7 +98,7 @@ function visit_path(path, block_callback)
 
     local map = {}
 
-    while #table > 0 do
+    while #path > 0 do
         local next = table.remove(path, 1)
         x, y, z = split_coord(next)
         print("Visiting "..x..", "..y..", "..z)

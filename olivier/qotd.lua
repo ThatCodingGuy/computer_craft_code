@@ -14,7 +14,7 @@ end
 
 local quote = getQuoteOfTheDay()
 local screen = monitor.getInstance()
-
+monitor.clear(screen)
 monitor.writeCenterLn(screen, "TurboCo Motivational Billboard")
 monitor.ln(screen)
 monitor.writeCenterLn(screen, quote['title'])

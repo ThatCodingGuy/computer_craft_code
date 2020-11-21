@@ -6,15 +6,15 @@ local function setCursorToNextLine(screen)
   screen.setCursorPos(1, y+1)
 end
 
-local function safesubstring(str, start, end):
+local function safeSubstring(str, startIndex, endIndex):
   local length = string.len(str)
-  if end > length then
-    end = -1
+  if endIndex > length then
+    endIndex = -1
   end
   if start >= length then
     return ""
   end
-  return string.sub(str, start, end)
+  return string.sub(str, start, endIndex)
 end
 
 --Assuming that you have only one monitor peripheral, returns the only one
@@ -29,13 +29,13 @@ function write(screen, text)
   while string.len(remainingText) > 0 do
     local x,y = screen.getCursorPos()
     local remainingX = width - x + 1
-    remainingLineText = safesubstring(remainingText, 1, remainingX)
+    remainingLineText = safeSubstring(remainingText, 1, remainingX)
     screen.write(remainingLineText)
     x,y = screen.getCursorPos()
     if (x == width) then
       setCursorToNextLine(screen)
     end
-    remainingText = safesubstring(remainingText, remainingX + 1, -1)
+    remainingText = safeSubstring(remainingText, remainingX + 1, -1)
   end
   screen.write(text)
 end

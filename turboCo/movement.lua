@@ -15,7 +15,7 @@ local BLOCK = 3
 
 
 function coord(x, y, z) 
-    return x.."_"..y.."_"..z
+    return tostring(x).."_"..tostring(y).."_"..tostring(z)
 end
 
 function figure_out_facing()

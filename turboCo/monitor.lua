@@ -19,7 +19,7 @@ function writeCenterLn(screen, text)
   local textSize = string.len(text)
   local emptySpace = width - textSize
   if emptySpace >= 0 then
-    monitor.setCursorPos(emptySpace / 2, y)
+    monitor.setCursorPos(emptySpace / 2, height)
   end
   writeLn(screen, text)
 end

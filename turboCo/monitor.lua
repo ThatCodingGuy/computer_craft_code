@@ -27,17 +27,20 @@ function write(screen, text)
   local width,height = screen.getSize()
   remainingText = text
   while string.len(remainingText) > 0 do
+    print("string.len(remainingText): " + string.len(remainingText))
     local x,y = screen.getCursorPos()
     local remainingX = width - x + 1
     remainingLineText = safeSubstring(remainingText, 1, remainingX)
+    print("remainingLineText: " + remainingLineText)
     screen.write(remainingLineText)
     x,y = screen.getCursorPos()
     if (x == width) then
+      print("endLine")
       setCursorToNextLine(screen)
     end
     remainingText = safeSubstring(remainingText, remainingX + 1, -1)
+    print("remainingText: " + remainingLineText)
   end
-  screen.write(text)
 end
 
 --Sets cursor to the beggining of the next line after writing

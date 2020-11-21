@@ -162,7 +162,7 @@ function scan_area(width, depth, block_callback)
     local path = {}
     for x = start_x, final_x, x_offset do
         for z = start_z, final_z, z_offset do
-            table.insert(path, 1,  coord(x, start_y, z))
+            table.insert(path, coord(x, start_y, z))
         end
     end
 

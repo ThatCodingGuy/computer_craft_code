@@ -1,3 +1,8 @@
+function dropAllButOne(slot)
+    turtle.select(slot)
+    turtle.drop(turtle.getItemCount() - 1)
+end
+
 for i = 0, 100 do
     turtle.refuel(2)
     dropAllButOne(1)
@@ -25,8 +30,3 @@ for i = 0, 100 do
     turtle.turnRight()
 
 end
-
-function dropAllButOne(slot)
-    turtle.select(slot)
-    turtle.drop(turtle.getItemCount() - 1)
- end

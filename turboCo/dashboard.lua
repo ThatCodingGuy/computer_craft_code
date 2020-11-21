@@ -10,10 +10,11 @@ function alert(message)
     }
 end
 
-function updateRobot(robotLabel, x, y, z)
+function updateRobot()
+    local x, y, z = gps.locate()
     http.request
     {
-        url = "https://turboco-app.azurewebsites.net/api/robots/" .. robotLabel,
+        url = "https://turboco-app.azurewebsites.net/api/robots/" .. os.getComputerLabel(),
         method = "PUT",
         body = "{ \"x\": \"" .. x .. "\", \"y\": \"" .. y .. "\", \"z\": \"" .. z .. "\" }",
         headers =

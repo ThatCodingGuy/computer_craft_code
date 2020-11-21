@@ -131,8 +131,8 @@ function scan_area(width, depth, block_callback)
     end
     
     local area = {}
-    for x = start_x, x_total, x_offset do
-        for z = start_z, z_total, z_offset do
+    for x = start_x, final_x, x_offset do
+        for z = start_z, final_z, z_offset do
             area[coord(x, start_y, z)] = UNVISITED
         end
     end

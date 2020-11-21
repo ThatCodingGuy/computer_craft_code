@@ -25,16 +25,17 @@ function forceDown()
 end
 
 function cleanup()
-    turtle.refuel(2)
     dropAllButOne(2)
     dropAllButOne(3)
     dropAllButOne(4)
     dropAllButOne(5)
     dropAllButOne(6)
+    dropAllButOne(7)
     turtle.select(1)
 end
 
 for i = 0, 100 do
+    turtle.refuel(2)
     cleanup()
     for y = 0, 50 do
         force()
@@ -42,6 +43,7 @@ for i = 0, 100 do
     forceUp()
     turtle.turnLeft()
     turtle.turnLeft()
+    cleanup()
     for y = 0, 50 do
         force()
     end

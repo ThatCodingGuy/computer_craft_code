@@ -1,4 +1,4 @@
-os.loadAPI("../turboCo/dashboard.lua")
+os.loadAPI("/gitlib/turboCo/dashboard.lua")
 
 function dropAllButOne(slot)
     turtle.select(slot)

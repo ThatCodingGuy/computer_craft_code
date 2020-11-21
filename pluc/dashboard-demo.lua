@@ -1,4 +1,4 @@
-os.loadAPI("../gitlib/turboCo/dashboard.lua")
+os.loadAPI("/gitlib/turboCo/dashboard.lua")
 
 while true do
     while turtle.inspect() do

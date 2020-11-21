@@ -5,11 +5,12 @@ end
 
 for i = 0, 100 do
     turtle.refuel(2)
-    dropAllButOne(1)
     dropAllButOne(2)
     dropAllButOne(3)
     dropAllButOne(4)
     dropAllButOne(5)
+    dropAllButOne(6)
+    turtle.select(1)
 
     for y = 0, 50 do
         turtle.dig()

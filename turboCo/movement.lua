@@ -122,11 +122,11 @@ function scan_area(width, depth, block_callback)
     
     x_offset = 1
     z_offset = 1
-    if start_x > x_total then
+    if start_x > final_x then
         x_offset = -1
     end   
 
-    if start_z > z_total then
+    if start_z > final_z then
         z_offset = -1
     end
     

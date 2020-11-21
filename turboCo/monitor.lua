@@ -6,7 +6,7 @@ local function setCursorToNextLine(screen)
   screen.setCursorPos(1, y+1)
 end
 
-local function safeSubstring(str, startIndex, endIndex):
+local function safeSubstring(str, startIndex, endIndex)
   local length = string.len(str)
   if endIndex > length then
     endIndex = -1

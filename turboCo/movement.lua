@@ -166,6 +166,7 @@ function scan_area(width, depth, block_callback)
         end
     end
 
+    print("Path of length: "..#path)
     visit_path(path, block_callback)
 
     return final_x, final_z

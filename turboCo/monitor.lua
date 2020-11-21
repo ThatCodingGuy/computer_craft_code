@@ -45,8 +45,8 @@ function writeLn(screen, text)
   setCursorToNextLine(screen)
 end
 
---Writes centered text for a monitor of any size, then enter a new line
-function writeCenterLn(screen, text)
+--Writes centered text for a monitor of any size
+function writeCenter(screen, text)
   local width,height = screen.getSize()
   local x,y = screen.getCursorPos()
   local textSize = string.len(text)
@@ -55,7 +55,43 @@ function writeCenterLn(screen, text)
     startingX = (emptySpace / 2) + 1
     screen.setCursorPos(startingX, y)
   end
-  writeLn(screen, text)
+  write(screen, text)
+end
+
+--Writes centered text for a monitor of any size, then enter a new line
+function writeCenterLn(screen, text)
+  writeCenter(screen, text)
+  setCursorToNextLine(screen, text)
+end
+
+--Writes text to the left for a monitor of any size
+function writeLeft(screen, text)
+  local x,y = screen.getCursorPos()
+  screen.setCursorPos(1, y)
+  write(screen, text)
+end
+
+--Writes text to the left for a monitor of any size, then enter a new line
+function writeLeftLn(screen, text)
+  writeLeft(screen, text)
+  setCursorToNextLine(screen, text)
+end
+
+--Writes text to the right for a monitor of any size
+function writeRight(screen, text)
+  local width,height = screen.getSize()
+  local x,y = screen.getCursorPos()
+  local textLen = string.len(text)
+  if textLen <= width then
+    screen.setCursorPos(width - string.len(text)+1, y)
+  end
+  write(screen, text)
+end
+
+--Writes text to the right for a monitor of any size, then enter a new line
+function writeRightLn(screen, text)
+  writeRight(screen, text)
+  setCursorToNextLine(screen, text)
 end
 
 -- Clears the screen then resets the cursor pointer

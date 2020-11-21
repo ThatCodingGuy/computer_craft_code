@@ -1,5 +1,5 @@
-os.loadAPI(".gitlib/turboCo/json")
-os.loadAPI(".gitlib/turboCo/monitor")
+os.loadAPI("./gitlib/turboCo/json.lua")
+os.loadAPI("./gitlib/turboCo/monitor.lua")
 
 function getQuoteOfTheDay()
   local quoteResponse = http.get("https://interactive-cv-api.herokuapp.com/quotes/today", {["Content-Type"] = "application/json"})

@@ -1,3 +1,5 @@
+os.loadAPI("../turboCo/dashboard.lua")
+
 function dropAllButOne(slot)
     turtle.select(slot)
     turtle.drop(turtle.getItemCount() - 1)
@@ -39,6 +41,9 @@ for i = 0, 100 do
     cleanup()
     for y = 0, 50 do
         force()
+        if y % 10 == 0 then
+            dashboard.updateRobot()
+        end
     end
     forceUp()
     turtle.turnLeft()
@@ -46,6 +51,9 @@ for i = 0, 100 do
     cleanup()
     for y = 0, 50 do
         force()
+        if y % 10 == 0 then
+            dashboard.updateRobot()
+        end
     end
     forceDown()
     turtle.turnRight()

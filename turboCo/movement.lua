@@ -11,7 +11,7 @@ SOUTH = "SOUTH"
 
 function figure_out_facing()
     local start_position_x, start_position_y, start_position_z = gps.locate()
-    if not start_position then
+    if not start_position_x then
         print("GPS not connected.")
         return nil
     end

@@ -80,6 +80,8 @@ function scan_area(width, depth, block_callback)
         return
     end
 
+    print("Facing "..direction)
+
     local start_x, start_y, start_z = gps.locate()
     if not start_x then
         print("Could not connect to gps")
@@ -88,7 +90,6 @@ function scan_area(width, depth, block_callback)
 
     local x_total = 0
     local z_total = 0
-
     if direction == NORTH then
         x_total = -width
         z_total = depth

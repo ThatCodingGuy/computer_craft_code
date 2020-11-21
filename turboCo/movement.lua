@@ -74,16 +74,12 @@ function scan_area(width, depth, block_callback)
     -- +depth forward, -depth backwards
     -- block_callback is called with block data whenever a collision occurs.
 
-    print("Here")
     local direction = figure_out_facing()
-    print(direction) 
     if not direction then
         print("Could not determine facing")
         return
     end
-
-    print("Facing "..direction)
-
+    
     local start_x, start_y, start_z = gps.locate()
     if not start_x then
         print("Could not connect to gps")
@@ -113,7 +109,7 @@ function scan_area(width, depth, block_callback)
     end
 
     local final_x = start_x + x_total
-    local final_z = start_y + z_total
+    local final_z = start_z + z_total
     print("Scanning from "..start_x..","..start_z.." to "..final_x..","..final_z)
     
     return final_x, final_z

@@ -1,8 +1,8 @@
 
 -- By convention, x/y/z are relative to you.
 -- x to the right, -x to the left.
--- y is in front, -y is behind.
--- z is up, -z is down.
+-- z is in front, -y is behind.
+-- y is up, -z is down.
 
 EAST = "EAST"
 WEST = "WEST"
@@ -15,14 +15,12 @@ function figure_out_facing()
         print("GPS not connected.")
         return nil
     end
-    print(start_position_x.." "..start_position_y.." "..start_position_z)
 
     for i=0, 4, 1 do
         local success = turtle.forward()
         local new_position_x, new_position_y, new_position_z = gps.locate()
 
         if success then 
-            print(new_position_x.." "..new_position_y.." "..new_position_z)
             if new_position_x > start_position_x then
                 return EAST
             end
@@ -31,11 +29,11 @@ function figure_out_facing()
                 return WEST
             end
 
-            if new_position_y > start_position_y then
+            if new_position_z > start_position_z then
                 return NORTH
             end
 
-            if new_position_y < start_position_y then
+            if new_position_z < start_position_z then
                 return SOUTH
             end
         end

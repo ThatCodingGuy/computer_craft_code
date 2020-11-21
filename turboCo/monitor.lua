@@ -21,8 +21,11 @@ function writeCenterLn(screen, text)
   writeLn(screen, text)
 end
 
+--Writes centered text for a monitor of any size, then enter a new line
 function clear(screen)
   screen.clear()
   screen.setCursorPos(1,1)
 end
+
+function getInstance
 

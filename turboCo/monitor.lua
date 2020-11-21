@@ -15,7 +15,7 @@ end
 
 --Writes centered text for a monitor of any size, then enter a new line
 function writeCenterLn(screen, text)
-  local width,height = peripheral.getSize()
+  local width,height = screen.getSize()
   local textSize = string.len(text)
   local emptySpace = width - textSize
   if emptySpace >= 0 then

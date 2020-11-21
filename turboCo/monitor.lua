@@ -38,7 +38,7 @@ function write(screen, text)
     screen.write(remainingLineText)
     x,y = screen.getCursorPos()
     print("x after: " .. x)
-    if (x == width) then
+    if (x > width) then
       print("endLine")
       setCursorToNextLine(screen)
     end

@@ -9,6 +9,14 @@ WEST = "WEST"
 NORTH = "NORTH"
 SOUTH = "SOUTH"
 
+local UNVISITED = 1
+local EMPTY = 2
+local BLOCK = 3
+
+
+function coord(x, y, z) 
+    return x.."_"..y.."_"..z
+end
 
 function figure_out_facing()
     -- TODO: Handle case when covered in gravel/sand.
@@ -112,6 +120,24 @@ function scan_area(width, depth, block_callback)
     local final_z = start_z + z_total
     print("Scanning from "..start_x..","..start_z.." to "..final_x..","..final_z)
     
+    x_offset = 1
+    z_offset = 1
+    if start_x > x_total then
+        x_offset = -1
+    end   
+
+    if start_z > z_total then
+        z_offset = -1
+    end
+    
+    local area = {}
+    for x = start_x, x_total, x_offset do
+        for z = start_z, z_total, z_offset do
+            area[coord(x, start_y, z)] = UNVISITED
+        end
+    end
+
+    print(area)    
     return final_x, final_z
 
 end

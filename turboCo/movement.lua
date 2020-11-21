@@ -99,13 +99,13 @@ function scan_area(width, depth, block_callback)
     end
 
     if direction == EAST then
-        x_total = width
-        z_total = -depth
+        x_total = -depth
+        z_total = width
     end
 
     if direction == WEST then
-        x_total = -width
-        z_total = depth
+        x_total = depth
+        z_total = -width
     end
 
     local final_x = start_x + x_total

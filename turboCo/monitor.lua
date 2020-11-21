@@ -25,25 +25,17 @@ end
 --Write so that the text wraps to the next line
 function write(screen, text)
   local width,height = screen.getSize()
-  print("width: " .. width)
   remainingText = text
   while string.len(remainingText) > 0 do
-    print("string.len(remainingText): " .. string.len(remainingText))
     local x,y = screen.getCursorPos()
-    print("x before: " .. x)
     local remainingX = width - x + 1
-    print("remainingX: " .. remainingX)
     remainingLineText = safeSubstring(remainingText, 1, remainingX)
-    print("remainingLineText: " .. remainingLineText)
     screen.write(remainingLineText)
     x,y = screen.getCursorPos()
-    print("x after: " .. x)
     if (x > width) then
-      print("endLine")
       setCursorToNextLine(screen)
     end
     remainingText = safeSubstring(remainingText, remainingX + 1, -1)
-    print("remainingText: " .. remainingLineText)
   end
 end
 

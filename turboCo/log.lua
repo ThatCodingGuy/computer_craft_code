@@ -2,4 +2,4 @@
 
 local function log(msg)
     print(msg)
-ends
+end

@@ -212,7 +212,7 @@ end
 
 function CheckForUpdate()
 	local input = io.open("hashmap", "r")
-	for line in io.lines(input) do
+	for line in input:lines() do
 		local startp, endp = string.find(line, ",")
 		print(string.sub(line, 0, startp-1))
 	end

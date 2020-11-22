@@ -35,10 +35,8 @@ function getBearings()
     print("Lets get busy!")
 end
 
-getBearings()
-while(true)
-do
-    blockspawned = turtle.detect()
+function miningCycle()
+    local blockspawned = turtle.detect()
     if blockspawned == true then
         print("Digging cobble!")
         print("It fills me with joy")

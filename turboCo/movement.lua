@@ -132,6 +132,7 @@ function pathfind(start, destination, map, block_callback)
             if map[target] and not visited[target] then
                 local new_path = copy(path)
                 table.insert(new_path, target)
+                visited[target] = 1
 
                 if target == destination then
                     return new_path

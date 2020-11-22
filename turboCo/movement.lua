@@ -265,8 +265,8 @@ function visit_path(path, block_callback)
         visit_map[next] = 1
 
         print("VISIT MAP")
-        for i=1, #visit_map, 1 do
-            print(visit_map[i])
+        for key, value in pairs(visit_map) do
+            print(key, " ", value)
         end
 
         local drive_path = pathfind(current, next, visit_map)

@@ -224,6 +224,7 @@ function CheckForUpdate()
 		local oldHash = string.sub(line, startp+1, #line)
 		if newHash == oldHash then
 			--do nothing
+			print("samesi")
 		else
 			print("hash mismatch! rebooting")
 			os.reboot()

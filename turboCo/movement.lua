@@ -135,7 +135,7 @@ function pathfind(start, destination, map)
     table.insert(queue, start_path)
 
     print("Pathfind "..start.."/"..destination)
-    for i = 0, #map, 1 do
+    for i=1, #map, 1 do
         print(map[i])
     end
     
@@ -257,18 +257,14 @@ function visit_path(path, block_callback)
 
     local current_x, current_y, current_z = gps.locate()
     local current = coord(current_x, current_y, current_z)
-    local map = {}
-    map[current] = 1
+    local visit_map = {}
+    visit_map[current] = 1
 
     while #path > 0 do
         local next = table.remove(path, 1)
-        map[next] = 1
+        visit_map[next] = 1
 
-        print("Visit")
-        print(current)
-        print(next)
-
-        local drive_path = pathfind(current, next, map)
+        local drive_path = pathfind(current, next, visit_map)
         local current_node = current
         
         print("Driving "..#drive_path)

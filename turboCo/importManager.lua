@@ -197,13 +197,13 @@ local function getFileHash(path)
 	return hash
 end
 
-function ImportRequirements(path)
+function ImportRequirements(path, exception)
 	local input = io.open(path, "r")
 	local output = io.open("hashmap","w")
 	for line in input:lines() do
 		print(line)
-		if line ~= '"/gitlib/louis/startup_template.lua"' then
-			if line ~= '"/gitlib/louis/requirements"' then
+		if line ~= exception then
+			if line ~= path then
 				os.loadAPI(line)
 			end
 		end
@@ -220,16 +220,17 @@ end
 
 function CheckForUpdate()
 	local input = io.open("hashmap", "r")
-	print("checking library hash mismatch")
+	print("checking libraries in requirements for updates")
 	for line in input:lines() do
 		local startp, endp = string.find(line, ",")
 		-- extract file path...no splitstring, really?
 		local newHash = getFileHash(string.sub(line, 0, startp-1))
 		local oldHash = string.sub(line, startp+1, #line)
 		if newHash == oldHash then
-			print("Same same")
+			-- do nothing
 		else
-			print("hash mismatch! rebooting")
+			print("libraries have been updated! rebooting in 5s")
+			sleep(5)
 			os.reboot()
 		end
 	end

@@ -1,15 +1,8 @@
 
-os.loadAPI("gitlib/turboCo/importManager.lua")
-importManager.ImportRequirements("gitlib/louis/requirements")
-cobblerbot.getBearings()
-
-
-local nextCheck = os.epoch("utc") + (1000*60*1)
+PAPTH_PREFIX = "gitlib/louis/"
+BOT_NAME = "cobblebitch"
 while (true)
 do
-    if os.epoch("utc") > nextCheck then
-        importManager.CheckForUpdate()
-        nextCheck = os.epoch("utc") + (1000*60*1)
-    end
-    cobblerbot.miningCycle()
+    pcall(os.loadAPI, PAPTH_PREFIX .. BOT_NAME .. "/start.lua")
 end
+

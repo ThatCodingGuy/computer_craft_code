@@ -2,7 +2,7 @@ function alert(message)
     http.post
     {
         url = "https://turboco-app.azurewebsites.net/api/alerts",
-        body = "{ \"message\": \"" .. textutils.serializeJSON(message) .. "\" }",
+        body = "{ \"message\": \"" .. message.replace("\"", "\\\"") .. "\" }",
         headers =
         {
             ["Content-Type"] = "application/json",

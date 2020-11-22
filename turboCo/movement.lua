@@ -131,6 +131,7 @@ function pathfind(start, destination, map, block_callback)
 
         for i=1, #coords, 1 do
             local target = coords[i]
+            print("Checking "..target.."/"..map[target].."/"..visisted[target])
             if map[target] and not visited[target] then
                 local new_path = copy(path)
                 table.insert(new_path, target)

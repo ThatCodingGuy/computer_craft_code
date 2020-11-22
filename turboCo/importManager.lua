@@ -202,8 +202,8 @@ function ImportRequirements(path)
 	local output = io.open("hashmap","w")
 	for line in input:lines() do
 		print(line)
-		if line ~= "/gitlib/louis/startup_template.lua" then
-			if line ~= "/gitlib/louis/requirements" then
+		if line ~= '"/gitlib/louis/startup_template.lua"' then
+			if line ~= '"/gitlib/louis/requirements"' then
 				os.loadAPI(line)
 			end
 		end
@@ -227,7 +227,7 @@ function CheckForUpdate()
 		local newHash = getFileHash(string.sub(line, 0, startp-1))
 		local oldHash = string.sub(line, startp+1, #line)
 		if newHash == oldHash then
-			--do nothing
+			print("Same same")
 		else
 			print("hash mismatch! rebooting")
 			os.reboot()

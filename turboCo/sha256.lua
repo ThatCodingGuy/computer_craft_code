@@ -191,7 +191,7 @@ local function sha256(msg)
 end
 
 
-local function importRequirements(path)
+function ImportRequirements(path)
 	local input = io.open(path, "r")
 	local output = io.open("hashmap","w")
 	for line in io.lines(input) do
@@ -208,7 +208,7 @@ local function importRequirements(path)
 	return true
 end
 
-local function checkForUpdate()
+function CheckForUpdate()
 	local input = io.open("hashmap", "r")
 	for line in io.lines(input) do
 		local startp, endp = string.find(line, ",")

@@ -192,9 +192,9 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     --     end
     -- end
 
-    print("Visit adjacent")
-    print(current)
-    print(adjacent)
+    -- print("Visit adjacent")
+    -- print(current)
+    -- print(adjacent)
 
     local found = false
     if current_x - adjacent_x == 1 then

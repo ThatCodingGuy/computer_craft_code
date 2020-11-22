@@ -202,7 +202,8 @@ function ImportRequirements(path)
 	local output = io.open("hashmap","w")
 	for line in input:lines() do
 		print(line)
-		os.loadAPI(line)
+		if line ~= "/gitlib/louis/startup_template.lua" then
+			os.loadAPI(line)
 		local hash = getFileHash(line)
 		local output_string = line .. "," .. hash
 		output:write(output_string, "\n")

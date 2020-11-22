@@ -120,6 +120,7 @@ function pathfind(start, destination, map, block_callback)
         local x, y, z = split_coord(last_elem)
 
         print("Pathfinding: "..last_elem)
+        print(x.." "..y.." "..z)
 
         local coords = {}
         table.insert(coords, coord(x+1, y, z))
@@ -131,6 +132,9 @@ function pathfind(start, destination, map, block_callback)
 
         for i=1, #coords, 1 do
             local target = coords[i]
+            print("Checking "..target.."/"..tostring(map[target]).."/"..tostring(visited[target]))
+            
+            
             if map[target] and not visited[target] then
                 local new_path = copy(path)
                 table.insert(new_path, target)

@@ -206,7 +206,7 @@ function ImportRequirements(path)
 		local hash = getFileHash(line)
 		local output_string = line .. "," .. hash
 		output:write(output_string, "\n")
-		print("loaded library " .. line .. " with hash " .. hash)
+		--print("loaded library " .. line .. " with hash " .. hash)
 		
 	end
 	input:close()
@@ -220,10 +220,10 @@ function CheckForUpdate()
 		local startp, endp = string.find(line, ",")
 		-- extract file path...no splitstring, really?
 		local newHash = getFileHash(string.sub(line, 0, startp-1))
-		local oldHash = string.sub(line, startp, #line)
+		local oldHash = string.sub(line, startp+1, #line)
 		print("old: " .. oldHash)
 		print("new: " .. newHash)
-		sleep(10)
+		sleep(1)
 		if newHash == oldHash then
 			--do nothing
 		else

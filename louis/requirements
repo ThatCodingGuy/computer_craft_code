@@ -1,3 +1,2 @@
-/gitlib/turboCo/log.lua
-/gitlib/turboCo/sha256.lua
-/gitlib/cobblerbot.lua
+"/gitlib/turboCo/importManager.lua"
+"/gitlib/louis/cobblerbot.lua"

@@ -190,20 +190,24 @@ local function sha256(msg)
 		num2s(H[5], 4) .. num2s(H[6], 4) .. num2s(H[7], 4) .. num2s(H[8], 4))
 end
 
+local function getFileHash(path)
+	local library = io.open(path, "r")
+	local hash = sha256(library:read("*all"))
+	library:close()
+	return hash
+end
 
 function ImportRequirements(path)
 	local input = io.open(path, "r")
 	local output = io.open("hashmap","w")
-	print(io.lines(input))
-	for line in io.lines(input) do
+	for line in input:lines() do
 		print(line)
 		os.loadAPI(line)
-		local library = io.open(line)
-		local hash = sha256(library:read("*all"))
+		local hash = getFileHash(line)
 		local output_string = line .. "," .. hash
 		output:write(output_string, "\n")
-		os.print("loaded library " .. line .. " with hash " .. hash)
-		library:close()
+		--print("loaded library " .. line .. " with hash " .. hash)
+		
 	end
 	input:close()
 	output:close()
@@ -212,8 +216,20 @@ end
 
 function CheckForUpdate()
 	local input = io.open("hashmap", "r")
-	for line in io.lines(input) do
+	print("checking library hash mismatch")
+	for line in input:lines() do
 		local startp, endp = string.find(line, ",")
-		log(string.sub(line, 0, startp-1))
+		-- extract file path...no splitstring, really?
+		local newHash = getFileHash(string.sub(line, 0, startp-1))
+		local oldHash = string.sub(line, startp+1, #line)
+		if newHash == oldHash then
+			--do nothing
+			print("samesi")
+		else
+			print("hash mismatch! rebooting")
+			os.reboot()
+		end
 	end
+	input:close()
+	print("no mismatch found")
 end

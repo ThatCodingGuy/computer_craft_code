@@ -1,0 +1,5 @@
+mon = peripheral.wrap("left")
+image = paintutils.loadImage("/gitlib/turboCo/logo.txt")
+term.redirect(mon)
+paintutils.drawImage(image, 1, 1)
+term.restore()

@@ -227,7 +227,7 @@ function CheckForUpdate()
 		local newHash = getFileHash(string.sub(line, 0, startp-1))
 		local oldHash = string.sub(line, startp+1, #line)
 		if newHash == oldHash then
-			--do nothing
+			print("Same same")
 		else
 			print("hash mismatch! rebooting")
 			os.reboot()

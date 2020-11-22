@@ -199,9 +199,10 @@ function ImportRequirements(path)
 		os.loadAPI(line)
 		local library = io.open(line)
 		local hash = sha256(library:read("*all"))
+		print(hash)
 		local output_string = line .. "," .. hash
 		output:write(output_string, "\n")
-		os.print("loaded library " .. line .. " with hash " .. hash)
+		print("loaded library " .. line .. " with hash " .. hash)
 		library:close()
 	end
 	input:close()
@@ -213,6 +214,6 @@ function CheckForUpdate()
 	local input = io.open("hashmap", "r")
 	for line in io.lines(input) do
 		local startp, endp = string.find(line, ",")
-		logger.log(string.sub(line, 0, startp-1))
+		print(string.sub(line, 0, startp-1))
 	end
 end

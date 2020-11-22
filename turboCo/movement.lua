@@ -136,12 +136,15 @@ function pathfind(start, destination, map)
 
     print("Pathfind "..start.."/"..destination)
     for key, value in pairs(map) do
-        print(key, " ", value)
+        print("Map ", key, " ", value)
     end
     
 
     while #queue > 0 do
         local path = table.remove(queue, 1)
+        for key, value in pairs(visited) do
+            print("Visited ", key, " ", value)
+        end
 
         -- Check foward, backward, left, right, up, down
         local last_elem = path[#path]
@@ -159,6 +162,7 @@ function pathfind(start, destination, map)
 
         for i=1, #coords, 1 do
             local target = coords[i]           
+            print("Checking ", target)
             
             if target == destination then
                 local new_path = copy(path)

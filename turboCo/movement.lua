@@ -105,7 +105,7 @@ function pathfind(start, destination, map, block_callback)
 
     local queue = {}
     local visited = {}
-    table.insert(visited, start)
+    visited[start] = 1
 
     local start_path = {}
     table.insert(start_path, start)
@@ -118,6 +118,8 @@ function pathfind(start, destination, map, block_callback)
         -- Check foward, backward, left, right, up, down
         local last_elem = path[#path]
         local x, y, z = split_coord(last_elem)
+
+        print("Pathfinding: "..last_elem)
 
         local coords = {}
         table.insert(coords, coord(x+1, y, z))

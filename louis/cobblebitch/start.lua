@@ -1,6 +1,6 @@
 -- load requirements and requirements management library
 os.loadAPI("gitlib/turboCo/importManager.lua")
-importManager.ImportRequirements("gitlib/louis/cobblebitch/requirements","gitlib/louis/cobblebitch/start")
+importManager.ImportRequirements("gitlib/louis/cobblebitch/requirements","gitlib/louis/cobblebitch/start.lua")
 
 -- Feel free to insert start up code here
 cobblerbot.getBearings()

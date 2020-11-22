@@ -221,7 +221,9 @@ function CheckForUpdate()
 		-- extract file path...no splitstring, really?
 		local newHash = getFileHash(string.sub(line, 0, startp-1))
 		local oldHash = string.sub(line, startp, #line)
-		print(oldHash)
+		print("old: " .. oldHash)
+		print("new: " .. newHash)
+		sleep(10)
 		if newHash == oldHash then
 			--do nothing
 		else

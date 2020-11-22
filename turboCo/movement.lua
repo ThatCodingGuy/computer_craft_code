@@ -166,6 +166,9 @@ function pathfind(start, destination, map)
                 return new_path
             end
 
+            for key, value in pairs(visited) do
+                print("Visisted ", key, " ", value)
+            end
             if map[target] and not visited[target] then
                 local new_path = copy(path)
                 table.insert(new_path, target)

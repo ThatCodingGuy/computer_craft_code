@@ -202,6 +202,7 @@ function ImportRequirements(path, exception)
 	local output = io.open("hashmap","w")
 	for line in input:lines() do
 		print(line)
+		print(exception)
 		if line ~= exception then
 			if line ~= path then
 				os.loadAPI(line)

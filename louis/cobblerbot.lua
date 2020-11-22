@@ -7,8 +7,6 @@ function emtpyInventory()
             turtle.turnRight()
             turtle.select(i)
             turtle.drop(64)
-            sleep(5)
-            turtle.turnLeft()
             sucked = turtle.suck()
             if (sucked==true) then
                 print("Oh! Looks like the chess is full!")

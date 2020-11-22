@@ -25,8 +25,6 @@
 -- SOFTWARE.
 --
 
-local json = { _version = "0.1.2" }
-
 -------------------------------------------------------------------------------
 -- Encode
 -------------------------------------------------------------------------------
@@ -124,7 +122,7 @@ local type_func_map = {
 }
 
 
-encode = function(val, stack)
+encodef = function(val, stack)
   local t = type(val)
   local f = type_func_map[t]
   if f then
@@ -134,8 +132,8 @@ encode = function(val, stack)
 end
 
 
-function json.encode(val)
-  return ( encode(val) )
+function encode(val)
+  return ( encodef(val) )
 end
 
 
@@ -375,7 +373,7 @@ parse = function(str, idx)
 end
 
 
-function json.decode(str)
+function decode(str)
   if type(str) ~= "string" then
     error("expected argument of type string, got " .. type(str))
   end
@@ -386,6 +384,3 @@ function json.decode(str)
   end
   return res
 end
-
-
-return json

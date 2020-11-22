@@ -2,7 +2,7 @@ function alert(message)
     http.post
     {
         url = "https://turboco-app.azurewebsites.net/api/alerts",
-        body = "{ \"message\": \"" .. message .. "\" }",
+        body = "{ \"message\": \"" .. textutils.serializeJSON(message) .. "\" }",
         headers =
         {
             ["Content-Type"] = "application/json",
@@ -14,9 +14,9 @@ function updateRobot()
     local x, y, z = gps.locate()
     http.request
     {
-        url = "https://turboco-app.azurewebsites.net/api/robots/" .. os.getComputerLabel(),
+        url = "https://turboco-app.azurewebsites.net/api/robots/" .. textutils.urlEncode(os.getComputerLabel()),
         method = "PUT",
-        body = "{ \"x\": \"" .. x .. "\", \"y\": \"" .. y .. "\", \"z\": \"" .. z .. "\" }",
+        body = "{ \"x\": " .. x .. ", \"y\": " .. y .. ", \"z\": " .. z .. " }",
         headers =
         {
             ["Content-Type"] = "application/json",

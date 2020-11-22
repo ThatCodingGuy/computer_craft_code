@@ -1,9 +1,9 @@
 mon = peripheral.wrap("left")
 mon.clear()
 mon.setTextScale(0.5)
-image = paintutils.loadImage("/gitlib/turboCo/logo.txt")
 term.redirect(mon)
 while true do
-    paintutils.drawImage(image, 1, 1)
+    image = paintutils.loadImage("/gitlib/turboCo/logo.txt")
+    paintutils.drawImage(image, 0, 0)
     sleep(30)
 end

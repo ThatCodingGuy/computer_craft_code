@@ -219,6 +219,10 @@ function visit_adjacent(current, adjacent, facing, block_callback)
         found = true
     end
 
+    if current_x == adjacent_x and current_y == adjacent_y and current_z == current_z then
+        return facing
+    end
+
     if not found then
         print("Blocks not adjacent, error")
         return

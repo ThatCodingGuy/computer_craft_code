@@ -192,8 +192,9 @@ end
 
 
 function ImportRequirements(path)
+	local input = io.open(path, "r")
 	local output = io.open("hashmap","w")
-	for line in io.lines(path, "r") do
+	for line in input:lines() do
 		print(line)
 		os.loadAPI(line)
 		local library = io.open(line)
@@ -203,6 +204,7 @@ function ImportRequirements(path)
 		os.print("loaded library " .. line .. " with hash " .. hash)
 		library:close()
 	end
+	input:close()
 	output:close()
 	return true
 end
@@ -211,6 +213,6 @@ function CheckForUpdate()
 	local input = io.open("hashmap", "r")
 	for line in io.lines(input) do
 		local startp, endp = string.find(line, ",")
-		log(string.sub(line, 0, startp-1))
+		logger.log(string.sub(line, 0, startp-1))
 	end
 end

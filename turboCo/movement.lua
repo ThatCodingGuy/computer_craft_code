@@ -1,8 +1,18 @@
 
--- By convention, x/y/z are relative to you.
+-- By convention, x/y/z can either be relative or global
+--
+-- Relative
 -- x to the right, -x to the left.
 -- z is in front, -y is behind.
 -- y is up, -z is down.
+--
+-- Global 
+-- West is +x
+-- East is -x
+-- Up is +y
+-- Down is -y
+-- North is +z
+-- South is -z
 
 EAST = "EAST"
 WEST = "WEST"
@@ -35,6 +45,19 @@ function split_coord(coord)
         table.insert(result, tonumber(v))
     end
     return result[1], result[2], result[3]
+end
+
+function turn_to_face(current, target)
+    local directions = {}
+    directions[NORTH] = EAST
+    directions[EAST] = SOUTH
+    directions[SOUTH] = WEST
+    directions[WEST] = NORTH
+
+    while current != target do
+        turtle.turnRight()
+        current = directions[current]
+    end
 end
 
 function figure_out_facing()
@@ -95,7 +118,7 @@ function figure_out_facing()
     return
 end
 
-function pathfind(start, destination, map, block_callback)
+function pathfind(start, destination, map)
     -- This runs a BFS of path using map to find the path to take.
     -- It returns the nodes in order of visitation.
 
@@ -119,9 +142,6 @@ function pathfind(start, destination, map, block_callback)
         local last_elem = path[#path]
         local x, y, z = split_coord(last_elem)
 
-        print("Pathfinding: "..last_elem)
-        print(x.." "..y.." "..z)
-
         local coords = {}
         table.insert(coords, coord(x+1, y, z))
         table.insert(coords, coord(x-1, y, z))
@@ -131,19 +151,18 @@ function pathfind(start, destination, map, block_callback)
         table.insert(coords, coord(x, y, z-1))
 
         for i=1, #coords, 1 do
-            local target = coords[i]
-            print("Checking "..target.."/"..tostring(map[target]).."/"..tostring(visited[target]))
+            local target = coords[i]           
             
-            
+            if target == destination then
+                local new_path = copy(path)
+                table.insert(new_path, target)
+                return new_path
+            end
+
             if map[target] and not visited[target] then
                 local new_path = copy(path)
                 table.insert(new_path, target)
                 visited[target] = 1
-
-                if target == destination then
-                    return new_path
-                end
-
                 table.insert(queue, new_path)
             end
         end  
@@ -151,6 +170,64 @@ function pathfind(start, destination, map, block_callback)
 
     print("No path found in map.")
     return
+end
+
+function visit_adjacent(current, adjacent, facing, block_callback)
+    -- This moves the robot to the adjacent coord specified
+    -- It returns the facing. It will call block_callback, then
+    -- ???
+    local current_x, current_y, current_z = split_coord(current)
+    local adjacent_x, adjacent_y, adjacent_z = split_coord(current)
+    
+    -- TODO: Support 3d
+    -- if current_y - adjacent_y == 1 then
+    --     found, block_data = turtle.inspectDown()
+    --     if found then
+    --         block_callback(block_data)
+    --     end
+    -- end
+    -- if current_y - adjacent_y == -1 then
+    --     if found then
+    --         block_callback(block_data)
+    --     end
+    -- end
+
+    local found = false
+    if current_x - adjacent_x == 1 then
+        turn_to_face(facing, EAST)
+        facing = EAST
+        found = true
+    end
+    if current_x - adjacent_x == -1 then
+        turn_to_face(facing, WEST)
+        facing = WEST
+        found = true
+    end
+
+    if current_z - adjacent_z == 1 then
+        turn_to_face(facing, SOUTH)
+        facing = SOUTH
+        found = true
+    end
+    if current_z - adjacent_z == -1 then
+        turn_to_face(facing, NORTH)
+        facing = NORTH
+        found = true
+    end
+
+    if not found then
+        print("Blocks not adjacent, error")
+        return
+    end
+
+    blockExists, blockData = turtle.inspect()
+    if blockExists then
+        block_callback(blockData)
+    end
+
+    turtle.dig()
+    turtle.forward()
+    return facing
 end
 
 function visit_path(path, block_callback)
@@ -166,14 +243,22 @@ function visit_path(path, block_callback)
     end
 
     local current_x, current_y, current_z = gps.locate()
+    local current = coord(current_x, current_y, current_z)
     local map = {}
-    map[coord(current_x, current_y, current_z)] = 1
+    map[current] = 1
 
     while #path > 0 do
         local next = table.remove(path, 1)
-        x, y, z = split_coord(next)
-        print("Visiting "..x..", "..y..", "..z)
-        map[coord(x, y, z)] = 1
+        map[next] = 1
+
+        local drive_path = pathfind(current, next, map)
+        local current_node = current
+        
+        for i = 0, #drive_path, 1 do
+            local next_node = drive_path[i]
+            direction = visit_adjacent(current_node, next_node)
+            current_node = next_node
+        end
     end
 end
 

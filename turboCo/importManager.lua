@@ -228,4 +228,5 @@ function CheckForUpdate()
 			os.reboot()
 		end
 	end
+	input:close()
 end

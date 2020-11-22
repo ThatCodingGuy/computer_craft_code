@@ -254,8 +254,11 @@ function visit_path(path, block_callback)
         local drive_path = pathfind(current, next, map)
         local current_node = current
         
+        print("Driving "..#drive_path)
+        
         for i = 0, #drive_path, 1 do
             local next_node = drive_path[i]
+            print(next_node)
             direction = visit_adjacent(current_node, next_node)
             current_node = next_node
         end

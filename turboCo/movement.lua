@@ -13,6 +13,17 @@ local UNVISITED = 1
 local EMPTY = 2
 local BLOCK = 3
 
+function copy(obj, seen)
+    if type(obj) ~= 'table' then return obj end
+    if seen and seen[obj] then return seen[obj] end
+    local s = seen or {}
+    local res = setmetatable({}, getmetatable(obj))
+    s[obj] = res
+    for k, v in pairs(obj) do res[copy(k, s)] = copy(v, s) end
+    return res
+end
+  
+  
 
 function coord(x, y, z) 
     local p = {}
@@ -81,6 +92,57 @@ function figure_out_facing()
     end
 
     print("Robot can't move, refuel or unstuck")
+    return
+end
+
+function pathfind(start, destination, map, block_callback)
+    -- This runs a BFS of path using map to find the path to take.
+    -- It returns the nodes in order of visitation.
+
+    if start == destination then
+        return {}
+    end
+
+    local queue = {}
+    local visited = {}
+    table.insert(visisted, start)
+
+    local start_path = {}
+    table.insert(start_path, start)
+    table.insert(queue, start)
+    
+
+    while #queue > 0 do
+        local path = table.remove(queue, 1)
+
+        -- Check foward, backward, left, right, up, down
+        local last_elem = path[#path]
+        local x, y, z = split_coord(last_elem)
+
+        local coords = {}
+        table.insert(coords, coord(x+1, y, z))
+        table.insert(coords, coord(x-1, y, z))
+        table.insert(coords, coord(x, y+1, z))
+        table.insert(coords, coord(x, y-1, z))
+        table.insert(coords, coord(x, y, z+1))
+        table.insert(coords, coord(x+1, y, z-1))
+
+        for i=1, #coords, 1 do
+            local target = coords[i]
+            if map[target] and not visited[target] then
+                local new_path = copy(path)
+                table.insert(new_path, target)
+
+                if target == destination then
+                    return new_path
+                end
+
+                table.insert(queue, new_path)
+            end
+        end  
+    end
+
+    print("No path found in map.")
     return
 end
 

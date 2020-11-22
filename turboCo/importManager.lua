@@ -203,7 +203,10 @@ function ImportRequirements(path)
 	for line in input:lines() do
 		print(line)
 		if line ~= "/gitlib/louis/startup_template.lua" then
-			os.loadAPI(line)
+			if line ~= "/gitlib/louis/requirements.lua" then
+				os.loadAPI(line)
+			end
+		end
 		local hash = getFileHash(line)
 		local output_string = line .. "," .. hash
 		output:write(output_string, "\n")

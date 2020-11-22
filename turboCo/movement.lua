@@ -162,6 +162,7 @@ function pathfind(start, destination, map)
 
         for i=1, #coords, 1 do
             local target = coords[i]           
+            print("Checking ", target)
             
             if target == destination then
                 local new_path = copy(path)

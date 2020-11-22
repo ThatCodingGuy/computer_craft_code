@@ -30,10 +30,11 @@ function coord(x, y, z)
 end
 
 function split_coord(coord)
-    coord = {}
-    for k, v in string.gmatch(, coord, "%a+")
+    result = {}
+    for k, v in string.gmatch(coord, "%a+") do
         table.insert(result, 1, to_number(v))
-    return coord[1], coord[2], coord[3]
+    end
+    return result[1], result[2], result[3]
 end
 
 function figure_out_facing()

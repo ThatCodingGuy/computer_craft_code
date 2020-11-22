@@ -203,7 +203,7 @@ function ImportRequirements(path)
 	for line in input:lines() do
 		print(line)
 		if line ~= "/gitlib/louis/startup_template.lua" then
-			if line ~= "/gitlib/louis/requirements.lua" then
+			if line ~= "/gitlib/louis/requirements" then
 				os.loadAPI(line)
 			end
 		end

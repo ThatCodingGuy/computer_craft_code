@@ -216,6 +216,7 @@ end
 
 function CheckForUpdate()
 	local input = io.open("hashmap", "r")
+	print("checking library hash mismatch")
 	for line in input:lines() do
 		local startp, endp = string.find(line, ",")
 		-- extract file path...no splitstring, really?
@@ -229,4 +230,5 @@ function CheckForUpdate()
 		end
 	end
 	input:close()
+	print("no mismatch found")
 end

@@ -197,7 +197,7 @@ function ImportRequirements(path)
 	for line in input:lines() do
 		print(line)
 		os.loadAPI(line)
-		local library = io.open(line)
+		local library = io.open(line, "r")
 		local hash = sha256(library:read("*all"))
 		print(hash)
 		local output_string = line .. "," .. hash

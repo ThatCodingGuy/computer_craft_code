@@ -26,14 +26,13 @@ end
   
 
 function coord(x, y, z) 
-    local p = {}
-    table.insert(p, x)
-    table.insert(p, y)
-    table.insert(p, z)
-    return p
+    return x.." "..y.." "..z
 end
 
 function split_coord(coord)
+    coord = {}
+    for k, v in string.gmatch(, coord, "%a+")
+        table.insert(result, 1, to_number(v))
     return coord[1], coord[2], coord[3]
 end
 
@@ -105,11 +104,11 @@ function pathfind(start, destination, map, block_callback)
 
     local queue = {}
     local visited = {}
-    table.insert(visisted, start)
+    table.insert(visited, start)
 
     local start_path = {}
     table.insert(start_path, start)
-    table.insert(queue, start)
+    table.insert(queue, start_path)
     
 
     while #queue > 0 do
@@ -125,7 +124,7 @@ function pathfind(start, destination, map, block_callback)
         table.insert(coords, coord(x, y+1, z))
         table.insert(coords, coord(x, y-1, z))
         table.insert(coords, coord(x, y, z+1))
-        table.insert(coords, coord(x+1, y, z-1))
+        table.insert(coords, coord(x, y, z-1))
 
         for i=1, #coords, 1 do
             local target = coords[i]

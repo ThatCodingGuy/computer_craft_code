@@ -1,3 +1,4 @@
 "/gitlib/turboCo/importManager.lua"
 "/gitlib/louis/cobblerbot.lua"
 "/gitlib/louis/startup_template.lua"
+"/gitlib/louis/requirements.lua"

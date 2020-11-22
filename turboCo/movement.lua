@@ -41,7 +41,7 @@ end
 
 function split_coord(coord)
     result = {}
-    for v in string.gmatch(coord, "(%w+)") do
+    for v in string.gmatch(coord, "(-?%w+)") do
         table.insert(result, tonumber(v))
     end
     return result[1], result[2], result[3]

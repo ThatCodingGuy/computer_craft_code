@@ -133,6 +133,11 @@ function pathfind(start, destination, map)
     local start_path = {}
     table.insert(start_path, start)
     table.insert(queue, start_path)
+
+    print("Pathfind "..start.."/"..destination)
+    for i = 0, #map, 1 do
+        print(map[i])
+    end
     
 
     while #queue > 0 do

@@ -264,12 +264,15 @@ function visit_path(path, block_callback)
         local next = table.remove(path, 1)
         visit_map[next] = 1
 
+        print("VISIT MAP")
+        for key, value in pairs(visit_map) do
+            print(key, " ", value)
+        end
+
         local drive_path = pathfind(current, next, visit_map)
         local current_node = current
         
-        print("Driving "..#drive_path)
-        
-        for i = 0, #drive_path, 1 do
+        for i=1, #drive_path, 1 do
             local next_node = drive_path[i]
             print(next_node)
             direction = visit_adjacent(current_node, next_node)

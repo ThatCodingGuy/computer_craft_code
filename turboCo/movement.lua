@@ -135,8 +135,8 @@ function pathfind(start, destination, map)
     table.insert(queue, start_path)
 
     print("Pathfind "..start.."/"..destination)
-    for i=1, #map, 1 do
-        print(map[i])
+    for key, value in pairs(map) do
+        print(key, " ", value)
     end
     
 
@@ -146,6 +146,8 @@ function pathfind(start, destination, map)
         -- Check foward, backward, left, right, up, down
         local last_elem = path[#path]
         local x, y, z = split_coord(last_elem)
+
+        print("Last elem: ", last_elem)
 
         local coords = {}
         table.insert(coords, coord(x+1, y, z))
@@ -263,11 +265,6 @@ function visit_path(path, block_callback)
     while #path > 0 do
         local next = table.remove(path, 1)
         visit_map[next] = 1
-
-        print("VISIT MAP")
-        for key, value in pairs(visit_map) do
-            print(key, " ", value)
-        end
 
         local drive_path = pathfind(current, next, visit_map)
         local current_node = current

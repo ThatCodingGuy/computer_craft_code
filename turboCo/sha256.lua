@@ -189,3 +189,29 @@ local function sha256(msg)
 	return str2hexa(num2s(H[1], 4) .. num2s(H[2], 4) .. num2s(H[3], 4) .. num2s(H[4], 4) ..
 		num2s(H[5], 4) .. num2s(H[6], 4) .. num2s(H[7], 4) .. num2s(H[8], 4))
 end
+
+
+function ImportRequirements(path)
+	local input = io.open(path, "r")
+	local output = io.open("hashmap","w")
+	for line in io.lines(input) do
+		os.loadAPI(line)
+		local library = io.open(line)
+		local hash = sha256(library:read("*all"))
+		local output_string = line .. "," .. hash
+		output:write(output_string, "\n")
+		os.print("loaded library " .. line .. " with hash " .. hash)
+		library:close()
+	end
+	input:close()
+	output:close()
+	return true
+end
+
+function CheckForUpdate()
+	local input = io.open("hashmap", "r")
+	for line in io.lines(input) do
+		local startp, endp = string.find(line, ",")
+		log(string.sub(line, 0, startp-1))
+	end
+end

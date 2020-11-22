@@ -255,6 +255,10 @@ function visit_path(path, block_callback)
         local next = table.remove(path, 1)
         map[next] = 1
 
+        print("Visit")
+        print(current)
+        print(next)
+
         local drive_path = pathfind(current, next, map)
         local current_node = current
         

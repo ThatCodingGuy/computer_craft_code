@@ -365,6 +365,7 @@ function explore_area(area, block_callback)
     adjacent = filter(adjacent, is_not_explored)
 
     for i=1, #adjacent, 1 do
+        print("Initial: Adding "..node_adjacent[i].." to queue")
         table.insert(to_explore, adjacent[i])
     end
 

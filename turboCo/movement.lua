@@ -45,7 +45,17 @@ function filter(x, fun)
             table.insert(results, x[i])
         end
     end
+    return results
+end
 
+function filter_map_keys(x, fun)
+    local results = {}
+    for k in pairs(x) do
+        local valid = fun(k)
+        if valid then
+            results[k] = x[k]
+        end
+    end
     return results
 end
 
@@ -86,8 +96,6 @@ function turn_to_face(current, target)
     directions[EAST] = SOUTH
     directions[SOUTH] = WEST
     directions[WEST] = NORTH
-
-    print("Turning from "..current.." to "..target)
 
     while current ~= target do
         turtle.turnRight()
@@ -160,8 +168,6 @@ function pathfind_with_map(start, destination, map)
     if start == destination then
         return {}
     end
-
-    print("Pathfind "..start.. " to "..destination)
 
     local queue = {}
     local visited = {}
@@ -238,16 +244,12 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     -- This moves the robot to the adjacent coord specified
     -- It returns the facing and position. It will call block_callback if there is a block
     -- then return.
-    print(current)
-    print(adjacent)
     local current_x, current_y, current_z = split_coord(current)
     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
 
-    if current_x == adjacent_x and current_y == adjacent_y and current_z == current_z then
-        return facing
+    if current_x == adjacent_x and current_y == adjacent_y and current_z == adjacent_z then
+        return facing, current
     end
-
-    print("Visit "..current.." to "..adjacent)
     
     if current_y - adjacent_y == 1 then
         found, block_data = turtle.inspectDown()
@@ -310,6 +312,7 @@ function visit_adjacent(current, adjacent, facing, block_callback)
         error("blocks not adjacent, error")
     end
 
+    print("Moving "..facing)
     blockExists, blockData = turtle.inspect()
     if blockExists then
         local moved = block_callback(blockData, FORWARD)
@@ -376,10 +379,13 @@ function explore_area(area, block_callback)
 
     while #to_explore > 0 do
         local node = table.remove(to_explore, 1)
+        
 
         if not explored[node] then
             -- If we're besides the node just visit it
+            print("Exploring "..node)
             if distance(position, node) > 1 then
+                print("Backtracking")
                 -- If we're not, find an adjacent empty block we've visisted,
                 -- then go there before digging it.
                 local node_adjacent = get_adjacent_blocks(node)
@@ -391,31 +397,27 @@ function explore_area(area, block_callback)
                 -- Force move to the correct spot besides node to be adjacent
                 -- Call the callback for any blocks encountered, and force dig if they're
                 -- Still there after. 
-                local walkable_map = filter(explored, is_empty)
+                local walkable_map = filter_map_keys(explored, is_empty)
                 local path = pathfind_with_map(position, target, walkable_map) 
                 for i = 1, #path, 1 do
-                    facing, position = visit_adjacent(position, node, facing, block_callback)
+                    facing, position = visit_adjacent(position, path[i], facing, block_callback)
                     if not node == position then
-                        visit_adjacent(position, node, facing, force_dig)
+                        facing, position = visit_adjacent(position, path[i], facing, force_dig)
                     end
                 end
             end
 
-            print("Adjacent")
-
             facing, position = visit_adjacent(position, node, facing, block_callback)
             explored[position] = EMPTY
 
-            print("Visited")
-
-            if not node == position then
+            if node == position then
                 explored[node] = EMPTY
                 local node_adjacent = get_adjacent_blocks(position)
                 local function is_in_area(x) return area[x] end
                 local function is_not_explored(x) return not explored[x] end
 
                 node_adjacent = filter(node_adjacent, is_in_area)
-                node_adjacent = filter(node_adjacent, is_not_visisted)
+                node_adjacent = filter(node_adjacent, is_not_explored)
                 for i=1, #node_adjacent, 1 do
                     table.insert(to_explore, node_adjacent[i])
                 end

@@ -87,8 +87,6 @@ function turn_to_face(current, target)
     directions[SOUTH] = WEST
     directions[WEST] = NORTH
 
-    print("Turning from "..current.." to "..target)
-
     while current ~= target do
         turtle.turnRight()
         current = directions[current]
@@ -238,16 +236,12 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     -- This moves the robot to the adjacent coord specified
     -- It returns the facing and position. It will call block_callback if there is a block
     -- then return.
-    print(current)
-    print(adjacent)
     local current_x, current_y, current_z = split_coord(current)
     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
 
     if current_x == adjacent_x and current_y == adjacent_y and current_z == current_z then
         return facing, current
     end
-
-    print("Visit "..current.." to "..adjacent)
     
     if current_y - adjacent_y == 1 then
         found, block_data = turtle.inspectDown()
@@ -401,12 +395,8 @@ function explore_area(area, block_callback)
                 end
             end
 
-            print("Adjacent")
-
             facing, position = visit_adjacent(position, node, facing, block_callback)
             explored[position] = EMPTY
-
-            print("Visited")
 
             if not node == position then
                 explored[node] = EMPTY
@@ -417,6 +407,7 @@ function explore_area(area, block_callback)
                 node_adjacent = filter(node_adjacent, is_in_area)
                 node_adjacent = filter(node_adjacent, is_not_visisted)
                 for i=1, #node_adjacent, 1 do
+                    print("Adding "..node_adjacent[i].." to queue")
                     table.insert(to_explore, node_adjacent[i])
                 end
             else 

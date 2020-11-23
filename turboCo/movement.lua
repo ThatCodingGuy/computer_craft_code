@@ -359,16 +359,19 @@ function explore_area(area, block_callback)
     local to_explore = {}
     print("Pre-adjacent")
     local adjacent = get_adjacent_blocks(position)
-    print("Adjacent "..#adjacent)
+    print("Adjacent "..#pairs(adjacent))
 
     local function is_in_area(x) print(x); return area[x] end
     local function is_not_explored(x) return not explored[x] end
     adjacent = filter(adjacent, is_in_area)
+    print("Area "..#pairs(adjacent))
     adjacent = filter(adjacent, is_not_visisted)
+    print("Not visisted "..#pairs(adjacent))
 
     print("Inserting")
     for k in pairs(adjacent) do
         table.insert(to_explore, k)
+        print(k)
     end
 
     

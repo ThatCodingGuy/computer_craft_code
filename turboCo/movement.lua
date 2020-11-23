@@ -363,7 +363,7 @@ function explore_area(area, block_callback)
     local function is_not_explored(x) return not explored[x] end
     adjacent = filter(adjacent, is_in_area)
     print("Area")
-    adjacent = filter(adjancet, is_not_visisted)
+    adjacent = filter(adjacent, is_not_visisted)
     print("Visited")
 
 

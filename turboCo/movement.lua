@@ -160,6 +160,7 @@ function pathfind_with_map(start, destination, map)
     end
 
     print("Pathfind "..start.. " to "..destination)
+    for k in pairs(map) do print("Map "..k) end
 
     local queue = {}
     local visited = {}

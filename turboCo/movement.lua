@@ -169,8 +169,6 @@ function pathfind_with_map(start, destination, map)
         return {}
     end
 
-    print("Pathfind "..start.. " to "..destination)
-
     local queue = {}
     local visited = {}
     visited[start] = 1
@@ -200,8 +198,6 @@ function pathfind_with_map(start, destination, map)
             if target == destination then
                 local new_path = copy(path)
                 table.insert(new_path, target)
-
-                print("Path "..table.concat(new_path, ","))
                 return new_path
             end
 
@@ -382,9 +378,11 @@ function explore_area(area, block_callback)
 
     while #to_explore > 0 do
         local node = table.remove(to_explore, 1)
+        print("Exploring "..node)
 
         if not explored[node] then
             -- If we're besides the node just visit it
+            print("Backtracking")
             if distance(position, node) > 1 then
                 -- If we're not, find an adjacent empty block we've visisted,
                 -- then go there before digging it.
@@ -399,7 +397,6 @@ function explore_area(area, block_callback)
                 -- Still there after. 
                 local walkable_map = filter_map_keys(explored, is_empty)
                 local path = pathfind_with_map(position, target, walkable_map) 
-                print("Found path")
                 for i = 1, #path, 1 do
                     facing, position = visit_adjacent(position, path[i], facing, block_callback)
                     if not node == position then

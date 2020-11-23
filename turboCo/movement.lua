@@ -401,7 +401,9 @@ function explore_area(area, block_callback)
                 -- Still there after. 
                 local walkable_map = filter_map_keys(explored, is_empty)
                 local path = pathfind_with_map(position, target, walkable_map) 
+                print("Found path")
                 for i = 1, #path, 1 do
+                    print("Following path")
                     facing, position = visit_adjacent(position, node, facing, block_callback)
                     if not node == position then
                         facing, position = visit_adjacent(position, node, facing, force_dig)

@@ -171,6 +171,7 @@ function pathfind_with_map(start, destination, map)
 
     print("Pathfind "..start.. " to "..destination)
     for k in pairs(map) do print("Map "..k) end
+    print("Endmap")
 
     local queue = {}
     local visited = {}
@@ -312,6 +313,8 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     end
 
     if not found then
+        print("current "..current)
+        print("adjacent "..adjacent)
         error("blocks not adjacent, error")
     end
 
@@ -376,7 +379,6 @@ function explore_area(area, block_callback)
     adjacent = filter(adjacent, is_not_explored)
 
     for i=1, #adjacent, 1 do
-        print("Initial: Adding "..adjacent[i].." to queue")
         table.insert(to_explore, adjacent[i])
     end
 
@@ -419,7 +421,6 @@ function explore_area(area, block_callback)
                 node_adjacent = filter(node_adjacent, is_in_area)
                 node_adjacent = filter(node_adjacent, is_not_explored)
                 for i=1, #node_adjacent, 1 do
-                    print("Adding "..node_adjacent[i].." to queue")
                     table.insert(to_explore, node_adjacent[i])
                 end
             else 

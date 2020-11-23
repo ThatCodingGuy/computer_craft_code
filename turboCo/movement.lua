@@ -242,6 +242,8 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     if current_x == adjacent_x and current_y == adjacent_y and current_z == current_z then
         return facing
     end
+
+    print("Visit "..current.." to "..adjacent)
     
     if current_y - adjacent_y == 1 then
         found, block_data = turtle.inspectDown()
@@ -372,7 +374,6 @@ function explore_area(area, block_callback)
         local node = table.remove(to_explore, 1)
 
         if not explored[node] then
-            print("Pathfinding")
             -- If we're besides the node just visit it
             if distance(position, node) > 1 then
                 -- If we're not, find an adjacent empty block we've visisted,

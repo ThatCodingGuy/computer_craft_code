@@ -89,7 +89,7 @@ function turn_to_face(current, target)
 
     print("Turning from "..current.." to "..target)
 
-    while not current == target do
+    while current ~= target do
         turtle.turnRight()
         current = directions[current]
     end

@@ -471,12 +471,12 @@ function scan_area(width, depth, block_callback)
         z_offset = -1
     end
     
-    local explore_area = {}
+    local area = {}
     for x = start_x, final_x, x_offset do
         for z = start_z, final_z, z_offset do
-            table.insert(explore_area, coord(x, start_y, z))
+            table.insert(area, coord(x, start_y, z))
         end
     end
 
-    explore(explore_area, block_callback)
+    explore_area(area, block_callback)
 end

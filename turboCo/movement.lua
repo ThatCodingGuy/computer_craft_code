@@ -366,8 +366,8 @@ function explore_area(area, block_callback)
     adjacent = filter(adjacent, is_in_area)
     adjacent = filter(adjacent, is_not_visisted)
 
-    
-    for k in adjacent do
+    print("Inserting")
+    for k, v in adjacent do
         table.insert(to_explore, k)
     end
 

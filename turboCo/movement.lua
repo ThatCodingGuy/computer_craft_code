@@ -389,7 +389,7 @@ function explore_area(area, block_callback)
                 local path = pathfind_with_map(current, node_adjacent[1], walkable_map) 
                 for i = 0, #path, 1 do
                     facing, position = visit_adjacent(position, node, facing, block_callback)
-                    if node != position then
+                    if not node == position then
                         visit_adjacent(position, node, facing, force_dig)
                     end
                 end
@@ -398,7 +398,7 @@ function explore_area(area, block_callback)
             facing, position = visit_adjacent(position, node, facing, block_callback)
             explored[position] = EMPTY
 
-            if node != position then
+            if not node == position then
                 explored[node] = EMPTY
                 local node_adjacent = get_adjacent_blocks(position)
                 local function is_in_area(x) return area[x] end

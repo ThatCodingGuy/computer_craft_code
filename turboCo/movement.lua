@@ -335,6 +335,7 @@ function explore_area(area, block_callback)
     -- This runs a BFS of path using map to find the path to take.
     -- It returns the nodes in order of visitation.
 
+    print("Explore area")
 
     local start_x, start_y, start_z = gps.locate()
     if not start_x then
@@ -365,10 +366,13 @@ function explore_area(area, block_callback)
         table.insert(to_explore, adjacent[i])
     end
 
+    print("Exploring")
+
     while #to_explore > 0 do
         local node = table.remove(to_explore, 1)
 
         if not explored[node] then
+            print("Pathfinding")
             -- If we're besides the node just visit it
             if distance(position, node) > 1 then
                 -- If we're not, find an adjacent empty block we've visisted,
@@ -396,6 +400,8 @@ function explore_area(area, block_callback)
                 end
             end
 
+            print("Adjacent")
+
             facing, position = visit_adjacent(position, node, facing, block_callback)
             explored[position] = EMPTY
 
@@ -410,6 +416,8 @@ function explore_area(area, block_callback)
                 for i = 1, #node_adjacent, 1 do
                     table.insert(to_explore, node_adjacent[i])
                 end
+            else 
+                explored[node] = BLOCK
             end
         end
     end

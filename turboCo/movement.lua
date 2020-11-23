@@ -364,6 +364,9 @@ function explore_area(area, block_callback)
     local function is_in_area(x) print(x); return area[x] end
     local function is_not_explored(x) return not explored[x] end
     adjacent = filter(adjacent, is_in_area)
+    print("in_area")
+    for k in pairs(adjacent) do print(k) end
+    print("in_area_post")
     adjacent = filter(adjacent, is_not_visisted)
 
     print("Inserting")

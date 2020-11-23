@@ -361,7 +361,7 @@ function explore_area(area, block_callback)
     adjacent = filter(adjancet, is_not_visisted)
 
 
-    for i=0, #adjacent, 1 do
+    for i=1, #adjacent, 1 do
         table.insert(to_explore, adjacent[i])
     end
 
@@ -388,7 +388,7 @@ function explore_area(area, block_callback)
                 -- Still there after. 
                 local walkable_map = filter(explored, is_empty)
                 local path = pathfind_with_map(current, node_adjacent[1], walkable_map) 
-                for i = 0, #path, 1 do
+                for i = 1, #path, 1 do
                     facing, position = visit_adjacent(position, node, facing, block_callback)
                     if not node == position then
                         visit_adjacent(position, node, facing, force_dig)
@@ -407,7 +407,7 @@ function explore_area(area, block_callback)
 
                 node_adjacent = filter(node_adjacent, is_in_area)
                 node_adjacent = filter(node_adjacent, is_not_visisted)
-                for i=0, #node_adjacent, 1 do
+                for i = 1, #node_adjacent, 1 do
                     table.insert(to_explore, node_adjacent[i])
                 end
             end

@@ -45,7 +45,17 @@ function filter(x, fun)
             table.insert(results, x[i])
         end
     end
+    return results
+end
 
+function filter_map_keys(x, fun)
+    local results = {}
+    for k in pairs(x) do
+        local valid = fun(k)
+        if valid then
+            results[k] = x[k]
+        end
+    end
     return results
 end
 
@@ -387,7 +397,7 @@ function explore_area(area, block_callback)
                 -- Force move to the correct spot besides node to be adjacent
                 -- Call the callback for any blocks encountered, and force dig if they're
                 -- Still there after. 
-                local walkable_map = filter(explored, is_empty)
+                local walkable_map = filter_map_keys(explored, is_empty)
                 local path = pathfind_with_map(position, target, walkable_map) 
                 for i = 1, #path, 1 do
                     facing, position = visit_adjacent(position, node, facing, block_callback)

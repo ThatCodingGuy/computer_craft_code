@@ -404,6 +404,8 @@ function explore_area(area, block_callback)
             facing, position = visit_adjacent(position, node, facing, block_callback)
             explored[position] = EMPTY
 
+            print("Visited")
+
             if not node == position then
                 explored[node] = EMPTY
                 local node_adjacent = get_adjacent_blocks(position)

@@ -247,7 +247,7 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     local current_x, current_y, current_z = split_coord(current)
     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
 
-    if current_x == adjacent_x and current_y == adjacent_y and current_z == current_z then
+    if current_x == adjacent_x and current_y == adjacent_y and current_z == adjacent_z then
         return facing, current
     end
     

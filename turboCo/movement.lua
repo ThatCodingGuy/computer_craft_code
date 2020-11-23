@@ -387,7 +387,7 @@ function explore_area(area, block_callback)
                 -- Call the callback for any blocks encountered, and force dig if they're
                 -- Still there after. 
                 local walkable_map = filter(explored, is_empty)
-                local path = pathfind_with_map(current, target, walkable_map) 
+                local path = pathfind_with_map(position, target, walkable_map) 
                 for i = 1, #path, 1 do
                     facing, position = visit_adjacent(position, node, facing, block_callback)
                     if not node == position then

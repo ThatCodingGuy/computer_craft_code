@@ -37,11 +37,11 @@ local BLOCK = 3
 local walkable_block = {}
 
 
-function filter(table, fun)
+function filter(x, fun)
     local results = {}
-    for i=1, #table, 1 do
-        if fun(table[i]) then
-            table.insert(results, table[i])
+    for i=1, #x, 1 do
+        if fun(x[i]) then
+            table.insert(results, x[i])
         end
     end
 

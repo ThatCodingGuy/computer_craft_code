@@ -406,7 +406,7 @@ function explore_area(area, block_callback)
                 local function is_not_explored(x) return not explored[x] end
 
                 node_adjacent = filter(node_adjacent, is_in_area)
-                node_adjacent = filter(node_adjacent, is_not_visisted)
+                node_adjacent = filter(node_adjacent, is_not_explored)
                 for i=1, #node_adjacent, 1 do
                     print("Adding "..node_adjacent[i].." to queue")
                     table.insert(to_explore, node_adjacent[i])

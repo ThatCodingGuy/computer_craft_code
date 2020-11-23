@@ -40,7 +40,9 @@ local walkable_block = {}
 function filter(x, fun)
     local results = {}
     for i=1, #x, 1 do
-        if fun(x[i]) then
+        local valid = fun(x[i])
+        print(valid)
+        if valid then
             table.insert(results, x[i])
         end
     end

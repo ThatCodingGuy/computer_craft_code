@@ -238,6 +238,8 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     -- This moves the robot to the adjacent coord specified
     -- It returns the facing and position. It will call block_callback if there is a block
     -- then return.
+    print(current)
+    print(adjacent)
     local current_x, current_y, current_z = split_coord(current)
     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
 

@@ -356,10 +356,13 @@ function explore_area(area, block_callback)
 
     local to_explore = {}
     local adjacent = get_adjacent_blocks(area, position, explored)
+    print("Adjacent")
     local function is_in_area(x) return area[x] end
     local function is_not_explored(x) return not explored[x] end
     adjacent = filter(adjacent, is_in_area)
+    print("Area")
     adjacent = filter(adjancet, is_not_visisted)
+    print("Visited")
 
 
     for i=1, #adjacent, 1 do

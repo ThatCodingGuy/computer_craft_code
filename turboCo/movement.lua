@@ -159,6 +159,8 @@ function pathfind_with_map(start, destination, map)
         return {}
     end
 
+    print("Pathfind "..start.. " to "..destination)
+
     local queue = {}
     local visited = {}
     visited[start] = 1
@@ -336,14 +338,12 @@ function explore_area(area, block_callback)
     -- This runs a BFS of path using map to find the path to take.
     -- It returns the nodes in order of visitation.
 
-    print("Explore area")
     local start_x, start_y, start_z = gps.locate()
     if not start_x then
         error("Could not connect to gps")
         return
     end
 
-    print("Facing")
 
     local facing = figure_out_facing()
     if not facing then
@@ -359,19 +359,14 @@ function explore_area(area, block_callback)
     local to_explore = {}
     local adjacent = get_adjacent_blocks(position)
 
-    local function is_in_area(x) print(x); return area[x] end
+    local function is_in_area(x) return area[x] end
     local function is_not_explored(x) return not explored[x] end
     adjacent = filter(adjacent, is_in_area)
     adjacent = filter(adjacent, is_not_explored)
 
-    print("Inserting")
     for i=1, #adjacent, 1 do
         table.insert(to_explore, adjacent[i])
-        print(adjacent[i])
     end
-
-    
-    print("Exploring ")
 
     while #to_explore > 0 do
         local node = table.remove(to_explore, 1)

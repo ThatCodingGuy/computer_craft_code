@@ -7,6 +7,7 @@ local function emptyInventory()
             turtle.turnRight()
             turtle.select(i)
             turtle.drop(64)
+            turtle.turnLeft()
             sucked = turtle.suck()
             if (sucked==true) then
                 print("Oh! Looks like the chess is full!")

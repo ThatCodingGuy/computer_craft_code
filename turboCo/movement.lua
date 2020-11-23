@@ -13,15 +13,40 @@
 -- Down is -y
 -- North is +z
 -- South is -z
+--
+--
+-- Some function expect a block callback.
+-- block_callback(block_data, direction)
+-- It must maintain the facing it started with, and the turtle
+-- must stop where it started, or in the block it was called for.
+-- It returns true if it moved, false if it didn't
 
 EAST = "EAST"
 WEST = "WEST"
 NORTH = "NORTH"
 SOUTH = "SOUTH"
 
+FORWARD = "FORWARD"
+UP = "UP"
+DOWN = "DOWN"
+
 local UNVISITED = 1
 local EMPTY = 2
 local BLOCK = 3
+
+local walkable_block = {}
+
+
+function filter(table, fun)
+    local results = {}
+    for i=1, #table, 1 do
+        if fun(table[i]) then
+            table.insert(results, table[i])
+        end
+    end
+
+    return results
+end
 
 function copy(obj, seen)
     if type(obj) ~= 'table' then return obj end
@@ -47,6 +72,13 @@ function split_coord(coord)
     return result[1], result[2], result[3]
 end
 
+function distance(coord1, coord2)
+    local x1, y1, z1 = split_coord(coord1)
+    local x2, y2, z2 = split_coord(coord2)
+    return math.abs(x2-x1) + math.abs(y2-y1) + math.abs(z2-z1)
+end
+
+
 function turn_to_face(current, target)
     local directions = {}
     directions[NORTH] = EAST
@@ -65,7 +97,7 @@ function figure_out_facing()
 
     local start_position_x, start_position_y, start_position_z = gps.locate()
     if not start_position_x then
-        print("GPS not connected.")
+        error("GPS not connected.")
         return nil
     end
 
@@ -114,11 +146,11 @@ function figure_out_facing()
         turtle.turnRight()
     end
 
-    print("Robot can't move, refuel or unstuck")
+    error("Robot can't move, refuel or unstuck")
     return
 end
 
-function pathfind(start, destination, map)
+function pathfind_with_map(start, destination, map)
     -- This runs a BFS of path using map to find the path to take.
     -- It returns the nodes in order of visitation.
 
@@ -151,7 +183,6 @@ function pathfind(start, destination, map)
 
         for i=1, #coords, 1 do
             local target = coords[i]           
-            print("Checking ", target)
             
             if target == destination then
                 local new_path = copy(path)
@@ -168,33 +199,80 @@ function pathfind(start, destination, map)
         end  
     end
 
-    print("No path found in map.")
+    error("No path found in map.")
     return
+end
+
+function force_dig(block_data, direction)
+    local success = false
+    if direction == UP then
+        while not success do
+            turtle.digUp()
+            success = turtle.up()
+        end
+        return true
+    elseif direction == DOWN then
+        while not success do
+            turtle.digDown()
+            success = turtle.down()
+        end
+        return true
+    elseif direction == FORWARD then
+        while not success do
+            turtle.dig()
+            success = turtle.forward()
+        end
+        return true
+    else
+        error("no direction passed to force_dig")
+    end
+
 end
 
 function visit_adjacent(current, adjacent, facing, block_callback)
     -- This moves the robot to the adjacent coord specified
-    -- It returns the facing. It will call block_callback, then
-    -- ???
+    -- It returns the facing and position. It will call block_callback if there is a block
+    -- then return.
     local current_x, current_y, current_z = split_coord(current)
-    local adjacent_x, adjacent_y, adjacent_z = split_coord(current)
-    
-    -- TODO: Support 3d
-    -- if current_y - adjacent_y == 1 then
-    --     found, block_data = turtle.inspectDown()
-    --     if found then
-    --         block_callback(block_data)
-    --     end
-    -- end
-    -- if current_y - adjacent_y == -1 then
-    --     if found then
-    --         block_callback(block_data)
-    --     end
-    -- end
+    local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
 
-    -- print("Visit adjacent")
-    -- print(current)
-    -- print(adjacent)
+    if current_x == adjacent_x and current_y == adjacent_y and current_z == current_z then
+        return facing
+    end
+    
+    if current_y - adjacent_y == 1 then
+        found, block_data = turtle.inspectDown()
+        if found then
+            local moved = block_callback(block_data, DOWN)
+            if moved then 
+                return facing, adjacent
+            end
+            return facing, current
+        else
+            local moved = turtle.down()
+            if moved then
+                return facing, adjacent
+            else
+                return facing, current
+            end
+        end
+    end
+    if current_y - adjacent_y == -1 then
+        if found then
+            local moved = block_callback(block_data, UP)
+            if moved then 
+                return facing, adjacent
+            end
+            return facing, current
+        else
+            local moved = turtle.up()
+            if moved then
+                return facing, adjacent
+            else
+                return facing, current
+            end
+        end
+    end
 
     local found = false
     if current_x - adjacent_x == 1 then
@@ -219,58 +297,124 @@ function visit_adjacent(current, adjacent, facing, block_callback)
         found = true
     end
 
-    if current_x == adjacent_x and current_y == adjacent_y and current_z == current_z then
-        return facing
-    end
-
     if not found then
-        print("Blocks not adjacent, error")
-        return
+        error("blocks not adjacent, error")
     end
 
     blockExists, blockData = turtle.inspect()
     if blockExists then
-        block_callback(blockData)
+        local moved = block_callback(blockData, FORWARD)
+        if moved then 
+            return facing, adjacent
+        end
+        return facing, current
+    else
+        local moved = turtle.forward()
+        if moved then
+            return facing, adjacent
+        else
+            return facing, current
+        end
     end
-
-    turtle.dig()
-    turtle.forward()
-    return facing
 end
 
-function visit_path(path, block_callback)
-    -- This function visits all points on a path.
-    -- They must all be connected, and ordered in a way 
-    -- where each cell is visitable going only through
-    -- previously visited cells.
-    
-    local direction = figure_out_facing()
-    if not direction then
-        print("Could not determine facing")
+function get_adjacent_blocks(position)
+    local coords = {}
+    table.insert(coords, coord(x+1, y, z))
+    table.insert(coords, coord(x-1, y, z))
+    table.insert(coords, coord(x, y+1, z))
+    table.insert(coords, coord(x, y-1, z))
+    table.insert(coords, coord(x, y, z+1))
+    table.insert(coords, coord(x, y, z-1))
+    return coords
+end
+
+
+function explore_area(area, block_callback)
+    -- This runs a BFS of path using map to find the path to take.
+    -- It returns the nodes in order of visitation.
+
+
+    local start_x, start_y, start_z = gps.locate()
+    if not start_x then
+        error("Could not connect to gps")
         return
     end
 
-    local current_x, current_y, current_z = gps.locate()
-    local current = coord(current_x, current_y, current_z)
-    local visit_map = {}
-    visit_map[current] = 1
+    local facing = figure_out_facing()
+    if not facing then
+        error("Could not determine facing")
+        return
+    end
 
-    while #path > 0 do
-        local next = table.remove(path, 1)
-        visit_map[next] = 1
+    local position = coord(start_x, start_y, start_z)
 
-        local drive_path = pathfind(current, next, visit_map)
-        local current_node = current
-        
-        print("Drive path length: ", #drive_path)
+    local explored = {}
+    explored[position] = EMPTY
 
-        for i=1, #drive_path, 1 do
-            local next_node = drive_path[i]
-            print(next_node)
-            direction = visit_adjacent(current_node, next_node)
-            current_node = next_node
+    local to_explore = {}
+    local adjacent = get_adjacent_blocks(area, position, explored)
+    local function is_in_area(x) return area[x] end
+    local function is_not_explored(x) return not explored[x] end
+    adjacent = filter(adjacent, is_in_area)
+    adjacent = filter(adjancet, is_not_visisted)
+
+
+    for i=0, #adjacent, 1 do
+        table.insert(to_explore, adjacent[i])
+    end
+
+    while #to_explore > 0 do
+        local node = table.remove(to_explore, 1)
+
+        if not explored[node] then
+            -- If we're besides the node just visit it
+            if distance(position, node) > 1 then
+                -- If we're not, find an adjacent empty block we've visisted,
+                -- then go there before digging it.
+                local node_adjacent = get_adjacent_blocks(node)
+                local function is_empty(x) return explored[x] == EMPTY end
+                node_adjacent = filter(node_adjacent, is_explored)
+                if not #node_adjacent then
+                    -- Should be impossible to hit this
+                    error("no adjacent empty nodes to target in explored")
+                    return
+                end
+
+
+                -- Force move to the correct spot besides node to be adjacent
+                -- Call the callback for any blocks encountered, and force dig if they're
+                -- Still there after. 
+                local walkable_map = filter(explored, is_empty)
+                local path = pathfind_with_map(current, node_adjacent[1], walkable_map) 
+                for i = 0, #path, 1 do
+                    facing, position = visit_adjacent(position, node, facing, block_callback)
+                    if node != position then
+                        visit_adjacent(position, node, facing, force_dig)
+                    end
+                end
+            end
+
+            facing, position = visit_adjacent(position, node, facing, block_callback)
+            explored[position] = EMPTY
+
+            if node != position then
+                explored[node] = EMPTY
+                local node_adjacent = get_adjacent_blocks(position)
+                local function is_in_area(x) return area[x] end
+                local function is_not_explored(x) return not explored[x] end
+
+                node_adjacent = filter(node_adjacent, is_in_area)
+                node_adjacent = filter(node_adjacent, is_not_visisted)
+                for i=0, #node_adjacent, 1 do
+                    table.insert(to_explore, node_adjacent[i])
+                end
+            end
         end
     end
+
+    print("Done exploring")
+    return
 end
 
 
@@ -281,13 +425,13 @@ function scan_area(width, depth, block_callback)
 
     local direction = figure_out_facing()
     if not direction then
-        print("Could not determine facing")
+        error("Could not determine facing")
         return
     end
 
     local start_x, start_y, start_z = gps.locate()
     if not start_x then
-        print("Could not connect to gps")
+        error("Could not connect to gps")
         return
     end
 
@@ -327,16 +471,12 @@ function scan_area(width, depth, block_callback)
         z_offset = -1
     end
     
-    local path = {}
+    local explore_area = {}
     for x = start_x, final_x, x_offset do
         for z = start_z, final_z, z_offset do
-            table.insert(path, coord(x, start_y, z))
+            table.insert(explore_area, coord(x, start_y, z))
         end
     end
 
-    print("Path of length: "..#path)
-    visit_path(path, block_callback)
-
-    return final_x, final_z
-
+    explore(explore_area, block_callback)
 end

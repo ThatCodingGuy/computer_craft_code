@@ -336,12 +336,13 @@ function explore_area(area, block_callback)
     -- It returns the nodes in order of visitation.
 
     print("Explore area")
-
     local start_x, start_y, start_z = gps.locate()
     if not start_x then
         error("Could not connect to gps")
         return
     end
+
+    print("Facing")
 
     local facing = figure_out_facing()
     if not facing then
@@ -355,6 +356,7 @@ function explore_area(area, block_callback)
     explored[position] = EMPTY
 
     local to_explore = {}
+    print("Pre-adjacent")
     local adjacent = get_adjacent_blocks(area, position, explored)
     print("Adjacent")
     local function is_in_area(x) return area[x] end

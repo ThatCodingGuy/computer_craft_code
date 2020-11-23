@@ -97,6 +97,10 @@ function turn_to_face(current, target)
     directions[SOUTH] = WEST
     directions[WEST] = NORTH
 
+    if current == target then
+        return
+    end
+
     while current ~= target do
         turtle.turnRight()
         current = directions[current]
@@ -312,7 +316,6 @@ function visit_adjacent(current, adjacent, facing, block_callback)
         error("blocks not adjacent, error")
     end
 
-    print("Moving "..facing)
     blockExists, blockData = turtle.inspect()
     if blockExists then
         local moved = block_callback(blockData, FORWARD)
@@ -383,9 +386,7 @@ function explore_area(area, block_callback)
 
         if not explored[node] then
             -- If we're besides the node just visit it
-            print("Exploring "..node)
             if distance(position, node) > 1 then
-                print("Backtracking")
                 -- If we're not, find an adjacent empty block we've visisted,
                 -- then go there before digging it.
                 local node_adjacent = get_adjacent_blocks(node)
@@ -419,7 +420,7 @@ function explore_area(area, block_callback)
                 node_adjacent = filter(node_adjacent, is_in_area)
                 node_adjacent = filter(node_adjacent, is_not_explored)
                 for i=1, #node_adjacent, 1 do
-                    table.insert(to_explore, node_adjacent[i])
+                    table.insert(to_explore, 1, node_adjacent[i])
                 end
             else 
                 explored[node] = BLOCK

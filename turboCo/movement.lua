@@ -41,7 +41,6 @@ function filter(x, fun)
     local results = {}
     for i=1, #x, 1 do
         local valid = fun(x[i])
-        print(valid)
         if valid then
             table.insert(results, x[i])
         end
@@ -361,6 +360,10 @@ function explore_area(area, block_callback)
     print("Pre-adjacent")
     local adjacent = get_adjacent_blocks(position)
     print("Adjacent "..#adjacent)
+
+    for i = 1, i = #adjacent, 1 do
+        print(adjacent[i])
+    end
     local function is_in_area(x) print(x); return area[x] end
     local function is_not_explored(x) return not explored[x] end
     adjacent = filter(adjacent, is_in_area)

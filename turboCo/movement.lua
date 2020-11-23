@@ -361,7 +361,7 @@ function explore_area(area, block_callback)
     local adjacent = get_adjacent_blocks(position)
     print("Adjacent "..#adjacent)
 
-    for i = 1, i = #adjacent, 1 do
+    for i = 1, #adjacent, 1 do
         print(adjacent[i])
     end
     local function is_in_area(x) print(x); return area[x] end

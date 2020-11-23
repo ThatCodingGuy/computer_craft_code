@@ -322,12 +322,12 @@ end
 function get_adjacent_blocks(position)
     local x, y, z = split_coord(position)
     local coords = {}
-    coords[coord(x+1, y, z)] = 1
-    coords[coord(x-1, y, z)] = 1
-    coords[coord(x, y+1, z)] = 1
-    coords[coord(x, y-1, z)] = 1
-    coords[coord(x, y, z+1)] = 1
-    coords[coord(x, y, z-1)] = 1
+    table.insert(coords, coord(x+1, y, z))
+    table.insert(coords, coord(x-1, y, z))
+    table.insert(coords, coord(x, y+1, z))
+    table.insert(coords, coord(x, y-1, z))
+    table.insert(coords, coord(x, y, z+1))
+    table.insert(coords, coord(x, y, z-1))
     return coords
 end
 
@@ -357,22 +357,17 @@ function explore_area(area, block_callback)
     explored[position] = EMPTY
 
     local to_explore = {}
-    print("Pre-adjacent")
     local adjacent = get_adjacent_blocks(position)
-    for k in pairs(adjacent) do print(k) end
-    print("Post-adjacent")
+
     local function is_in_area(x) print(x); return area[x] end
     local function is_not_explored(x) return not explored[x] end
     adjacent = filter(adjacent, is_in_area)
-    print("in_area")
-    for k in pairs(adjacent) do print(k) end
-    print("in_area_post")
-    adjacent = filter(adjacent, is_not_visisted)
+    adjacent = filter(adjacent, is_not_explored)
 
     print("Inserting")
-    for k in pairs(adjacent) do
-        table.insert(to_explore, k)
-        print(k)
+    for i=1, #adjacent, 1 do
+        table.insert(to_explore, adjacent[i])
+        print(adjacent[i])
     end
 
     
@@ -391,10 +386,7 @@ function explore_area(area, block_callback)
                 local function is_empty(x) return explored[x] == EMPTY end
                 node_adjacent = filter(node_adjacent, is_empty)
 
-                local target;
-                for k in pairs(node_adjacent) do
-                    target = k
-                end
+                local target = node_adjacent[1]
 
                 -- Force move to the correct spot besides node to be adjacent
                 -- Call the callback for any blocks encountered, and force dig if they're
@@ -422,8 +414,8 @@ function explore_area(area, block_callback)
 
                 node_adjacent = filter(node_adjacent, is_in_area)
                 node_adjacent = filter(node_adjacent, is_not_visisted)
-                for k in pairs(node_adjacent) do
-                    table.insert(to_explore, k)
+                for i=1, #node_adjacent, 1 do
+                    table.insert(to_explore, node_adjacent[i])
                 end
             else 
                 explored[node] = BLOCK
@@ -492,7 +484,7 @@ function scan_area(width, depth, block_callback)
     local area = {}
     for x = start_x, final_x, x_offset do
         for z = start_z, final_z, z_offset do
-            table.insert(area, coord(x, start_y, z))
+            area[coord(x, start_y, z)] = 1
         end
     end
 

@@ -1,5 +1,5 @@
 
-function emtpyInventory()
+local function emtpyInventory()
     print("dropping inventory!")
     local sucked = false
     for i=1,16 do

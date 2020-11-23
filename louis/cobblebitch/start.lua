@@ -18,6 +18,6 @@ function main()
             NEXT_CHECK = os.epoch("utc") + (1000*60*1)
         end
     -- insert commands
-    cobblerbot.miningCycle()
-end
+        cobblerbot.miningCycle()
+    end
 end

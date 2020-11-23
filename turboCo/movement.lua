@@ -319,6 +319,7 @@ function visit_adjacent(current, adjacent, facing, block_callback)
 end
 
 function get_adjacent_blocks(position)
+    local x, y, z = split_coord(position)
     local coords = {}
     table.insert(coords, coord(x+1, y, z))
     table.insert(coords, coord(x-1, y, z))

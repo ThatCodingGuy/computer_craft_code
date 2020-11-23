@@ -378,12 +378,13 @@ function explore_area(area, block_callback)
 
     while #to_explore > 0 do
         local node = table.remove(to_explore, 1)
-        print("Exploring "..node)
+        
 
         if not explored[node] then
             -- If we're besides the node just visit it
-            print("Backtracking")
+            print("Exploring "..node)
             if distance(position, node) > 1 then
+                print("Backtracking")
                 -- If we're not, find an adjacent empty block we've visisted,
                 -- then go there before digging it.
                 local node_adjacent = get_adjacent_blocks(node)

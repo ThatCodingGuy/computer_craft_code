@@ -322,12 +322,12 @@ end
 function get_adjacent_blocks(position)
     local x, y, z = split_coord(position)
     local coords = {}
-    table.insert(coords, coord(x+1, y, z))
-    table.insert(coords, coord(x-1, y, z))
-    table.insert(coords, coord(x, y+1, z))
-    table.insert(coords, coord(x, y-1, z))
-    table.insert(coords, coord(x, y, z+1))
-    table.insert(coords, coord(x, y, z-1))
+    coords[coord(x+1, y, z)] = 1
+    coords[coord(x-1, y, z)] = 1
+    coords[coord(x, y+1, z)] = 1
+    coords[coord(x, y-1, z)] = 1
+    coords[coord(x, y, z+1)] = 1
+    coords[coord(x, y, z-1)] = 1
     return coords
 end
 
@@ -361,19 +361,14 @@ function explore_area(area, block_callback)
     local adjacent = get_adjacent_blocks(position)
     print("Adjacent "..#adjacent)
 
-    for i = 1, #adjacent, 1 do
-        print(adjacent[i])
-    end
     local function is_in_area(x) print(x); return area[x] end
     local function is_not_explored(x) return not explored[x] end
     adjacent = filter(adjacent, is_in_area)
-    print("Area "..#adjacent)
     adjacent = filter(adjacent, is_not_visisted)
-    print("Visited "..#adjacent)
 
     
-    for i=1, #adjacent, 1 do
-        table.insert(to_explore, adjacent[i])
+    for k in adjacent do
+        table.insert(to_explore, k)
     end
 
     
@@ -390,19 +385,18 @@ function explore_area(area, block_callback)
                 -- then go there before digging it.
                 local node_adjacent = get_adjacent_blocks(node)
                 local function is_empty(x) return explored[x] == EMPTY end
-                node_adjacent = filter(node_adjacent, is_explored)
-                if not #node_adjacent then
-                    -- Should be impossible to hit this
-                    error("no adjacent empty nodes to target in explored")
-                    return
-                end
+                node_adjacent = filter(node_adjacent, is_empty)
 
+                local target;
+                for k in node_adjacent do
+                    target = k
+                end
 
                 -- Force move to the correct spot besides node to be adjacent
                 -- Call the callback for any blocks encountered, and force dig if they're
                 -- Still there after. 
                 local walkable_map = filter(explored, is_empty)
-                local path = pathfind_with_map(current, node_adjacent[1], walkable_map) 
+                local path = pathfind_with_map(current, target, walkable_map) 
                 for i = 1, #path, 1 do
                     facing, position = visit_adjacent(position, node, facing, block_callback)
                     if not node == position then
@@ -424,8 +418,8 @@ function explore_area(area, block_callback)
 
                 node_adjacent = filter(node_adjacent, is_in_area)
                 node_adjacent = filter(node_adjacent, is_not_visisted)
-                for i = 1, #node_adjacent, 1 do
-                    table.insert(to_explore, node_adjacent[i])
+                for k in node_adjacent do
+                    table.insert(to_explore, k)
                 end
             else 
                 explored[node] = BLOCK

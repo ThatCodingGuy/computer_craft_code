@@ -367,7 +367,7 @@ function explore_area(area, block_callback)
     adjacent = filter(adjacent, is_not_visisted)
 
     print("Inserting")
-    for k, v in adjacent do
+    for k in pairs(adjacent) do
         table.insert(to_explore, k)
     end
 
@@ -388,7 +388,7 @@ function explore_area(area, block_callback)
                 node_adjacent = filter(node_adjacent, is_empty)
 
                 local target;
-                for k in node_adjacent do
+                for k in pairs(node_adjacent) do
                     target = k
                 end
 
@@ -418,7 +418,7 @@ function explore_area(area, block_callback)
 
                 node_adjacent = filter(node_adjacent, is_in_area)
                 node_adjacent = filter(node_adjacent, is_not_visisted)
-                for k in node_adjacent do
+                for k in pairs(node_adjacent) do
                     table.insert(to_explore, k)
                 end
             else 

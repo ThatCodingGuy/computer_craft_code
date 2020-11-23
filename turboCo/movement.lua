@@ -244,7 +244,7 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
 
     if current_x == adjacent_x and current_y == adjacent_y and current_z == current_z then
-        return facing
+        return facing, current
     end
 
     print("Visit "..current.." to "..adjacent)
@@ -396,7 +396,7 @@ function explore_area(area, block_callback)
                 for i = 1, #path, 1 do
                     facing, position = visit_adjacent(position, node, facing, block_callback)
                     if not node == position then
-                        visit_adjacent(position, node, facing, force_dig)
+                        facing, position = visit_adjacent(position, node, facing, force_dig)
                     end
                 end
             end

@@ -200,6 +200,8 @@ function pathfind_with_map(start, destination, map)
             if target == destination then
                 local new_path = copy(path)
                 table.insert(new_path, target)
+
+                print("Path "..table.concat(new_path, ","))
                 return new_path
             end
 
@@ -311,8 +313,6 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     end
 
     if not found then
-        print("current "..current)
-        print("adjacent "..adjacent)
         error("blocks not adjacent, error")
     end
 

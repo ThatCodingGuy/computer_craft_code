@@ -359,7 +359,7 @@ function explore_area(area, block_callback)
     local to_explore = {}
     print("Pre-adjacent")
     local adjacent = get_adjacent_blocks(position)
-
+    for k in pairs(adjacent) do print(k) end
     local function is_in_area(x) print(x); return area[x] end
     local function is_not_explored(x) return not explored[x] end
     adjacent = filter(adjacent, is_in_area)

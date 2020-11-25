@@ -17,6 +17,17 @@ local function safeSubstring(str, startIndex, endIndex)
   return string.sub(str, startIndex, endIndex)
 end
 
+--sets monitor to new color and returns the old color
+local function setMonitorColorIfNeeded(screen, color)
+  if color ~= nil and screen.isColor()
+    currentColor = screen.getTextColor() 
+    screen.setTextColor(color)
+    return currentColor
+  end
+  return nil
+end
+
+
 --Assuming that you have only one monitor peripheral, returns the only one
 function getInstance()
   return peripheral.find("monitor")
@@ -28,7 +39,8 @@ function ln(screen)
 end
 
 --Write so that the text wraps to the next line
-function write(screen, text)
+function write(screen, text, color)
+  local oldColor = setMonitorColorIfNeeded(screen, color)
   local width,height = screen.getSize()
   remainingText = text
   while string.len(remainingText) > 0 do
@@ -42,16 +54,17 @@ function write(screen, text)
     end
     remainingText = safeSubstring(remainingText, remainingX + 1, -1)
   end
+  setMonitorColorIfNeeded(screen, oldColor)
 end
 
 --Sets cursor to the beggining of the next line after writing
-function writeLn(screen, text)
-  write(screen, text)
+function writeLn(screen, text, color)
+  write(screen, text, color)
   setCursorToNextLine(screen)
 end
 
 --Writes centered text for a monitor of any size
-function writeCenter(screen, text)
+function writeCenter(screen, text, color)
   local width,height = screen.getSize()
   local x,y = screen.getCursorPos()
   local textSize = string.len(text)
@@ -60,43 +73,43 @@ function writeCenter(screen, text)
     startingX = (emptySpace / 2) + 1
     screen.setCursorPos(startingX, y)
   end
-  write(screen, text)
+  write(screen, text, color)
 end
 
 --Writes centered text for a monitor of any size, then enter a new line
-function writeCenterLn(screen, text)
-  writeCenter(screen, text)
+function writeCenterLn(screen, text, color)
+  writeCenter(screen, text, color)
   setCursorToNextLine(screen, text)
 end
 
 --Writes text to the left for a monitor of any size
-function writeLeft(screen, text)
+function writeLeft(screen, text, color)
   local x,y = screen.getCursorPos()
   screen.setCursorPos(1, y)
-  write(screen, text)
+  write(screen, text, color)
 end
 
 --Writes text to the left for a monitor of any size, then enter a new line
-function writeLeftLn(screen, text)
+function writeLeftLn(screen, text, color)
   writeLeft(screen, text)
-  setCursorToNextLine(screen, text)
+  setCursorToNextLine(screen, text, color)
 end
 
 --Writes text to the right for a monitor of any size
-function writeRight(screen, text)
+function writeRight(screen, text, color)
   local width,height = screen.getSize()
   local x,y = screen.getCursorPos()
   local textLen = string.len(text)
   if textLen <= width then
     screen.setCursorPos(width - string.len(text)+1, y)
   end
-  write(screen, text)
+  write(screen, text, color)
 end
 
 --Writes text to the right for a monitor of any size, then enter a new line
-function writeRightLn(screen, text)
-  writeRight(screen, text)
-  setCursorToNextLine(screen, text)
+function writeRightLn(screen, text, color)
+  writeRight(screen, text, color)
+  setCursorToNextLine(screen, text, color)
 end
 
 -- Clears the screen then resets the cursor pointer

@@ -12,25 +12,22 @@ categoryToColorMap['life'] = colors.cyan
 categoryToColorMap['art'] = colors.blue
 
 function getQuoteOfTheDay()
-  local quoteResponse, err = pcall(http.get("https://interactive-cv-api.herokuapp.com/quotes/today", {["Content-Type"] = "application/json"}))
-  if err then
-    logger.log(err)
+  worked, quoteResponse = pcall(function() http.get("https://interactive-cv-api.herokuapp.com/quotes/today", {["Content-Type"] = "application/json"}) end)
+  if not worked then
+    logger.log(quoteResponse)
+    return
   end
-  if quoteResponse ~= nil then
-    local responseStr,err = pcall(quoteResponse.readAll())
-    if err then
-      logger.log(err)
-    end
-    if responseStr ~= nil then
-      local responseObject,err = pcall(json.decode(responseStr))
-      if err then
-        logger.log(err)
-      end
-      if responseObject ~= nil then
-        return responseObject['quote']
-      end
-    end
+  worked, responseStr = pcall(quoteResponse.readAll)
+  if not worked then
+    logger.log(responseStr)
+    return
   end
+  worked, responseObject = pcall(json.decode, responseStr)
+  if not worked then
+    logger.log(responseObject)
+    return
+  end
+  return responseObject['quote']
 end
 
 function displayQuote(screen, quote)

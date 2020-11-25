@@ -19,7 +19,7 @@ end
 
 --sets monitor to new color and returns the old color
 local function setMonitorColorIfNeeded(screen, color)
-  if color ~= nil and screen.isColor()
+  if color ~= nil and screen.isColor() then
     currentColor = screen.getTextColor() 
     screen.setTextColor(color)
     return currentColor

@@ -2,7 +2,9 @@
 os.loadAPI("/gitlib/turboCo/movement.lua")
 
 function treeChop(block_data, position, adjacent, facing, direction)
-
+    print("Chop tree")
+    print(position)
+    print(adjacent)
     local start_position = position
     local start_facing = facing
 
@@ -58,15 +60,10 @@ function run(refuel_coords, tree_spot)
 
     facing, current = movement.navigate(current, facing, refuel_coords)
     movement.refuel()
-
+    facing, current = movement.navigate(current, facing, turtle_spot)
 
     while true do
-        facing, current = movement.navigate(current, facing, turtle_spot)
-
-        local tree = {}
-        table.insert(tree, tree_spot)
-        movement.explore_area(tree, current, facing, movement.keepChurning(refuel_coords, tree_chop))
-        
+        facing, current = movement.visit_adjacent(current, tree_spot,  facing, treeChop)
     end
 end
 

@@ -445,11 +445,9 @@ function visit(position, target, facing, block_callback, walkable_map)
     -- This moves the robot the coord specific
     -- It returns the facing and position. 
     -- If we're besides the node just visit it
-    print("a")
     if distance(position, target) > 1 then
         -- If we're not, find an adjacent empty block we've visisted,
         -- then go there before digging it.
-        print("b")
         local target_adjacent = get_adjacent_blocks(target)
         local function is_valid(x) return walkable_map[x] end
         target_adjacent = filter(target_adjacent, is_valid)
@@ -459,16 +457,11 @@ function visit(position, target, facing, block_callback, walkable_map)
         -- Force move to the correct spot besides node to be adjacent
         -- Call the callback for any blocks encountered, and force dig if they're
         -- Still there after. 
-        print("c")
         local path = pathfind_with_map(position, target, walkable_map) 
-        print("d")
         facing, position = follow_path(position, path, facing, block_callback, walkable_map)
         
     end
-    print("e")
-    print(position)
     facing, position = visit_adjacent(position, target, facing, block_callback, walkable_map)
-    print("f")
     return facing, position
 end
 
@@ -582,13 +575,11 @@ function navigate_no_map(current, facing, destination)
         local walkable_map = filter_map_keys(visited, is_empty)
 
         local next = table.remove(stack, 1)
-        print("1 "..current.." "..next.." "..facing)
+        print("next "..next)
         facing, current = visit(current, next, facing, no_dig, walkable_map)
-        print("2")
 
         if next == curent then
             visited[next] = EMPTY
-            print("3")
             local node_adjacent = get_biased_adjacency(current, destination)
             local function is_not_visited(x) return not visited[x] end
             node_adjacent = filter(node_adjacent, is_not_visited)
@@ -600,7 +591,6 @@ function navigate_no_map(current, facing, destination)
         else 
             visited[next] = BLOCK
         end
-        print("4")
     end
 
     error("Could not find path")

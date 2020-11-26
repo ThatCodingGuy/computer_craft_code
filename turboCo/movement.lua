@@ -177,37 +177,21 @@ function figure_out_facing()
         if success then 
             if new_position_x > start_position_x then
                 turtle.back()
-
-                for j = 0, i-1, 1 do 
-                    turtle.turnLeft()
-                end
                 return WEST
             end
 
             if new_position_x < start_position_x then
                 turtle.back()
-
-                for j = 0, i-1, 1 do 
-                    turtle.turnLeft()
-                end
                 return EAST
             end
 
             if new_position_z > start_position_z then
                 turtle.back()
-
-                for j = 0, i-1, 1 do 
-                    turtle.turnLeft()
-                end
                 return NORTH
             end
 
             if new_position_z < start_position_z then
                 turtle.back()
-
-                for j = 0, i-1, 1 do 
-                    turtle.turnLeft()
-                end
                 return SOUTH
             end
         end

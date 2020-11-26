@@ -608,13 +608,12 @@ function keepChurning(exit_coords, dropoff_coords, block_callback)
             local start_position = current
             local start_facing = facing
             local exit_path = pathfind_with_map(current, exit_coords, map)
-            facing, current = follow_path(position, path, facing, block_callback, walkable_map)
-
-            local refuel_path = pathfind_no_map(current, dropoff_coords)
-
+            facing, current = follow_path(current, exit_path, facing, block_callback, map)
+            facing, current = navigate_no_map(current, facing, dropoff_coords)
             empty_inventory()
+            facing, current = navigate_no_map(current, facing, exit_coords)
             local path = pathfind_with_map(current, start_position, map)
-            facing, current = follow_path(position, path, facing, block_callback, walkable_map)
+            facing, current = follow_path(current, path, facing, block_callback, map)
             turn_to_face(facing, start_facing)
         end
 

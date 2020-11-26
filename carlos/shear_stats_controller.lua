@@ -48,21 +48,21 @@ function aggregateBucketsAndPrintUpdate()
     for bot_id,current_stats in pairs(g_current_stats_bucket) do
         prev_stats = g_prev_stats_bucket[bot_id]
         if prev_stats == nil then
-            print("New bot came online!", bot_id, "with initial count", current_stats.total_wool)
-            goto continue
+            print("New bot came online!", bot_id, "with initial count",
+                  current_stats.total_wool)
+        else
+            delta_wool = (current_stats.total_wool - prev_stats.total_wool)
+            if delta_wool < 0 then
+                print("Negative delta for bot", bot_id,
+                      "it probably just reset its count")
+                delta_wool = current_stats.total_wool
+            end
+            total_count = total_count + delta_wool
         end
-
-        delta_wool = (current_stats.total_wool - prev_stats.total_wool)
-        if delta_wool < 0 then
-            print("Negative delta for bot", bot_id, "it probably just reset its count")
-            delta_wool = current_stats.total_wool
-        end
-        total_count = total_count + delta_wool
-
-        ::continue::
     end
 
-    print("collected", total_count, "wool in", g_current_stats_time - g_prev_stats_time, "seconds")
+    print("collected", total_count, "wool in",
+          g_current_stats_time - g_prev_stats_time, "seconds")
 end
 
 rednet.open("left")

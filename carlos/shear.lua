@@ -22,7 +22,7 @@ while 1 do
         wool_count = new_wool_count
         print("MOAR WOOL!", wool_count)
     end
-    if last_export_time = nil or (os.time() - last_export_time) > 20 then
+    if last_export_time == nil or (os.time() - last_export_time) > 20 then
         rednet.broadcast({total_wool=wool_count}, "shear_stats")
     end
     sleep(1)

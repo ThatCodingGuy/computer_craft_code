@@ -189,12 +189,12 @@ function get_biased_adjaceny(current, destination)
     -- This returns the adjacent coords in the order in which they should be visited to get
     -- to destination fastest.
 
-    local current_x, current_y, current_z = split_coord(current)
+    local x, y, z = split_coord(current)
     local destination_x, destination_y, destination_z = split_coord(destination)
 
-    local delta_x = current_x - destination_x
-    local delta_y = current_y - destination_y
-    local delta_z = current_z - destination_z
+    local delta_x = x - destination_x
+    local delta_y = y - destination_y
+    local delta_z = z - destination_z
 
     local abs_x = math.abs(delta_x)
     local abs_y = math.abs(delta_y)

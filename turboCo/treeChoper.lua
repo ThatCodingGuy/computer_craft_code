@@ -14,7 +14,9 @@ function treeChop(block_data, position, adjacent, facing, direction)
         -- Trees grow up to 7 high, with a width of 5
         -- Tree is in adjacent
 
+        print("here")
         local tree_x, tree_y, tree_z = movement.split_coord(adjacent)
+        print("wut")
 
         local tree_area = {}
         for x = tree_x - 2, tree_x + 2, 1 do
@@ -34,6 +36,7 @@ function treeChop(block_data, position, adjacent, facing, direction)
         facing = start_facing
     end
 
+    print("wait")
     sleep(1)
 
     return facing, position

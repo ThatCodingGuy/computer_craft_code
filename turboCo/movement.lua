@@ -563,7 +563,7 @@ function navigate_no_map(current, facing, destination)
     local stack = {}
     local next_steps = get_biased_adjaceny(current, destination)
 
-    while #stack > 0 then
+    while #stack > 0 do
         if current == destination then
             return current, facing
         end

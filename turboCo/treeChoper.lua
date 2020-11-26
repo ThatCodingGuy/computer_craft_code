@@ -39,7 +39,7 @@ function treeChop(block_data, position, adjacent, facing, direction)
     print("wait")
     sleep(1)
 
-    return facing, position
+    return false
 end
 
 function run(refuel_coords, tree_spot)

@@ -607,8 +607,7 @@ function keepChurning(dropoff_coords, block_callback)
         print(current)
         print(dropoff_coords)
 
-        if get_empty_slot_count() <= 1 then
-            print("1")
+        if get_empty_slot_count() <= 15 then
             local start_position = current
             local start_facing = facing
             facing, current = navigate_no_map(current, facing, dropoff_coords)

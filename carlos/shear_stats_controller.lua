@@ -11,14 +11,14 @@ g_current_stats_bucket = {}
 g_current_stats_time = nil
 
 function collectUpdates(secs_to_wait)
-    print("waiting for updates")
     end_time = os.time() + secs_to_wait
     secs_left = secs_to_wait
     while secs_left > 0 do
+        print("waiting " .. secs_left .. "s for updates")
         sender_id, message = rednet.receive("shear_stats", secs_left)
         secs_left = end_time - os.time()
         if message ~= nil then
-            print("Got update from ID", sender_id)
+            print("t=" .. os.time(), "got update from ID", sender_id)
             g_current_stats_bucket[sender_id] = message
         end
     end

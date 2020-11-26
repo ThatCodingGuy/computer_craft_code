@@ -4,10 +4,26 @@
  
 os.loadAPI("/gitlib/carlos/inventory.lua")
 
-rednet.open("left")
-
-last_export_time = nil
 wool_count = 0
+last_export_time = nil
+should_export_stats = false
+
+function export_stats()
+    if not should_export_stats then
+        return
+    end
+    if last_export_time == nil or (os.time() - last_export_time) > 20 then
+        print("exporting stats")
+        rednet.broadcast({total_wool=wool_count}, "shear_stats")
+        last_export_time = os.time()
+    end
+end
+
+if peripheral.getType("right") == "modem" then
+  should_export_stats = true
+  rednet.open("left")
+end
+
 while 1 do
     for i=1,4 do
         if not inventory.selectItemWithName("minecraft:shears")  then
@@ -22,10 +38,6 @@ while 1 do
         wool_count = new_wool_count
         print("MOAR WOOL!", wool_count)
     end
-    if last_export_time == nil or (os.time() - last_export_time) > 20 then
-        print("exporting stats")
-        rednet.broadcast({total_wool=wool_count}, "shear_stats")
-        last_export_time = os.time()
-    end
+    export_stats()
     sleep(1)
 end

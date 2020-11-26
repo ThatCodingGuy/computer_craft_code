@@ -38,7 +38,7 @@ function run(refuel_coords, tree_spot)
     -- Slot 1 is for saplings
 
     local facing = movement.figure_out_facing()
-    if not direction then
+    if not facing then
         error("Could not determine facing")
         return
     end

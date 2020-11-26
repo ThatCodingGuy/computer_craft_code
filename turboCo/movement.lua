@@ -123,11 +123,11 @@ function refuel()
     turtle.refuel()
 end
 
-local directions = {}
-directions[NORTH] = EAST
-directions[EAST] = SOUTH
-directions[SOUTH] = WEST
-directions[WEST] = NORTH
+local directions_right = {}
+directions_right[NORTH] = EAST
+directions_right[EAST] = SOUTH
+directions_right[SOUTH] = WEST
+directions_right[WEST] = NORTH
 
 
 function turn_to_face(current, target)
@@ -157,7 +157,7 @@ function turn_to_face(current, target)
 
     while current ~= target do
         turtle.turnRight()
-        current = directions[current]
+        current = directions_right[current]
     end
 end
 
@@ -177,26 +177,46 @@ function figure_out_facing()
         if success then 
             if new_position_x > start_position_x then
                 turtle.back()
-                return WEST
+                direction = WEST
+                for j = 1, i, 1 do
+                    turtle.turnRight()
+                    direction = directions_right[direction]
+                end
+                return direction
             end
 
             if new_position_x < start_position_x then
                 turtle.back()
-                return EAST
+                direction = EAST
+                for j = 1, i, 1 do
+                    turtle.turnRight()
+                    direction = directions_right[direction]
+                end
+                return direction
             end
 
             if new_position_z > start_position_z then
                 turtle.back()
-                return NORTH
+                direction = NORTH
+                for j = 1, i, 1 do
+                    turtle.turnRight()
+                    direction = directions_right[direction]
+                end
+                return direction
             end
 
             if new_position_z < start_position_z then
                 turtle.back()
-                return SOUTH
+                direction = SOUTH
+                for j = 1, i, 1 do
+                    turtle.turnRight()
+                    direction = directions_right[direction]
+                end
+                return direction
             end
         end
 
-        turtle.turnRight()
+        turtle.turnLeft()
     end
 
     error("Robot can't move, refuel or unstuck")

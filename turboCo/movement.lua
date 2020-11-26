@@ -466,7 +466,8 @@ function visit(position, target, facing, block_callback, walkable_map)
         
     end
     print("e")
-    facing, position = visit_adjacent(position, node, facing, block_callback, walkable_map)
+    print(position)
+    facing, position = visit_adjacent(position, target, facing, block_callback, walkable_map)
     print("f")
     return facing, position
 end

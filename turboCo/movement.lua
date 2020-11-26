@@ -564,7 +564,7 @@ function navigate_no_map(current, facing, destination)
     local next_steps = get_biased_adjaceny(current, destination)
     -- Insert in reverse order
     for i=#next_steps, 0, -1 do
-        table.insert(to_explore, 1, next_steps[i])
+        table.insert(stack, 1, next_steps[i])
     end
 
     while #stack > 0 do
@@ -586,7 +586,7 @@ function navigate_no_map(current, facing, destination)
 
             -- Insert in reverse order
             for i=#node_adjacent, 0, -1 do
-                table.insert(to_explore, 1, node_adjacent[i])
+                table.insert(stack, 1, node_adjacent[i])
             end
         else 
             explored[node] = BLOCK

@@ -614,9 +614,10 @@ function keepChurning(dropoff_coords, block_callback)
             empty_inventory()
             facing, current = navigate_no_map(current, facing, start_position)
             turn_to_face(facing, start_facing)
+            facing = start_facing
         end
 
-        block_callback(block_data, current, adjacent, facing, direction, map)
+        return block_callback(block_data, current, adjacent, facing, direction, map)
     end
     return wrapped 
 end

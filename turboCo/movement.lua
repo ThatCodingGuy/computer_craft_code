@@ -204,7 +204,7 @@ function get_biased_adjaceny(current, destination)
 
     local coords = {}
     if max == abs_x then
-        if delta_x > 0 then
+        if delta_x < 0 then
             table.insert(coords, coord(x+1, y, z))
             table.insert(coords, coord(x, y+1, z))
             table.insert(coords, coord(x, y, z+1))
@@ -223,7 +223,7 @@ function get_biased_adjaceny(current, destination)
         end
 
     elseif max == abs_y then
-        if delta_y > 0 then
+        if delta_y < 0 then
             table.insert(coords, coord(x, y+1, z))
             table.insert(coords, coord(x, y, z+1))
             table.insert(coords, coord(x, y, z-1))
@@ -243,7 +243,7 @@ function get_biased_adjaceny(current, destination)
 
 
     else 
-        if delta_z > 0 then
+        if delta_z < 0 then
             table.insert(coords, coord(x, y, z+1))
             table.insert(coords, coord(x, y+1, z))
             table.insert(coords, coord(x+1, y, z))

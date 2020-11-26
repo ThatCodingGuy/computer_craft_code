@@ -560,7 +560,7 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
     local distance_map = {}
     local adjacent = get_adjacent_blocks(current)
     
-    for i=#0, #adjacent, 1 do
+    for i=1, #adjacent, 1 do
         local distance = distance(adjacent[i], destination)
         if not distance_map[distance] then
             distance_map[distance] = {}
@@ -588,7 +588,7 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         local closest = 0
         local closest_distance = distance(current, closest)
 
-        for i = 0, #candidates, 1 do
+        for i=1, #candidates, 1 do
             local candidate_distance = distance(current, candidates[i])
             if candidate_distance < closest_distance then
                 closest = i
@@ -612,7 +612,7 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
             local function is_not_visited(x) return not visited[x] end
             adjacent = filter(adjacent, is_not_visited)
 
-            for i=#0, #adjacent, 1 do
+            for i=1, #adjacent, 1 do
                 local distance = distance(adjacent[i], destination)
                 if not distance_map[distance] then
                     distance_map[distance] = {}

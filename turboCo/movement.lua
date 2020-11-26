@@ -582,7 +582,7 @@ function navigate_no_map(current, facing, destination)
         local walkable_map = filter_map_keys(visited, is_empty)
 
         local next = table.remove(stack, 1)
-        print("1")
+        print("1 ", current, next, facing)
         current, facing = visit(current, next, facing, no_dig, walkable_map)
         print("2")
 

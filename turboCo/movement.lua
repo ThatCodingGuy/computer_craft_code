@@ -582,10 +582,13 @@ function navigate_no_map(current, facing, destination)
         local walkable_map = filter_map_keys(visited, is_empty)
 
         local next = table.remove(stack, 1)
+        print("1")
         current, facing = visit(current, next, facing, no_dig, walkable_map)
+        print("2")
 
         if next == curent then
             visited[node] = EMPTY
+            print("3")
             local node_adjacent = get_biased_adjacency(current, destination)
             local function is_not_visited(x) return not visited[x] end
             node_adjacent = filter(node_adjacent, is_not_visited)
@@ -597,6 +600,7 @@ function navigate_no_map(current, facing, destination)
         else 
             visited[node] = BLOCK
         end
+        print("4")
     end
 
     error("Could not find path")

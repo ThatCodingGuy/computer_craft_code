@@ -592,6 +592,8 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         local closest = 1
         local closest_distance = distance(current, candidates[closest])
 
+        print("a")
+
         for i=1, #candidates, 1 do
             local candidate_distance = distance(current, candidates[i])
             if candidate_distance < closest_distance then
@@ -604,18 +606,22 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         -- remove closest from the array
         table.remove(distance_map[shortest], closest)
 
+        print("b")
+
 
         local function is_empty(x) return visited[x] == EMPTY end
         local walkable_map = filter_map_keys(visited, is_empty)
 
         facing, current = visit(current, closest, facing, no_dig, walkable_map)
-
+        print("c")
         if next == current then
+            
             visited[next] = EMPTY
             local adjacent = get_adjacent_blocks(current)
             local function is_not_visited(x) return not visited[x] end
             adjacent = filter(adjacent, is_not_visited)
 
+            print("d")
             for i=1, #adjacent, 1 do
                 local distance = distance(adjacent[i], destination)
                 if not distance_map[distance] then
@@ -627,6 +633,7 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         else 
             visited[next] = BLOCK
         end
+        print("e")
     end
 
     error("#unreachable")

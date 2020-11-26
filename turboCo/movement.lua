@@ -178,7 +178,7 @@ function figure_out_facing()
             if new_position_x > start_position_x then
                 turtle.back()
                 direction = WEST
-                for j = 0, i, 1 do
+                for j = 0, i-1, 1 do
                     turtle.turnRight()
                     direction = directions_right[direction]
                 end
@@ -188,7 +188,7 @@ function figure_out_facing()
             if new_position_x < start_position_x then
                 turtle.back()
                 direction = EAST
-                for j = 0, i, 1 do
+                for j = 0, i-1, 1 do
                     turtle.turnRight()
                     direction = directions_right[direction]
                 end
@@ -198,7 +198,7 @@ function figure_out_facing()
             if new_position_z > start_position_z then
                 turtle.back()
                 direction = NORTH
-                for j = 0, i, 1 do
+                for j = 0, i-1, 1 do
                     turtle.turnRight()
                     direction = directions_right[direction]
                 end
@@ -208,7 +208,7 @@ function figure_out_facing()
             if new_position_z < start_position_z then
                 turtle.back()
                 direction = SOUTH
-                for j = 0, i, 1 do
+                for j = 0, i-1, 1 do
                     turtle.turnRight()
                     direction = directions_right[direction]
                 end

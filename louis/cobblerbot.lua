@@ -2,12 +2,13 @@
 local function emptyInventory()
     print("dropping inventory!")
     local sucked = false
+    
     for i=1,16 do
         repeat
-            turtle.turnRight()
+            
             turtle.select(i)
             turtle.drop(64)
-            turtle.turnLeft()
+            
             sucked = turtle.suck()
             if (sucked==true) then
                 print("Oh! Looks like the chess is full!")
@@ -46,7 +47,9 @@ function miningCycle()
     if (turtle.getItemCount(16)==64) then
         --print("My investory is full")
         --print("Going to drop my cobble for my masters!")
+        turtle.turnRight()
         emptyInventory()
+        turtle.turnLeft()
         --print("All done! I'm sure my masters will love it!")
     end
 end

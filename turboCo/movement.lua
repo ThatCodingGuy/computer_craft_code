@@ -16,10 +16,19 @@
 --
 --
 -- Some function expect a block callback.
--- block_callback(block_data, direction)
+-- Prototype : block_callback(block_data, current, adjacent, facing, direction, map)
 -- It must maintain the facing it started with, and the turtle
 -- must stop where it started, or in the block it was called for.
 -- It returns true if it moved, false if it didn't
+--
+-- block_data is the block adjacent to the robot
+-- current is the current coord of the robot
+-- adjacent is the coord of the block
+-- facing is the direction the robot is facing
+-- direction is the direction the block is in relative to the robot
+-- map is the known explored area so far
+
+
 
 EAST = "EAST"
 WEST = "WEST"

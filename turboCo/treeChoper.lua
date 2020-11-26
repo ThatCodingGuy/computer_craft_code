@@ -8,6 +8,8 @@ function treeChop(block_data, position, adjacent, facing, direction)
     local start_position = position
     local start_facing = facing
 
+    print(block_data.name)
+
     if block_data.name == "minecraft:birch_log" then
         -- Trees grow up to 7 high, with a width of 5
         -- Tree is in adjacent
@@ -23,7 +25,7 @@ function treeChop(block_data, position, adjacent, facing, direction)
             end
         end
 
-
+        print("Set up area")
 
         facing, position = movement.explore_area(tree_area, position, facing, movement.force_dig)
         facing, position = movement.navigate(position, facing, start_position)

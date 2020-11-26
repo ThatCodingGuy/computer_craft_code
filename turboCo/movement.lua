@@ -91,7 +91,7 @@ end
 
 function get_empty_slot_count()
     local count = 0
-    for i = 1, 17, 1 do
+    for i = 1, 16, 1 do
         local x = turtle.getItemCount(i)
         if x == 0 then
             count = count + 1
@@ -102,7 +102,7 @@ end
 
 function empty_inventory()
     local count = 0
-    for i = 1, 17, 1 do
+    for i = 1, 16, 1 do
         turtle.select(i)
         turtle.dropDown(i)
     end

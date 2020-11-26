@@ -70,5 +70,5 @@ function run(refuel_coords, tree_spot)
     end
 end
 
-refuel_coords, tree_spot = ...
-run(refuel_coords, tree_spot)
+refuel_x, refuel_y, refuel_z, tree_spot_x, tree_spot_y, tree_spot_z = ...
+run(movement.coord(refuel_x, refuel_y, refuel_z), movement.coord(tree_spot_x, tree_spot_y, tree_spot_z))

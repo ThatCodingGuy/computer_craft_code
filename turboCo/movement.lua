@@ -605,8 +605,8 @@ function keepChurning(dropoff_coords, block_callback)
     -- TODO: Add clear nav + exit point
     local function wrapped(block_data, current, adjacent, facing, direction, map)
         print(current)
-        print(facing)
-        print(direction)
+        print(dropoff_coords)
+
         if get_empty_slot_count() <= 1 then
             print("1")
             local start_position = current

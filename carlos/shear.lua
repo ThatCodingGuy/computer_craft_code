@@ -3,7 +3,10 @@
 -- and placing don't require fuel.
  
 os.loadAPI("/gitlib/carlos/inventory.lua")
- 
+
+rednet.open("left")
+
+last_export_time = nil
 wool_count = 0
 while 1 do
     for i=1,4 do
@@ -18,6 +21,9 @@ while 1 do
     if new_wool_count ~= wool_count then
         wool_count = new_wool_count
         print("MOAR WOOL!", wool_count)
+    end
+    if last_export_time = nil or (os.time() - last_export_time) > 20 then
+        rednet.broadcast({total_wool=wool_count}, "shear_stats")
     end
     sleep(1)
 end

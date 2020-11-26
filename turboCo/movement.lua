@@ -615,9 +615,9 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
 
         facing, current = visit(current, closest, facing, no_dig, walkable_map)
         print("c")
-        if next == current then
+        if closest == current then
             
-            visited[next] = EMPTY
+            visited[closest] = EMPTY
             local adjacent = get_adjacent_blocks(current)
             local function is_not_visited(x) return not visited[x] end
             adjacent = filter(adjacent, is_not_visited)
@@ -632,7 +632,7 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
                 table.insert(distance_map[distance], adjacent[i])
             end
         else 
-            visited[next] = BLOCK
+            visited[closest] = BLOCK
         end
         print("e")
     end

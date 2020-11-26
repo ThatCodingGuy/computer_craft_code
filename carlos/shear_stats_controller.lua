@@ -11,18 +11,18 @@ g_current_stats_bucket = {}
 g_current_stats_time = nil
 
 function collectUpdates(secs_to_wait)
-    end_time = os.time() + secs_to_wait
+    end_time = os.clock() + secs_to_wait
     secs_left = secs_to_wait
     while secs_left > 0 do
-        print("waiting " .. secs_left .. "s for updates")
+        print("t=" .. os.clock() .. " waiting " .. secs_left .. "s for updates")
         sender_id, message = rednet.receive("shear_stats", secs_left)
-        secs_left = end_time - os.time()
+        secs_left = end_time - os.clock()
         if message ~= nil then
-            print("t=" .. os.time(), "got update from ID", sender_id)
+            print("t=" .. os.clock(), "got update from ID", sender_id)
             g_current_stats_bucket[sender_id] = message
         end
     end
-    g_current_stats_time = os.time()
+    g_current_stats_time = os.clock()
 end
 
 function backfillStatsForInactiveBots()
@@ -71,7 +71,7 @@ end
 
 rednet.open("left")
 while 1 do
-    collectUpdates(60)
+    collectUpdates(10)
     backfillStatsForInactiveBots()
     aggregateBucketsAndPrintUpdate()
 

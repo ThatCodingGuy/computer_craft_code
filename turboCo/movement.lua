@@ -575,7 +575,7 @@ function navigate_no_map(current, facing, destination)
 
     while #stack > 0 do
         if current == destination then
-            return current, facing
+            return facing, current
         end
 
         local function is_empty(x) return visited[x] == EMPTY end
@@ -583,7 +583,7 @@ function navigate_no_map(current, facing, destination)
 
         local next = table.remove(stack, 1)
         print("1 "..current.." "..next.." "..facing)
-        current, facing = visit(current, next, facing, no_dig, walkable_map)
+        facing, current = visit(current, next, facing, no_dig, walkable_map)
         print("2")
 
         if next == curent then

@@ -10,20 +10,32 @@ g_prev_stats_time = nil
 g_current_stats_bucket = {}
 g_current_stats_time = nil
 
-function collectUpdates(secs_left)
-    begin_time = os.time()
+function collectUpdates(secs_to_wait)
+    print("waiting for updates")
+    end_time = os.time() + secs_to_wait
+    secs_left = secs_to_wait
     while secs_left > 0 do
         sender_id, message = rednet.receive("shear_stats", secs_left)
-
-        now = os.time()
-        secs_left = secs_left - (now - begin_time)
-        begin_time = now
-
+        secs_left = end_time - os.time()
         if message ~= nil then
+            print("Got update from ID", sender_id)
             g_current_stats_bucket[sender_id] = message
         end
     end
     g_current_stats_time = os.time()
+end
+
+function backfillStatsForInactiveBots()
+    if g_prev_stats_bucket == nil then
+        return
+    end
+    for bot_id,prev_stats in pairs(g_prev_stats_bucket) do
+        current_stats = g_current_stats_bucket[bot_id]
+        if current_stats == nil then
+            print("No new updates recieved for ID:", bot_id)
+            g_current_stats_bucket[bot_id] = prev_stats
+        end
+    end
 end
 
 function aggregateBucketsAndPrintUpdate()
@@ -36,14 +48,6 @@ function aggregateBucketsAndPrintUpdate()
         return
     end
 
-    for bot_id,prev_stats in pairs(g_prev_stats_bucket) do
-        current_stats = g_current_stats_bucket[bot_id]
-        if current_stats == nil then
-            print("No new updates recieved for bot:", bot_id)
-            g_current_stats_bucket[bot_id] = prev_stats
-        end
-    end
-
     total_count = 0
     for bot_id,current_stats in pairs(g_current_stats_bucket) do
         prev_stats = g_prev_stats_bucket[bot_id]
@@ -53,7 +57,7 @@ function aggregateBucketsAndPrintUpdate()
         else
             delta_wool = (current_stats.total_wool - prev_stats.total_wool)
             if delta_wool < 0 then
-                print("Negative delta for bot", bot_id,
+                print("Negative delta for ID", bot_id,
                       "it probably just reset its count")
                 delta_wool = current_stats.total_wool
             end
@@ -68,6 +72,7 @@ end
 rednet.open("left")
 while 1 do
     collectUpdates(60)
+    backfillStatsForInactiveBots()
     aggregateBucketsAndPrintUpdate()
 
     g_prev_stats_bucket = g_current_stats_bucket

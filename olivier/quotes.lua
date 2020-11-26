@@ -13,7 +13,7 @@ categoryToColorMap['art'] = colors.blue
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
-  worked, quoteResponse = pcall(function() return http.get("https://interactive-cv-api.herokuapp.com/quotes/", {["Content-Type"] = "application/json"}) end)
+  worked, quoteResponse = pcall(function() return http.get("https://interactive-cv-api.herokuapp.com/quotes", {["Content-Type"] = "application/json"}) end)
   if not worked then
     logger.log(quoteResponse)
     return

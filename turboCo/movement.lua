@@ -218,7 +218,9 @@ function pathfind_with_map(start, destination, map)
     return
 end
 
-function force_dig(block_data, direction)
+
+
+function force_dig(block_data, current, facing, direction)
     local success = false
     if direction == UP then
         while not success do
@@ -258,7 +260,7 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     if current_y - adjacent_y == 1 then
         found, block_data = turtle.inspectDown()
         if found then
-            local moved = block_callback(block_data, DOWN)
+            local moved = block_callback(block_data, current, adjacent, facing, DOWN)
             if moved then 
                 return facing, adjacent
             end
@@ -274,7 +276,7 @@ function visit_adjacent(current, adjacent, facing, block_callback)
     end
     if current_y - adjacent_y == -1 then
         if found then
-            local moved = block_callback(block_data, UP)
+            local moved = block_callback(block_data, current, adjacent, facing, UP)
             if moved then 
                 return facing, adjacent
             end
@@ -318,7 +320,7 @@ function visit_adjacent(current, adjacent, facing, block_callback)
 
     blockExists, blockData = turtle.inspect()
     if blockExists then
-        local moved = block_callback(blockData, FORWARD)
+        local moved = block_callback(block_data, current, adjacent, facing, FORWARD)
         if moved then 
             return facing, adjacent
         end
@@ -344,6 +346,89 @@ function get_adjacent_blocks(position)
     table.insert(coords, coord(x, y, z-1))
     return coords
 end
+
+
+-- function excavate_blocks(block_ids)
+--     -- params: block_ids map[string] -> any
+--     -- This returns an excavate function that clears all the block_ids in facing, returning the robot
+--     -- to the first excavated block
+
+
+--     local function is_excavate_type(x) return block_ids[x.name] end
+
+--     local function dig(block_data, current_position, block_position, facing, direction)
+--         local success = false
+--         if direction == UP then
+--             local block_exists, data =  turtle.inspectUp()
+--             if block_exists then
+--                 if ~is_excavate_type(data) then
+--                     return false
+--                 end
+--                 while not success do
+--                     turtle.digUp()
+--                     success = turtle.up()
+--                 end
+--                 return true
+--             end
+--             return false
+--         elseif direction == DOWN then
+--             local block_exists, data =  turtle.inspectDown()
+--             if block_exists then
+--                 if ~is_excavate_type(data) then
+--                     return false
+--                 end
+--                 while not success do
+--                     turtle.digDown()
+--                     success = turtle.down()
+--                 end
+--                 return true
+--             end
+--             return false
+--         elseif direction == FORWARD then
+--             local block_exists, data =  turtle.inspect()
+--             if block_exists then
+--                 if ~is_excavate_type(data) then
+--                     return false
+--                 end  
+--                 while not success do
+--                     turtle.dig()
+--                     success = turtle.forward()
+--                 end
+--                 return true
+--             end
+--             return false
+--         else
+--             error("no direction passed to force_dig")
+--         end
+--     end
+
+--     local function excavator(block_data, current_position, block_position, facing, direction)
+--         if not is_excavate_type(block_data) then
+--             return false
+--         end
+
+--         -- we diggin bois
+--         local to_dig = {}
+--         table.insert(to_dig, block_position)
+
+--         local visited = {}
+
+--         while #to_dig > 0 do
+--             local target = table.remove(to_dig, 1)
+--             facing, position = visit_adjacent(position, target, facing, dig)
+    
+
+--             visited[target] = 1
+--             adjacent = get_adjacent_blocks(target)
+--             local function not_visited(x) return not visited[x] end
+--             adjacent = filter(adjacent, not_visited)
+
+--             for i=0, #adjacent, 1 then
+--                 table.insert(to_dig, adjacent[i])
+--             end
+--         end
+--     end
+-- end
 
 
 function explore_area(area, block_callback)
@@ -432,10 +517,93 @@ function explore_area(area, block_callback)
     return
 end
 
+function explore(should_explore_, block_callback)
+    -- This runs a BFS of path using map to find the path to take.
+    -- It returns the nodes in order of visitation.
+    local start_x, start_y, start_z = gps.locate()
+    if not start_x then
+        error("Could not connect to gps")
+        return
+    end
 
-function scan_area(width, depth, block_callback)
+
+    local facing = figure_out_facing()
+    if not facing then
+        error("Could not determine facing")
+        return
+    end
+
+    local position = coord(start_x, start_y, start_z)
+
+    local explored = {}
+    explored[position] = EMPTY
+
+    local to_explore = {}
+    local adjacent = get_adjacent_blocks(position)
+    local function is_not_explored(x) return not explored[x] end
+    adjacent = filter(adjacent, is_in_area)
+
+    for i=1, #adjacent, 1 do
+        table.insert(to_explore, adjacent[i])
+    end
+
+    while #to_explore > 0 do
+        local node = table.remove(to_explore, 1)
+        
+
+        if not explored[node] then
+            -- If we're besides the node just visit it
+            if distance(position, node) > 1 then
+                -- If we're not, find an adjacent empty block we've visisted,
+                -- then go there before digging it.
+                local node_adjacent = get_adjacent_blocks(node)
+                local function is_empty(x) return explored[x] == EMPTY end
+                node_adjacent = filter(node_adjacent, is_empty)
+
+                local target = node_adjacent[1]
+
+                -- Force move to the correct spot besides node to be adjacent
+                -- Call the callback for any blocks encountered, and force dig if they're
+                -- Still there after. 
+                local walkable_map = filter_map_keys(explored, is_empty)
+                local path = pathfind_with_map(position, target, walkable_map) 
+                for i = 1, #path, 1 do
+                    facing, position = visit_adjacent(position, path[i], facing, block_callback)
+                    if not node == position then
+                        facing, position = visit_adjacent(position, path[i], facing, force_dig)
+                    end
+                end
+            end
+
+            facing, position = visit_adjacent(position, node, facing, block_callback)
+            explored[position] = EMPTY
+
+            if node == position then
+                explored[node] = EMPTY
+                local node_adjacent = get_adjacent_blocks(position)
+                local function is_in_area(x) return area[x] end
+                local function is_not_explored(x) return not explored[x] end
+
+                node_adjacent = filter(node_adjacent, is_in_area)
+                node_adjacent = filter(node_adjacent, is_not_explored)
+                for i=1, #node_adjacent, 1 do
+                    table.insert(to_explore, 1, node_adjacent[i])
+                end
+            else 
+                explored[node] = BLOCK
+            end
+        end
+    end
+
+    print("Done exploring")
+    return
+end
+
+
+function scan_area(width, depth, height, block_callback)
     -- +width to the right, -width to the left
     -- +depth forward, -depth backwards
+    -- +height up, -height down
     -- block_callback is called with block data whenever a collision occurs.
 
     local direction = figure_out_facing()
@@ -474,6 +642,7 @@ function scan_area(width, depth, block_callback)
 
     local final_x = start_x + x_total
     local final_z = start_z + z_total
+    local final_y = start_y + height
     print("Scanning from "..start_x..","..start_z.." to "..final_x..","..final_z)
     
     x_offset = 1
@@ -485,11 +654,17 @@ function scan_area(width, depth, block_callback)
     if start_z > final_z then
         z_offset = -1
     end
+
+    if start_y > final_y then
+        y_offset = -1
+    end
     
     local area = {}
     for x = start_x, final_x, x_offset do
         for z = start_z, final_z, z_offset do
-            area[coord(x, start_y, z)] = 1
+            for y = start_y, final_y, y_offset do
+                area[coord(x, y, z)] = 1
+            end
         end
     end
 

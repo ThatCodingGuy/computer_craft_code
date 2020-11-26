@@ -583,6 +583,7 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         for distance in pairs(distance_map) do table.insert(distances, distance) end
         for x=1, #distances, 1 do print("mm"..distances[x]) end
         table.sort(distances)
+        for x=1, #distances, 1 do print("ss"..distances[x]) end
         local shortest = distances[0]
 
         print("Shortest "..shortest)

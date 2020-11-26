@@ -20,6 +20,7 @@ function treeChop(block_data, position, adjacent, facing, direction)
         for x = tree_x - 2, tree_x + 2, 1 do
             for z = tree_z - 2, tree_z + 2, 1 do
                 for y = tree_z, tree_z+7, 1 do
+                    print(coord(x, y, z))
                     tree_area[coord(x, y, z)] = 1
                 end
             end

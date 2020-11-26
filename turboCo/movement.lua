@@ -614,7 +614,7 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         local walkable_map = filter_map_keys(visited, is_empty)
 
         facing, current = visit(current, closest, facing, no_dig, walkable_map)
-        print("c")
+        print("c "..current.." "..closest)
         if closest == current then
             
             visited[closest] = EMPTY

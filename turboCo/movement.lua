@@ -445,25 +445,8 @@ function follow_path(position, path, facing, block_callback, walkable_map)
 end
 
 
-function explore_area(area, block_callback)
-    -- This runs a BFS of path using map to find the path to take.
-    -- It returns the nodes in order of visitation.
-
-    local start_x, start_y, start_z = gps.locate()
-    if not start_x then
-        error("Could not connect to gps")
-        return
-    end
-
-
-    local facing = figure_out_facing()
-    if not facing then
-        error("Could not determine facing")
-        return
-    end
-
-    local position = coord(start_x, start_y, start_z)
-
+function explore_area(area, position, facing, block_callback)
+    -- This will call block_callback on every block in the area
     local explored = {}
     explored[position] = EMPTY
 
@@ -505,12 +488,13 @@ function explore_area(area, block_callback)
         end
     end
 
-    print("Done exploring")
-    return
+    return facing, position
 end
 
 function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
     -- FIXME: A path needs to exist, or the robot will forever explore
+
+    print("Navigating to "..destination)
 
     local visited = {}
     visited[current] = EMPTY
@@ -616,7 +600,7 @@ function scan_area(width, depth, height, block_callback)
     -- +height up, -height down
     -- block_callback is called with block data whenever a collision occurs.
 
-    local direction = figure_out_facing()
+    local facing = figure_out_facing()
     if not direction then
         error("Could not determine facing")
         return
@@ -630,22 +614,22 @@ function scan_area(width, depth, height, block_callback)
 
     local x_total = 0
     local z_total = 0
-    if direction == NORTH then
+    if facing == NORTH then
         x_total = -width
         z_total = depth
     end
 
-    if direction == SOUTH then
+    if facing == SOUTH then
         x_total = width
         z_total = -depth
     end
 
-    if direction == EAST then
+    if facing == EAST then
         x_total = -depth
         z_total = -width
     end
 
-    if direction == WEST then
+    if facing == WEST then
         x_total = depth
         z_total = width
     end
@@ -679,5 +663,5 @@ function scan_area(width, depth, height, block_callback)
         end
     end
 
-    explore_area(area, block_callback)
+    explore_area(area, coord(start_x, start_y, start_z), facing, block_callback)
 end

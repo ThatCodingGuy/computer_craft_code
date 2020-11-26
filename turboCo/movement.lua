@@ -198,7 +198,7 @@ function get_biased_adjaceny(current, destination)
 
     local abs_x = math.abs(delta_x)
     local abs_y = math.abs(delta_y)
-    local abs_z = math.abs(delta_y)
+    local abs_z = math.abs(delta_z)
 
     local max = math.max(abs_x, abs_y, abs_z)
 

@@ -109,15 +109,35 @@ function empty_inventory()
     return count
 end
 
+local directions = {}
+directions[NORTH] = EAST
+directions[EAST] = SOUTH
+directions[SOUTH] = WEST
+directions[WEST] = NORTH
+
 
 function turn_to_face(current, target)
-    local directions = {}
-    directions[NORTH] = EAST
-    directions[EAST] = SOUTH
-    directions[SOUTH] = WEST
-    directions[WEST] = NORTH
-
     if current == target then
+        return
+    end
+
+    if current == NORTH and target == WEST then
+        turtle.turnLeft()
+        return
+    end
+
+    if current == WEST and target == SOUTH then
+        turtle.turnLeft()
+        return
+    end
+
+    if current == SOUTH and target == EAST then
+        turtle.turnLeft()
+        return
+    end
+
+    if current == EAST and target == NORTH then
+        turtle.turnLeft()
         return
     end
 
@@ -183,85 +203,6 @@ function figure_out_facing()
 
     error("Robot can't move, refuel or unstuck")
     return
-end
-
-function get_biased_adjaceny(current, destination)
-    -- This returns the adjacent coords in the order in which they should be visited to get
-    -- to destination fastest.
-
-    local x, y, z = split_coord(current)
-    local destination_x, destination_y, destination_z = split_coord(destination)
-
-    local delta_x = x - destination_x
-    local delta_y = y - destination_y
-    local delta_z = z - destination_z
-
-    local abs_x = math.abs(delta_x)
-    local abs_y = math.abs(delta_y)
-    local abs_z = math.abs(delta_z)
-
-    local max = math.max(abs_x, abs_y, abs_z)
-
-    local coords = {}
-    if max == abs_x then
-        if delta_x < 0 then
-            table.insert(coords, coord(x+1, y, z))
-            table.insert(coords, coord(x, y+1, z))
-            table.insert(coords, coord(x, y, z+1))
-            table.insert(coords, coord(x, y, z-1))
-            table.insert(coords, coord(x, y-1, z))
-            table.insert(coords, coord(x-1, y, z))
-            return coords
-        else
-            table.insert(coords, coord(x-1, y, z))
-            table.insert(coords, coord(x, y+1, z))
-            table.insert(coords, coord(x, y, z+1))
-            table.insert(coords, coord(x, y, z-1))
-            table.insert(coords, coord(x, y-1, z))
-            table.insert(coords, coord(x+1, y, z)) 
-            return coords
-        end
-
-    elseif max == abs_y then
-        if delta_y < 0 then
-            table.insert(coords, coord(x, y+1, z))
-            table.insert(coords, coord(x, y, z+1))
-            table.insert(coords, coord(x, y, z-1))
-            table.insert(coords, coord(x+1, y, z))
-            table.insert(coords, coord(x-1, y, z))
-            table.insert(coords, coord(x, y-1, z))
-            return coords
-        else
-            table.insert(coords, coord(x, y-1, z))
-            table.insert(coords, coord(x, y, z+1))
-            table.insert(coords, coord(x, y, z-1))
-            table.insert(coords, coord(x+1, y, z))
-            table.insert(coords, coord(x-1, y, z))
-            table.insert(coords, coord(x, y+1, z))
-            return coords
-        end
-
-
-    else 
-        if delta_z < 0 then
-            table.insert(coords, coord(x, y, z+1))
-            table.insert(coords, coord(x, y+1, z))
-            table.insert(coords, coord(x+1, y, z))
-            table.insert(coords, coord(x-1, y, z))
-            table.insert(coords, coord(x, y-1, z))
-            table.insert(coords, coord(x, y, z-1))
-            return coords
-        else
-            table.insert(coords, coord(x, y, z-1))
-            table.insert(coords, coord(x, y+1, z))
-            table.insert(coords, coord(x+1, y, z))
-            table.insert(coords, coord(x-1, y, z))
-            table.insert(coords, coord(x, y-1, z))
-            table.insert(coords, coord(x, y, z+1))
-            return coords
-        end
-
-    end
 end
 
 function pathfind_with_map(start, destination, map)
@@ -581,18 +522,12 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         -- Find the shortest distance.
         local distances = {}
         for distance in pairs(distance_map) do table.insert(distances, distance) end
-        for x=1, #distances, 1 do print("mm"..distances[x]) end
         table.sort(distances)
-        for x=1, #distances, 1 do print("ss"..distances[x]) end
         local shortest = distances[1]
-
-        print("Shortest "..shortest)
 
         local candidates = distance_map[shortest]
         local closest_index = 1
         local closest_distance = distance(current, candidates[closest_index])
-
-        print("a")
 
         for i=1, #candidates, 1 do
             local candidate_distance = distance(current, candidates[i])
@@ -607,14 +542,10 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         local closest = candidates[closest_index]
         table.remove(distance_map[shortest], closest_index)
 
-        print("b")
-
-
         local function is_empty(x) return visited[x] == EMPTY end
         local walkable_map = filter_map_keys(visited, is_empty)
 
         facing, current = visit(current, closest, facing, no_dig, walkable_map)
-        print("c "..current.." "..closest)
         if closest == current then
             
             visited[closest] = EMPTY
@@ -622,19 +553,16 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
             local function is_not_visited(x) return not visited[x] end
             adjacent = filter(adjacent, is_not_visited)
 
-            print("d")
             for i=1, #adjacent, 1 do
                 local distance = distance(adjacent[i], destination)
                 if not distance_map[distance] then
                     distance_map[distance] = {}
                 end
-                print("insert "..distance.." "..adjacent[i])
                 table.insert(distance_map[distance], adjacent[i])
             end
         else 
             visited[closest] = BLOCK
         end
-        print("e")
     end
 
     error("#unreachable")

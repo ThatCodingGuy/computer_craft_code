@@ -48,8 +48,8 @@ local screen = monitor.getInstance()
 
 quotes = getQuotes()
 if quotes ~= nil then
-  for quote in quotes do
-    displayQuote(screen, quote)
+  for quote in pairs(quotes) do
+    displayQuote(screen, quotes[quote])
   end
 end
 
@@ -59,8 +59,12 @@ while true do
   local event, key, isHeld = os.pullEvent("key")
   local keyName = keys.getName( key )
   if keyName == keys.up then
+    print("UP!!!")
     screen.scroll(-1)
   elseif keyName == keys.down then
+    print("DOWN!!!")
     screen.scroll(1)
+  else
+    print(keyName)
   end
 end

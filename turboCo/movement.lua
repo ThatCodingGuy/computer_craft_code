@@ -50,8 +50,8 @@ end
 
 function filter_map_keys(x, fun)
     local results = {}
-    for k in pairs(x) do
-        local valid = fun(k)
+    for k, v in pairs(x) do
+        local valid = fun(k, v)
         if valid then
             results[k] = x[k]
         end
@@ -575,7 +575,7 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
             return facing, current
         end
 
-        local function no_elems(x) return #x > 0 end
+        local function no_elems(k, v) return #v > 0 end
         distance_map = filter_map_keys(distance_map, no_elems)
 
         -- Find the shortest distance.

@@ -275,6 +275,7 @@ function visit_adjacent(current, adjacent, facing, block_callback)
         end
     end
     if current_y - adjacent_y == -1 then
+        found, block_data = turtle.inspectUp()
         if found then
             local moved = block_callback(block_data, current, adjacent, facing, UP)
             if moved then 

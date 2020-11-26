@@ -575,17 +575,19 @@ function navigate_no_map(current, facing, destination)
         local walkable_map = filter_map_keys(visited, is_empty)
 
         local next = table.remove(stack, 1)
-        print("next "..next)
         facing, current = visit(current, next, facing, no_dig, walkable_map)
 
+        print("next "..next.." "..current)
         if next == curent then
             visited[next] = EMPTY
             local node_adjacent = get_biased_adjacency(current, destination)
             local function is_not_visited(x) return not visited[x] end
             node_adjacent = filter(node_adjacent, is_not_visited)
 
+            print("Inserting "..#node_adjacent)
             -- Insert in reverse order
             for i=#node_adjacent, 0, -1 do
+                
                 table.insert(stack, 1, node_adjacent[i])
             end
         else 

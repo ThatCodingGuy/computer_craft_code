@@ -628,7 +628,7 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
                 if not distance_map[distance] then
                     distance_map[distance] = {}
                 end
-        
+                print("insert "..distance.." "..adjacent[i])
                 table.insert(distance_map[distance], adjacent[i])
             end
         else 

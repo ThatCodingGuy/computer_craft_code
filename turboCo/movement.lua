@@ -262,7 +262,6 @@ function get_biased_adjaceny(current, destination)
         end
 
     end
-    
 end
 
 function pathfind_with_map(start, destination, map)
@@ -314,10 +313,8 @@ function pathfind_with_map(start, destination, map)
         end  
     end
 
-    error("No path found in map.")
-    return
+    return false
 end
-
 
 
 function force_dig(block_data, current, adjacent, facing, direction)
@@ -553,66 +550,94 @@ function explore_area(area, block_callback)
     return
 end
 
-function navigate_no_map(current, facing, destination)
+function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
     -- FIXME: A path needs to exist, or the robot will forever explore
 
     local visited = {}
     visited[current] = EMPTY
 
-    local stack = {}
-    local next_steps = get_biased_adjaceny(current, destination)
-    -- Insert in reverse order
-    for i=#next_steps, 0, -1 do
-        table.insert(stack, 1, next_steps[i])
+    -- distance_map is a map of distance -> list of known blocks at that distance.
+    local distance_map = {}
+    local adjacent = get_adjacent_blocks(current)
+    
+    for i=#0, #adjacent, 1 do
+        local distance = distance(adjacent[i], destination)
+        if not distance_map[distance] then
+            distance_map[distance] = {}
+        end
+
+        table.insert(distance_map[distance], adjacent[i])
     end
 
-    while #stack > 0 do
+    while true do
+        -- At destination, return
         if current == destination then
             return facing, current
         end
 
+        local function no_elems(x) return #x > 0 end
+        distance_map = filter_map_keys(distance_map, no_elems)
+
+        -- Find the shortest distance.
+        local distances = {}
+        for n in pairs(distance_map) do table.insert(distances, n) end
+        table.sort(distances)
+        local shortest = distances[0]
+
+        local candidates = distance_map[shortest]
+        local closest = 0
+        local closest_distance = distance(current, closest)
+
+        for i = 0, #candidates, 1 do
+            local candidate_distance = distance(current, candidates[i])
+            if candidate_distance < closest_distance then
+                closest = i
+                closest_distance = candidate_distance
+            end
+        end
+
+        -- At this point, closest is the next block we should visit.
+        -- remove closest from the array
+        table.remove(distance_map[shortest], closest)
+
+
         local function is_empty(x) return visited[x] == EMPTY end
         local walkable_map = filter_map_keys(visited, is_empty)
 
-        local next = table.remove(stack, 1)
-        facing, current = visit(current, next, facing, no_dig, walkable_map)
+        facing, current = visit(current, closest, facing, no_dig, walkable_map)
 
-        print("next "..next.." "..current)
         if next == current then
-            print("equal")
             visited[next] = EMPTY
-            local node_adjacent = get_biased_adjaceny(current, destination)
+            local adjacent = get_adjacent_blocks(current)
             local function is_not_visited(x) return not visited[x] end
-            node_adjacent = filter(node_adjacent, is_not_visited)
+            adjacent = filter(adjacent, is_not_visited)
 
-            print("Inserting "..#node_adjacent)
-            -- Insert in reverse order
-            for i=#node_adjacent, 0, -1 do
-                
-                table.insert(stack, 1, node_adjacent[i])
+            for i=#0, #adjacent, 1 do
+                local distance = distance(adjacent[i], destination)
+                if not distance_map[distance] then
+                    distance_map[distance] = {}
+                end
+        
+                table.insert(distance_map[distance], adjacent[i])
             end
         else 
             visited[next] = BLOCK
         end
     end
 
-    error("Could not find path")
-
+    error("#unreachable")
 end
 -- dropoff_coords is the slot above the chest
 function keepChurning(dropoff_coords, block_callback)
 
     -- TODO: Add clear nav + exit point
     local function wrapped(block_data, current, adjacent, facing, direction, map)
-        print(current)
-        print(dropoff_coords)
-
         if get_empty_slot_count() <= 15 then
             local start_position = current
             local start_facing = facing
-            facing, current = navigate_no_map(current, facing, dropoff_coords)
+            facing, current = navigate(current, facing, dropoff_coords, {})
             empty_inventory()
-            facing, current = navigate_no_map(current, facing, start_position)
+            facing, current = navigate(current, facing, start_position, {})
             turn_to_face(facing, start_facing)
             facing = start_facing
         end

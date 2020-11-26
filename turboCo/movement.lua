@@ -494,6 +494,8 @@ end
 function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
     -- FIXME: A path needs to exist, or the robot will forever explore
 
+    print("Navigating to "..destination)
+
     local visited = {}
     visited[current] = EMPTY
 

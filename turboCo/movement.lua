@@ -345,7 +345,7 @@ function force_dig(block_data, current, adjacent, facing, direction)
     end
 end
 
-function no_mine(block_data, current, adjacent, facing, direction)
+function no_dig(block_data, current, adjacent, facing, direction)
     -- Never try to break a block
     return false
 end
@@ -445,9 +445,11 @@ function visit(position, target, facing, block_callback, walkable_map)
     -- This moves the robot the coord specific
     -- It returns the facing and position. 
     -- If we're besides the node just visit it
+    print("a")
     if distance(position, target) > 1 then
         -- If we're not, find an adjacent empty block we've visisted,
         -- then go there before digging it.
+        print("b")
         local target_adjacent = get_adjacent_blocks(target)
         local function is_valid(x) return walkable_map[x] end
         target_adjacent = filter(target_adjacent, is_valid)
@@ -457,12 +459,15 @@ function visit(position, target, facing, block_callback, walkable_map)
         -- Force move to the correct spot besides node to be adjacent
         -- Call the callback for any blocks encountered, and force dig if they're
         -- Still there after. 
-        
+        print("c")
         local path = pathfind_with_map(position, target, walkable_map) 
+        print("d")
         facing, position = follow_path(position, path, facing, block_callback, walkable_map)
+        
     end
-
+    print("e")
     facing, position = visit_adjacent(position, node, facing, block_callback, walkable_map)
+    print("f")
     return facing, position
 end
 
@@ -572,15 +577,12 @@ function navigate_no_map(current, facing, destination)
             return current, facing
         end
 
-        print("1")
         local function is_empty(x) return visited[x] == EMPTY end
         local walkable_map = filter_map_keys(visited, is_empty)
 
         local next = table.remove(stack, 1)
-        print("2")
-        current, facing = visit(current, next, facing, block_callback, map)
+        current, facing = visit(current, next, facing, no_dig, walkable_map)
 
-        print("3")
         if next == curent then
             visited[node] = EMPTY
             local node_adjacent = get_biased_adjacency(current, destination)

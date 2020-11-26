@@ -1,8 +1,6 @@
 
 os.loadAPI("/gitlib/turboCo/movement.lua")
 
-
-
 function treeChop(block_data, position, adjacent, facing, direction)
 
     local start_position = position
@@ -71,3 +69,6 @@ function run(refuel_coords, tree_spot)
         
     end
 end
+
+refuel_coords, tree_spot = ...
+run(refuel_coords, tree_spot)

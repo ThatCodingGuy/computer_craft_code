@@ -22,14 +22,12 @@ function treeChop(block_data, position, adjacent, facing, direction)
         for x = tree_x - 2, tree_x + 2, 1 do
             for z = tree_z - 2, tree_z + 2, 1 do
                 for y = tree_z, tree_z+7, 1 do
-                    print(coord(x, y, z))
-                    tree_area[coord(x, y, z)] = 1
+                    tree_area[movement.coord(x, y, z)] = 1
                 end
             end
         end
 
         print("Set up area")
-
         facing, position = movement.explore_area(tree_area, position, facing, movement.force_dig)
         facing, position = movement.navigate(position, facing, start_position)
         movement.turn_to_face(facing, start_facing)

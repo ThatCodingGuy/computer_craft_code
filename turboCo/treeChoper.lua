@@ -48,7 +48,7 @@ function run(refuel_coords, tree_spot)
         error("Could not connect to gps")
         return
     end
-    local current = coord(start_x, start_y, start_z)
+    local current = movement.coord(start_x, start_y, start_z)
 
 
     -- We always position ourselves to the south

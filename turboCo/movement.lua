@@ -587,7 +587,7 @@ function navigate_no_map(current, facing, destination)
         print("2")
 
         if next == curent then
-            visited[node] = EMPTY
+            visited[next] = EMPTY
             print("3")
             local node_adjacent = get_biased_adjacency(current, destination)
             local function is_not_visited(x) return not visited[x] end
@@ -598,7 +598,7 @@ function navigate_no_map(current, facing, destination)
                 table.insert(stack, 1, node_adjacent[i])
             end
         else 
-            visited[node] = BLOCK
+            visited[next] = BLOCK
         end
         print("4")
     end

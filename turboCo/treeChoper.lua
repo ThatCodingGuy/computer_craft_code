@@ -69,6 +69,3 @@ function run(refuel_coords, tree_spot)
         
     end
 end
-
-refuel_coords, tree_spot = ...
-run(refuel_coords, tree_spot)

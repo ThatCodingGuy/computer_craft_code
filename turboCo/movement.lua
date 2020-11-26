@@ -104,7 +104,7 @@ function empty_inventory()
     local count = 0
     for i = 1, 16, 1 do
         turtle.select(i)
-        turtle.dropDown(i)
+        turtle.dropDown()
     end
     return count
 end

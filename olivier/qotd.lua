@@ -38,11 +38,11 @@ function displayQuote(screen, quote)
     monitor.writeCenterLn(screen, "TurboCo Motivational Billboard")
     monitor.ln(screen)
     monitor.writeCenterLn(screen, quote['title'], color)
+    monitor.writeCenterLn(screen, "Date: " .. quote['date'])
     monitor.ln(screen)
     monitor.writeLn(screen, quote['content'], color)
     monitor.ln(screen)
     monitor.writeLeftLn(screen, "Author: " .. quote['author'])
-    monitor.writeLeftLn(screen, "Date: " .. quote['date'])
   end
 end
 

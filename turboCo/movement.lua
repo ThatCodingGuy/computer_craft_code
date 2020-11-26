@@ -572,12 +572,15 @@ function navigate_no_map(current, facing, destination)
             return current, facing
         end
 
+        print("1")
         local function is_empty(x) return visited[x] == EMPTY end
         local walkable_map = filter_map_keys(visited, is_empty)
 
         local next = table.remove(stack, 1)
+        print("2")
         current, facing = visit(current, next, facing, block_callback, map)
 
+        print("3")
         if next == curent then
             visited[node] = EMPTY
             local node_adjacent = get_biased_adjacency(current, destination)

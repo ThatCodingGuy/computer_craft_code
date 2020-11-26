@@ -600,20 +600,16 @@ function navigate_no_map(current, facing, destination)
 
 end
 -- dropoff_coords is the slot above the chest
-function keepChurning(exit_coords, dropoff_coords, block_callback)
+function keepChurning(dropoff_coords, block_callback)
 
     -- TODO: Add clear nav + exit point
     local function wrapped(block_data, current, adjacent, facing, direction, map)
         if get_empty_slot_count() <= 1 then
             local start_position = current
             local start_facing = facing
-            local exit_path = pathfind_with_map(current, exit_coords, map)
-            facing, current = follow_path(current, exit_path, facing, block_callback, map)
             facing, current = navigate_no_map(current, facing, dropoff_coords)
             empty_inventory()
-            facing, current = navigate_no_map(current, facing, exit_coords)
-            local path = pathfind_with_map(current, start_position, map)
-            facing, current = follow_path(current, path, facing, block_callback, map)
+            facing, current = navigate_no_map(current, facing, start_position)
             turn_to_face(facing, start_facing)
         end
 

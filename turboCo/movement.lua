@@ -572,24 +572,24 @@ function navigate_no_map(current, facing, destination)
             return current, facing
         end
 
-        local function is_empty(x) return explored[x] == EMPTY end
+        local function is_empty(x) return visited[x] == EMPTY end
         local walkable_map = filter_map_keys(visited, is_empty)
 
         local next = table.remove(stack, 1)
         current, facing = visit(current, next, facing, block_callback, map)
 
         if next == curent then
-            explored[node] = EMPTY
+            visited[node] = EMPTY
             local node_adjacent = get_biased_adjacency(current, destination)
-            local function is_not_explored(x) return not explored[x] end
-            node_adjacent = filter(node_adjacent, is_not_explored)
+            local function is_not_visited(x) return not visited[x] end
+            node_adjacent = filter(node_adjacent, is_not_visited)
 
             -- Insert in reverse order
             for i=#node_adjacent, 0, -1 do
                 table.insert(stack, 1, node_adjacent[i])
             end
         else 
-            explored[node] = BLOCK
+            visited[node] = BLOCK
         end
     end
 

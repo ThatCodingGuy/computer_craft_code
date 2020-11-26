@@ -584,6 +584,8 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         table.sort(distances)
         local shortest = distances[0]
 
+        print("Shortest "..shortest)
+
         local candidates = distance_map[shortest]
         local closest = 1
         local closest_distance = distance(current, candidates[closest])

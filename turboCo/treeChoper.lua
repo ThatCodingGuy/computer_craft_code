@@ -2,27 +2,21 @@
 os.loadAPI("/gitlib/turboCo/movement.lua")
 
 function treeChop(block_data, position, adjacent, facing, direction)
-    print("Chop tree")
-    print(position)
-    print(adjacent)
     local start_position = position
     local start_facing = facing
 
-    print(block_data.name)
 
     if block_data.name == "minecraft:birch_log" then
         -- Trees grow up to 7 high, with a width of 5
         -- Tree is in adjacent
 
-        print("here")
         local tree_x, tree_y, tree_z = movement.split_coord(adjacent)
-        print("wut")
-
         local tree_area = {}
         for x = tree_x - 2, tree_x + 2, 1 do
             for z = tree_z - 2, tree_z + 2, 1 do
                 for y = tree_z, tree_z+7, 1 do
                     tree_area[movement.coord(x, y, z)] = 1
+                    print(movement.coord(x, y, z))
                 end
             end
         end

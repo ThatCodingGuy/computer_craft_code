@@ -589,22 +589,23 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         print("Shortest "..shortest)
 
         local candidates = distance_map[shortest]
-        local closest = 1
-        local closest_distance = distance(current, candidates[closest])
+        local closest_index = 1
+        local closest_distance = distance(current, candidates[closest_index])
 
         print("a")
 
         for i=1, #candidates, 1 do
             local candidate_distance = distance(current, candidates[i])
             if candidate_distance < closest_distance then
-                closest = i
+                closest_index = i
                 closest_distance = candidate_distance
             end
         end
 
         -- At this point, closest is the next block we should visit.
         -- remove closest from the array
-        table.remove(distance_map[shortest], closest)
+        local closest = candidates[closest_index]
+        table.remove(distance_map[shortest], closest_index)
 
         print("b")
 

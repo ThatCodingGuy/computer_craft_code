@@ -220,7 +220,7 @@ end
 
 
 
-function force_dig(block_data, current, facing, direction)
+function force_dig(block_data, current, adjacent, facing, direction)
     local success = false
     if direction == UP then
         while not success do

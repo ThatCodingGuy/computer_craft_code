@@ -319,8 +319,8 @@ function visit_adjacent(current, adjacent, facing, block_callback)
         error("blocks not adjacent, error")
     end
 
-    blockExists, blockData = turtle.inspect()
-    if blockExists then
+    found, block_data = turtle.inspect()
+    if found then
         local moved = block_callback(block_data, current, adjacent, facing, FORWARD)
         if moved then 
             return facing, adjacent

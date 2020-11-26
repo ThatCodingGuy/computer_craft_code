@@ -578,7 +578,8 @@ function navigate_no_map(current, facing, destination)
         facing, current = visit(current, next, facing, no_dig, walkable_map)
 
         print("next "..next.." "..current)
-        if next == curent then
+        if next == current then
+            print("equal")
             visited[next] = EMPTY
             local node_adjacent = get_biased_adjacency(current, destination)
             local function is_not_visited(x) return not visited[x] end

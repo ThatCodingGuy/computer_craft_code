@@ -581,7 +581,7 @@ function navigate_no_map(current, facing, destination)
         if next == current then
             print("equal")
             visited[next] = EMPTY
-            local node_adjacent = get_biased_adjacency(current, destination)
+            local node_adjacent = get_biased_adjaceny(current, destination)
             local function is_not_visited(x) return not visited[x] end
             node_adjacent = filter(node_adjacent, is_not_visited)
 

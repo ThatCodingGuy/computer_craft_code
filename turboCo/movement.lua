@@ -585,8 +585,8 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
         local shortest = distances[0]
 
         local candidates = distance_map[shortest]
-        local closest = 0
-        local closest_distance = distance(current, closest)
+        local closest = 1
+        local closest_distance = distance(current, candidates[closest])
 
         for i=1, #candidates, 1 do
             local candidate_distance = distance(current, candidates[i])

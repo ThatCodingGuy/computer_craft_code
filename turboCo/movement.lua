@@ -580,7 +580,8 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
 
         -- Find the shortest distance.
         local distances = {}
-        for n in pairs(distance_map) do table.insert(distances, n) end
+        for distance in pairs(distance_map) do table.insert(distances, distance) end
+        for x in pairs(distance_map) do print("mm"..x) end
         table.sort(distances)
         local shortest = distances[0]
 

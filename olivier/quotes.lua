@@ -45,6 +45,7 @@ function displayQuote(screen, quote)
 end
 
 local screen = monitor.getInstance()
+monitor.clear(screen)
 
 quotes = getQuotes()
 if quotes ~= nil then

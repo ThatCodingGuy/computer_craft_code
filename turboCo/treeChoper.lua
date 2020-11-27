@@ -1,7 +1,7 @@
 
 os.loadAPI("/gitlib/turboCo/movement.lua")
 
-function treeChop(block_data, position, adjacent, facing, direction)
+function treeChop(current, adjacent, facing, direction, block_data, map)
     local start_position = position
     local start_facing = facing
 
@@ -14,13 +14,11 @@ function treeChop(block_data, position, adjacent, facing, direction)
         local tree_area = {}
         for x = tree_x - 2, tree_x + 2, 1 do
             for z = tree_z - 2, tree_z + 2, 1 do
-                for y = tree_y+2, tree_y+7, 1 do
+                for y = tree_y, tree_y+7, 1 do
                     tree_area[movement.coord(x, y, z)] = 1
                 end
             end
         end
-        tree_area[adjacent] = 1
-        tree_area[movement.coord(tree_x, tree_y+1, tree_z)] = 1
 
         print("Set up area")
         facing, position = movement.explore_area(tree_area, position, facing, movement.force_dig)

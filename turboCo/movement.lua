@@ -276,125 +276,201 @@ function pathfind_with_map(start, destination, map)
 end
 
 
-function force_dig(block_data, current, adjacent, facing, direction)
+function force_dig(current, adjacent, facing, direction, block_data, map)
     local success = false
     if direction == UP then
         while not success do
             turtle.digUp()
             success = turtle.up()
         end
-        return true
+        return facing, adjacent
     elseif direction == DOWN then
         while not success do
             turtle.digDown()
             success = turtle.down()
         end
-        return true
+        return facing, adjacent
     elseif direction == FORWARD then
         while not success do
             turtle.dig()
             success = turtle.forward()
         end
-        return true
+        return facing, adjacent
     else
         error("no direction passed to force_dig")
     end
 end
 
-function no_dig(block_data, current, adjacent, facing, direction)
-    -- Never try to break a block
-    return false
+function dig_only_blocks(block_types)
+    local function digfunc(current, adjacent, facing, direction, block_data, map)
+
+    end
 end
 
-function visit_adjacent(current, adjacent, facing, block_callback, map)
-    -- This moves the robot to the adjacent coord specified
-    -- It returns the facing and position. It will call block_callback if there is a block
-    -- then return.
-    --  map is optional, just pass it in if the block_callback needs to use a map
+function no_dig(current, adjacent, facing, direction, block_data, map)
+    -- Never try to break a block
+    local success = false
+    local x, y, z =  split_coord(current)
+    if direction == UP then
+        success = turtle.up()
+        if success then
+            return facing, adjacent
+        else 
+            return facing, current
+        end
+    elseif direction == DOWN then
+        success = turtle.down()
+        if success then
+            return facing, adjacent
+        else 
+            return facing, current
+        end
+    elseif direction == FORWARD then
+        success = turtle.forward()
+        if success then
+            return facing, adjacent
+        else 
+            return facing, current
+        end
+    else
+        error("no direction passed to force_dig")
+    end
+end
+
+-- function visit_adjacent(current, adjacent, facing, block_callback, map)
+--     -- This moves the robot to the adjacent coord specified
+--     -- It returns the facing and position. It will call block_callback if there is a block
+--     -- then return.
+--     --  map is optional, just pass it in if the block_callback needs to use a map
+--     local current_x, current_y, current_z = split_coord(current)
+--     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
+
+--     if current_x == adjacent_x and current_y == adjacent_y and current_z == adjacent_z then
+--         return facing, current
+--     end
+    
+--     if current_y - adjacent_y == 1 then
+--         found, block_data = turtle.inspectDown()
+--         if found then
+--             local moved = block_callback(block_data, current, adjacent, facing, DOWN, map)
+--             if moved then 
+--                 return facing, adjacent
+--             end
+--             return facing, current
+--         else
+--             local moved = turtle.down()
+--             if moved then
+--                 return facing, adjacent
+--             else
+--                 return facing, current
+--             end
+--         end
+--     end
+--     if current_y - adjacent_y == -1 then
+--         found, block_data = turtle.inspectUp()
+--         if found then
+--             local moved = block_callback(block_data, current, adjacent, facing, UP, map)
+--             if moved then 
+--                 return facing, adjacent
+--             end
+--             return facing, current
+--         else
+--             local moved = turtle.up()
+--             if moved then
+--                 return facing, adjacent
+--             else
+--                 return facing, current
+--             end
+--         end
+--     end
+
+--     local found = false
+--     if current_x - adjacent_x == 1 then
+--         turn_to_face(facing, EAST)
+--         facing = EAST
+--         found = true
+--     end
+--     if current_x - adjacent_x == -1 then
+--         turn_to_face(facing, WEST)
+--         facing = WEST
+--         found = true
+--     end
+
+--     if current_z - adjacent_z == 1 then
+--         turn_to_face(facing, SOUTH)
+--         facing = SOUTH
+--         found = true
+--     end
+--     if current_z - adjacent_z == -1 then
+--         turn_to_face(facing, NORTH)
+--         facing = NORTH
+--         found = true
+--     end
+
+--     if not found then
+--         error("blocks not adjacent, error")
+--     end
+
+--     found, block_data = turtle.inspect()
+--     if found then
+--         local moved = block_callback(block_data, current, adjacent, facing, FORWARD, map)
+--         if moved then 
+--             return facing, adjacent
+--         end
+--         return facing, current
+--     else
+--         local moved = turtle.forward()
+--         if moved then
+--             return facing, adjacent
+--         else
+--             return facing, current
+--         end
+--     end
+-- end
+
+function visit_adjacent(current, adjacent, facing, direction, block_callback, map)
+    -- This calls block_callback with the following data
+    -- current: current position of the robot
+    -- adjacent: block its looking at
+    -- facing: facing of the robot (NORTH, SOUTH, EAST, WEST)
+    -- direction: relative to the robot (UP, DOWN, FORWARD)
+    -- block_type: either nil for empty, or the block data
+    -- map is optional, just pass it in if the block_callback needs to use a map
+    -- it returns the facing and position of the robot after.
+
     local current_x, current_y, current_z = split_coord(current)
     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
-
-    if current_x == adjacent_x and current_y == adjacent_y and current_z == adjacent_z then
-        return facing, current
-    end
     
     if current_y - adjacent_y == 1 then
         found, block_data = turtle.inspectDown()
-        if found then
-            local moved = block_callback(block_data, current, adjacent, facing, DOWN, map)
-            if moved then 
-                return facing, adjacent
-            end
-            return facing, current
-        else
-            local moved = turtle.down()
-            if moved then
-                return facing, adjacent
-            else
-                return facing, current
-            end
-        end
-    end
-    if current_y - adjacent_y == -1 then
+        direction = DOWN
+    elseif current_y - adjacent_y == -1 then
         found, block_data = turtle.inspectUp()
-        if found then
-            local moved = block_callback(block_data, current, adjacent, facing, UP, map)
-            if moved then 
-                return facing, adjacent
-            end
-            return facing, current
-        else
-            local moved = turtle.up()
-            if moved then
-                return facing, adjacent
-            else
-                return facing, current
-            end
-        end
-    end
-
-    local found = false
-    if current_x - adjacent_x == 1 then
-        turn_to_face(facing, EAST)
-        facing = EAST
-        found = true
-    end
-    if current_x - adjacent_x == -1 then
-        turn_to_face(facing, WEST)
-        facing = WEST
-        found = true
-    end
-
-    if current_z - adjacent_z == 1 then
-        turn_to_face(facing, SOUTH)
-        facing = SOUTH
-        found = true
-    end
-    if current_z - adjacent_z == -1 then
-        turn_to_face(facing, NORTH)
-        facing = NORTH
-        found = true
-    end
-
-    if not found then
-        error("blocks not adjacent, error")
-    end
-
-    found, block_data = turtle.inspect()
-    if found then
-        local moved = block_callback(block_data, current, adjacent, facing, FORWARD, map)
-        if moved then 
-            return facing, adjacent
-        end
-        return facing, current
+        direction = UP
     else
-        local moved = turtle.forward()
-        if moved then
-            return facing, adjacent
-        else
-            return facing, current
+        if current_x - adjacent_x == 1 then
+            turn_to_face(facing, EAST)
+            facing = EAST
         end
+        if current_x - adjacent_x == -1 then
+            turn_to_face(facing, WEST)
+            facing = WEST
+        end
+    
+        if current_z - adjacent_z == 1 then
+            turn_to_face(facing, SOUTH)
+            facing = SOUTH
+        end
+        if current_z - adjacent_z == -1 then
+            turn_to_face(facing, NORTH)
+            facing = NORTH
+        end
+        found, block_data = turtle.inspect()
+        direction = FORWARD
     end
+
+    facing, current = block_callback(current, adjacent, facing, block_data, map)
+    return facing, current
 end
 
 function visit(position, target, facing, block_callback, walkable_map)
@@ -573,7 +649,7 @@ end
 function keepChurning(dropoff_coords, block_callback)
 
     -- TODO: Add clear nav + exit point
-    local function wrapped(block_data, current, adjacent, facing, direction, map)
+    local function wrapped(current, adjacent, facing, direction, block_data, map)
         local chest_distance = distance(current, dropoff_coords)
         if get_empty_slot_count() <= 1 or turtle.getFuelLevel() < chest_distance * 5 then
             print("heading to dropoff")
@@ -588,7 +664,7 @@ function keepChurning(dropoff_coords, block_callback)
             facing = start_facing
         end
 
-        return block_callback(block_data, current, adjacent, facing, direction, map)
+        return block_callback(current, adjacent, facing, direction, block_data, map)
     end
     return wrapped 
 end

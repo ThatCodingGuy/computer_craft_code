@@ -97,7 +97,7 @@ function aggregateBucketsAndPrintUpdate()
     end
 
     ilog("collected", total_count, "wool",
-         "(EMA=" .. g_exponental_moving_average .. ") in",
+         "(EMA=" .. g_exponential_moving_average .. ") in",
          g_current_stats_time - g_prev_stats_time, "seconds")
 end
 

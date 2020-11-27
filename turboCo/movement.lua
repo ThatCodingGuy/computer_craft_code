@@ -439,7 +439,7 @@ end
 --     end
 -- end
 
-function visit_adjacent(current, adjacent, facing, block_callback, map)
+function visit_adjacent(position, adjacent, facing, block_callback, map)
     -- This calls block_callback with the following data
     -- current: current position of the robot
     -- adjacent: block its looking at
@@ -449,7 +449,7 @@ function visit_adjacent(current, adjacent, facing, block_callback, map)
     -- map is optional, just pass it in if the block_callback needs to use a map
     -- it returns the facing and position of the robot after.
 
-    local current_x, current_y, current_z = split_coord(current)
+    local current_x, current_y, current_z = split_coord(position)
     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
     
     if current_y - adjacent_y == 1 then
@@ -481,9 +481,9 @@ function visit_adjacent(current, adjacent, facing, block_callback, map)
     end
 
     error_gps_drift(position)
-    facing, current = block_callback(current, adjacent, facing, direction, block_data, map)
+    facing, position = block_callback(position, adjacent, facing, direction, block_data, map)
     error_gps_drift(position)
-    return facing, current
+    return facing, position
 end
 
 function visit(position, target, facing, block_callback, walkable_map)

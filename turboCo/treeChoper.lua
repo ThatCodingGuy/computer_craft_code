@@ -14,7 +14,7 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
         local tree_area = {}
         for x = tree_x - 2, tree_x + 2, 1 do
             for z = tree_z - 2, tree_z + 2, 1 do
-                for y = tree_y, tree_y+7, 1 do
+                for y = tree_y, tree_y + 7, 1 do
                     tree_area[movement.coord(x, y, z)] = 1
                 end
             end

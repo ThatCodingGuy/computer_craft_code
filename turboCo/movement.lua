@@ -98,6 +98,11 @@ function distance(coord1, coord2)
     return math.abs(x2-x1) + math.abs(y2-y1) + math.abs(z2-z1)
 end
 
+function gps_locate()
+    local x, y, z = gps.locate()
+    return coord(x, y, z)
+end
+
 function get_empty_slot_count()
     local count = 0
     for i = 1, 16, 1 do
@@ -539,6 +544,11 @@ function explore_area(area, position, facing, block_callback)
     end
 
     while #to_explore > 0 do
+
+        if gps_locate() != position then
+            error("gps drift detected")
+        end
+
         local node = table.remove(to_explore, 1)
         local function is_empty(x) return explored[x] == EMPTY end
         local walkable_map = filter_map_keys(explored, is_empty)

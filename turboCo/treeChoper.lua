@@ -56,8 +56,8 @@ function run(refuel_coords, tree_spot)
     local turtle_spot = movement.coord(turtle_x + 1, turtle_y, turtle_z)
 
 
-    facing, current = movement.navigate(current, facing, refuel_coords)
-    movement.refuel()
+    -- facing, current = movement.navigate(current, facing, refuel_coords)
+    -- movement.refuel()
     facing, current = movement.navigate(current, facing, turtle_spot)
 
     while true do

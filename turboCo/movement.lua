@@ -333,7 +333,7 @@ function no_dig(current, adjacent, facing, direction, block_data, map)
             return facing, current
         end
     else
-        error("no direction passed to force_dig")
+        error("no direction passed to no_dig")
     end
 end
 
@@ -469,7 +469,7 @@ function visit_adjacent(current, adjacent, facing, block_callback, map)
         direction = FORWARD
     end
 
-    facing, current = block_callback(current, adjacent, facing, block_data, map)
+    facing, current = block_callback(current, adjacent, facing, direction, block_data, map)
     return facing, current
 end
 

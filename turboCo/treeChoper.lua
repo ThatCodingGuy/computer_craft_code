@@ -14,15 +14,19 @@ function treeChop(block_data, position, adjacent, facing, direction)
         local tree_area = {}
         for x = tree_x - 2, tree_x + 2, 1 do
             for z = tree_z - 2, tree_z + 2, 1 do
-                for y = tree_y, tree_y+7, 1 do
+                for y = tree_y+2, tree_y+7, 1 do
                     tree_area[movement.coord(x, y, z)] = 1
-                    print(movement.coord(x, y, z))
                 end
             end
         end
+        tree_area[adjacent] = 1
+        tree_area[movement.coord(tree_x, tree_y+1, tree_z)] = 1
 
         print("Set up area")
         facing, position = movement.explore_area(tree_area, position, facing, movement.force_dig)
+        print(facing)
+        print(position)
+        error("STOP")
         facing, position = movement.navigate(position, facing, start_position)
         movement.turn_to_face(facing, start_facing)
         facing = start_facing
@@ -67,3 +71,6 @@ end
 
 refuel_x, refuel_y, refuel_z, tree_spot_x, tree_spot_y, tree_spot_z = ...
 run(movement.coord(refuel_x, refuel_y, refuel_z), movement.coord(tree_spot_x, tree_spot_y, tree_spot_z))
+
+-- -95 65 431
+-- -94 64 425

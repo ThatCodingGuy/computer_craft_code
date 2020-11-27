@@ -61,6 +61,7 @@ function run(refuel_coords, tree_spot)
     facing, current = movement.navigate(current, facing, turtle_spot)
 
     while true do
+        print(current.." "..tree_spot)
         facing, current = movement.visit_adjacent(current, tree_spot,  facing, treeChop)
     end
 end

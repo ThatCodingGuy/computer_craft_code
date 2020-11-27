@@ -484,9 +484,11 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
         direction = FORWARD
     end
 
-    print(debug.getinfo(2).name)
+    print("Caller: "..debug.getinfo(2).name)
     print(position.." "..adjacent.." "..facing.." "..direction)
+    error_gps_drift(position)
     facing, position = block_callback(position, adjacent, facing, direction, block_data, map)
+    print("Callback done")
     error_gps_drift(position)
     return facing, position
 end

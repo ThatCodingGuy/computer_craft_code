@@ -10,6 +10,18 @@ function alert(message)
     }
 end
 
+function log(level, message)
+    http.post
+    {
+        url = "https://turboco-app.azurewebsites.net/api/logs",
+        body = "{ \"level\": " .. level .. ", \"message\": \"" .. message.replace("\"", "\\\"") .. "\" }",
+        headers =
+        {
+            ["Content-Type"] = "application/json",
+        }
+    }
+end
+
 function updateRobot()
     local x, y, z = gps.locate()
     http.request

@@ -93,7 +93,7 @@ end
 function error_gps_drift(position)
     local gps_pos = gps_locate()
     if gps_pos ~= position then
-        print(debug.getinfo(2).name)
+        print("Caller "..debug.getinfo(2).name)
         error("gps drift detected")
     end
 end
@@ -142,34 +142,33 @@ directions_right[WEST] = NORTH
 
 
 function turn_to_face(current, target)
-    if current == target then
-        return
-    end
 
     if current == NORTH and target == WEST then
         turtle.turnLeft()
-        return
+        return target
     end
 
     if current == WEST and target == SOUTH then
         turtle.turnLeft()
-        return
+        return target
     end
 
     if current == SOUTH and target == EAST then
         turtle.turnLeft()
-        return
+        return target
     end
 
     if current == EAST and target == NORTH then
         turtle.turnLeft()
-        return
+        return target
     end
 
     while current ~= target do
         turtle.turnRight()
         current = directions_right[current]
     end
+
+    return target
 end
 
 function figure_out_facing()

@@ -1,8 +1,8 @@
 -- Utilities to manage turtle's inventory.
 
-function selectItemWithName(name)
+local function selectItemWithName(name)
     for i=1,16 do
-        detail = turtle.getItemDetail(i)
+        local detail = turtle.getItemDetail(i)
         if detail and detail.name == name then
             turtle.select(i)
             return true
@@ -11,8 +11,8 @@ function selectItemWithName(name)
     return false
 end
    
-function countItemWithName(name)
-    total_count = 0
+local function countItemWithName(name)
+    local total_count = 0
     for i=1,16 do
         detail = turtle.getItemDetail(i)
         if detail and detail.name == name then

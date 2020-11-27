@@ -4,26 +4,26 @@
  
 os.loadAPI("/gitlib/carlos/inventory.lua")
 
-SECONDS_BETWEEN_EXPORTS = 20
+local SECONDS_BETWEEN_EXPORTS = 20
 
-wool_count = 0
-last_export_time = nil
-should_export_stats = false
+local g_wool_count = 0
+local g_last_export_time = nil
+local g_should_export_stats = false
 
-function export_stats()
-    if not should_export_stats then
+local function export_stats()
+    if not g_should_export_stats then
         return
     end
-    if last_export_time == nil or
-       (os.clock() - last_export_time) > SECONDS_BETWEEN_EXPORTS then
+    if g_last_export_time == nil or
+       (os.clock() - g_last_export_time) > SECONDS_BETWEEN_EXPORTS then
         print("exporting stats")
-        rednet.broadcast({total_wool=wool_count}, "shear_stats")
-        last_export_time = os.clock()
+        rednet.broadcast({total_wool=g_wool_count}, "shear_stats")
+        g_last_export_time = os.clock()
     end
 end
 
 if peripheral.getType("left") == "modem" then
-  should_export_stats = true
+  g_should_export_stats = true
   rednet.open("left")
 end
 
@@ -36,10 +36,11 @@ while 1 do
         turtle.suck()
         turtle.turnLeft()
     end
-    new_wool_count = inventory.countItemWithName("minecraft:black_wool")
-    if new_wool_count ~= wool_count then
-        wool_count = new_wool_count
-        print("MOAR WOOL!", wool_count)
+    local new_wool_count =
+            inventory.countItemWithName("minecraft:black_wool")
+    if new_wool_count ~= g_wool_count then
+        g_wool_count = new_wool_count
+        print("MOAR WOOL!", g_wool_count)
     end
     export_stats()
     sleep(1)

@@ -1,5 +1,6 @@
 
 os.loadAPI("/gitlib/turboCo/movement.lua")
+os.loadAPI("/gitlib/carlos/inventory.lua")
 
 function treeChop(position, adjacent, facing, direction, block_data, map)
     local start_position = position
@@ -24,8 +25,11 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
         facing, position = movement.explore_area(tree_area, position, facing, movement.force_dig)
         print("Done exploring: "..facing.." "..position)
         facing, position = movement.navigate(position, facing, start_position)
-        movement.turn_to_face(facing, start_facing)
-        facing = start_facing
+        facing = movement.turn_to_face(facing, start_facing)
+
+
+        inventory.selectItemWithName("minecraft:birch_sapling")
+        turtle.place()
     end
 
     print("wait")
@@ -56,8 +60,8 @@ function run(refuel_coords, tree_spot)
     local turtle_spot = movement.coord(turtle_x + 1, turtle_y, turtle_z)
 
 
-    -- facing, current = movement.navigate(current, facing, refuel_coords)
-    -- movement.refuel()
+    facing, current = movement.navigate(current, facing, refuel_coords)
+    movement.refuel()
     facing, current = movement.navigate(current, facing, turtle_spot)
 
     while true do

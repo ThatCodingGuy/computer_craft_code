@@ -1,7 +1,7 @@
 
 os.loadAPI("/gitlib/turboCo/movement.lua")
 
-function treeChop(current, adjacent, facing, direction, block_data, map)
+function treeChop(position, adjacent, facing, direction, block_data, map)
     local start_position = position
     local start_facing = facing
 
@@ -62,7 +62,7 @@ function run(refuel_coords, tree_spot)
 
     while true do
         print(current.." "..tree_spot)
-        facing, current = movement.visit_adjacent(current, tree_spot,  facing, treeChop)
+        facing, current = movement.visit_adjacent(current, tree_spot, facing, treeChop, {})
     end
 end
 

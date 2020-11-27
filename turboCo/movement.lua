@@ -78,8 +78,6 @@ function copy(obj, seen)
     return res
 end
   
-  
-
 function coord(x, y, z) 
     return x.." "..y.." "..z
 end
@@ -90,6 +88,14 @@ function split_coord(coords)
         table.insert(result, tonumber(v))
     end
     return result[1], result[2], result[3]
+end
+
+function error_gps_drift(position)
+    local gps_pos = gps_locate()
+    if gps_pos ~= position then
+        print(debug.getinfo(2).name)
+        error("gps drift detected")
+    end
 end
 
 function distance(coord1, coord2)
@@ -474,7 +480,9 @@ function visit_adjacent(current, adjacent, facing, block_callback, map)
         direction = FORWARD
     end
 
+    error_gps_drift(position)
     facing, current = block_callback(current, adjacent, facing, direction, block_data, map)
+    error_gps_drift(position)
     return facing, current
 end
 
@@ -482,6 +490,7 @@ function visit(position, target, facing, block_callback, walkable_map)
     -- This moves the robot the coord specific
     -- It returns the facing and position. 
     -- If we're besides the node just visit it
+    error_gps_drift(position)
     if distance(position, target) > 1 then
         -- If we're not, find an adjacent empty block we've visisted,
         -- then go there before digging it.
@@ -496,9 +505,11 @@ function visit(position, target, facing, block_callback, walkable_map)
         -- Still there after. 
         local path = pathfind_with_map(position, target, walkable_map) 
         facing, position = follow_path(position, path, facing, block_callback, walkable_map)
-        
+        error_gps_drift(position)
     end
+
     facing, position = visit_adjacent(position, target, facing, block_callback, walkable_map)
+    error_gps_drift(position)
     return facing, position
 end
 
@@ -518,8 +529,10 @@ end
 function follow_path(position, path, facing, block_callback, walkable_map)
     for i = 1, #path, 1 do
         facing, position = visit_adjacent(position, path[i], facing, block_callback, walkable_map)
+        error_gps_drift(position)
         if not node == position then
             facing, position = visit_adjacent(position, path[i], facing, force_dig)
+            error_gps_drift(position)
         end
     end
     return facing, position
@@ -545,10 +558,7 @@ function explore_area(area, position, facing, block_callback)
 
     while #to_explore > 0 do
 
-        local gps_pos = gps_locate()
-        if gps_pos ~= position then
-            error("gps drift detected")
-        end
+        error_gps_drift(position)
 
         local node = table.remove(to_explore, 1)
         local function is_empty(x) return explored[x] == EMPTY end

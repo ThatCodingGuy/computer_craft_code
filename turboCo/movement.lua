@@ -450,6 +450,8 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
     -- it returns the facing and position of the robot after.
 
     if distance(position, adjacent) ~= 1 then
+        print("Caller: "..debug.getinfo(2).name)
+        print(position.."/"..adjacent)
         error("not adjacent")
     end
 
@@ -484,11 +486,8 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
         direction = FORWARD
     end
 
-    print("Caller: "..debug.getinfo(2).name)
-    print(position.." "..adjacent.." "..facing.." "..direction)
     error_gps_drift(position)
     facing, position = block_callback(position, adjacent, facing, direction, block_data, map)
-    print("Callback done")
     error_gps_drift(position)
     return facing, position
 end

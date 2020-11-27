@@ -545,7 +545,8 @@ function explore_area(area, position, facing, block_callback)
 
     while #to_explore > 0 do
 
-        if gps_locate() != position then
+        local gps_pos = gps_locate()
+        if gps_pos ~= position then
             error("gps drift detected")
         end
 

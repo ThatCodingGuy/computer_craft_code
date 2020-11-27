@@ -449,6 +449,10 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
     -- map is optional, just pass it in if the block_callback needs to use a map
     -- it returns the facing and position of the robot after.
 
+    if distance(position, adjacent) ~= 1 then
+        error("not adjacent")
+    end
+
     local current_x, current_y, current_z = split_coord(position)
     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
     

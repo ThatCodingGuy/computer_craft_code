@@ -449,7 +449,11 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
     -- map is optional, just pass it in if the block_callback needs to use a map
     -- it returns the facing and position of the robot after.
 
-    if distance(position, adjacent) ~= 1 then
+    if position == adjacent then
+        return facing, position
+    end
+
+    if distance(position, adjacent) > 1 then
         print("Caller: "..debug.getinfo(2).name)
         print(position.."/"..adjacent)
         error("not adjacent")

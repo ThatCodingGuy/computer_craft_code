@@ -4,21 +4,43 @@
 -- 
 --   total_wool: int  -- total amount of wool a bot currently has.
 
+cmdline = {...}
+
+function log(severity, ...)
+    print(severity..":t="..os.clock(), unpack(arg))
+end
+
+function vlog(...)
+    for _,v in pairs(cmdline) do
+        if v == "-v" then
+            log("V", unpack(arg))
+            return
+        end
+    end
+end
+
+function ilog(...)
+    log("I", unpack(arg))
+end
+
 g_prev_stats_bucket = nil
 g_prev_stats_time = nil
 
 g_current_stats_bucket = {}
 g_current_stats_time = nil
 
+g_exponential_moving_average_weight = 0.7
+g_exponential_moving_average = nil
+
 function collectUpdates(secs_to_wait)
     end_time = os.clock() + secs_to_wait
     secs_left = secs_to_wait
     while secs_left > 0 do
-        print("t=" .. os.clock() .. " waiting " .. secs_left .. "s for updates")
+        vlog("waiting " .. secs_left .. "s for updates")
         sender_id, message = rednet.receive("shear_stats", secs_left)
         secs_left = end_time - os.clock()
         if message ~= nil then
-            print("t=" .. os.clock(), "got update from ID", sender_id)
+            vlog("got update from ID", sender_id)
             g_current_stats_bucket[sender_id] = message
         end
     end
@@ -32,7 +54,7 @@ function backfillStatsForInactiveBots()
     for bot_id,prev_stats in pairs(g_prev_stats_bucket) do
         current_stats = g_current_stats_bucket[bot_id]
         if current_stats == nil then
-            print("No new updates recieved for ID:", bot_id)
+            ilog("No new updates recieved for ID:", bot_id)
             g_current_stats_bucket[bot_id] = prev_stats
         end
     end
@@ -44,7 +66,7 @@ function aggregateBucketsAndPrintUpdate()
         for k,v in pairs(g_current_stats_bucket) do
             total_count = total_count + v.total_wool
         end
-        print("Starting amount of wool", total_count)
+        ilog("Starting amount of wool", total_count)
         return
     end
 
@@ -52,26 +74,36 @@ function aggregateBucketsAndPrintUpdate()
     for bot_id,current_stats in pairs(g_current_stats_bucket) do
         prev_stats = g_prev_stats_bucket[bot_id]
         if prev_stats == nil then
-            print("New bot came online!", bot_id, "with initial count",
-                  current_stats.total_wool)
+            ilog("New bot came online!", bot_id, "with initial count",
+                 current_stats.total_wool)
         else
             delta_wool = (current_stats.total_wool - prev_stats.total_wool)
             if delta_wool < 0 then
-                print("Negative delta for ID", bot_id,
-                      "it probably just reset its count")
+                ilog("Negative delta for ID", bot_id,
+                     "it probably just reset its count")
                 delta_wool = current_stats.total_wool
             end
             total_count = total_count + delta_wool
         end
     end
 
-    print("collected", total_count, "wool in",
-          g_current_stats_time - g_prev_stats_time, "seconds")
+    if g_exponential_moving_average == nil then
+        g_exponential_moving_average = total_count
+    else
+        prev_average = g_exponential_moving_average
+        g_exponential_moving_average =
+                g_exponential_moving_average_weight * total_count +
+                (1 - g_exponential_moving_average_weight) * prev_average
+    end
+
+    ilog("collected", total_count, "wool",
+         "(EMA=" .. g_exponental_moving_average .. ") in",
+         g_current_stats_time - g_prev_stats_time, "seconds")
 end
 
 rednet.open("left")
 while 1 do
-    collectUpdates(10)
+    collectUpdates(60)
     backfillStatsForInactiveBots()
     aggregateBucketsAndPrintUpdate()
 

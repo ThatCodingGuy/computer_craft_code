@@ -4,7 +4,7 @@
  
 os.loadAPI("/gitlib/carlos/inventory.lua")
 
-SECONDS_BETWEEN_EXPORTS = 2
+SECONDS_BETWEEN_EXPORTS = 20
 
 wool_count = 0
 last_export_time = nil

@@ -2,7 +2,7 @@ function alert(message)
     http.post
     {
         url = "https://turboco-app.azurewebsites.net/api/alerts",
-        body = "{ \"message\": \"" .. message.replace("\"", "\\\"") .. "\" }",
+        body = "{ \"message\": \"" .. message .. "\" }",
         headers =
         {
             ["Content-Type"] = "application/json",
@@ -14,7 +14,7 @@ function log(level, message)
     http.post
     {
         url = "https://turboco-app.azurewebsites.net/api/logs",
-        body = "{ \"level\": " .. level .. ", \"message\": \"" .. message.replace("\"", "\\\"") .. "\" }",
+        body = "{ \"level\": " .. level .. ", \"message\": \"" .. message .. "\" }",
         headers =
         {
             ["Content-Type"] = "application/json",

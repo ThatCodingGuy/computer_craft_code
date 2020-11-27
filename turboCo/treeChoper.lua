@@ -1,7 +1,7 @@
 
 os.loadAPI("/gitlib/turboCo/movement.lua")
 
-function treeChop(block_data, position, adjacent, facing, direction)
+function treeChop(position, adjacent, facing, direction, block_data, map)
     local start_position = position
     local start_facing = facing
 
@@ -14,15 +14,15 @@ function treeChop(block_data, position, adjacent, facing, direction)
         local tree_area = {}
         for x = tree_x - 2, tree_x + 2, 1 do
             for z = tree_z - 2, tree_z + 2, 1 do
-                for y = tree_y, tree_y+7, 1 do
+                for y = tree_y, tree_y + 7, 1 do
                     tree_area[movement.coord(x, y, z)] = 1
-                    print(movement.coord(x, y, z))
                 end
             end
         end
 
         print("Set up area")
         facing, position = movement.explore_area(tree_area, position, facing, movement.force_dig)
+        print("Done exploring: "..facing.." "..position)
         facing, position = movement.navigate(position, facing, start_position)
         movement.turn_to_face(facing, start_facing)
         facing = start_facing
@@ -31,7 +31,7 @@ function treeChop(block_data, position, adjacent, facing, direction)
     print("wait")
     sleep(1)
 
-    return false
+    return facing, position
 end
 
 function run(refuel_coords, tree_spot)
@@ -56,14 +56,17 @@ function run(refuel_coords, tree_spot)
     local turtle_spot = movement.coord(turtle_x + 1, turtle_y, turtle_z)
 
 
-    facing, current = movement.navigate(current, facing, refuel_coords)
-    movement.refuel()
+    -- facing, current = movement.navigate(current, facing, refuel_coords)
+    -- movement.refuel()
     facing, current = movement.navigate(current, facing, turtle_spot)
 
     while true do
-        facing, current = movement.visit_adjacent(current, tree_spot,  facing, treeChop)
+        facing, current = movement.visit_adjacent(current, tree_spot, facing, treeChop, {})
     end
 end
 
 refuel_x, refuel_y, refuel_z, tree_spot_x, tree_spot_y, tree_spot_z = ...
 run(movement.coord(refuel_x, refuel_y, refuel_z), movement.coord(tree_spot_x, tree_spot_y, tree_spot_z))
+
+-- -95 65 431
+-- -94 64 425

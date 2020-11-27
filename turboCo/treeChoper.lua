@@ -31,7 +31,7 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
     print("wait")
     sleep(1)
 
-    return false
+    return facing, position
 end
 
 function run(refuel_coords, tree_spot)

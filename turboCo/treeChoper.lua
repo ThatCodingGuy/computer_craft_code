@@ -22,9 +22,7 @@ function treeChop(current, adjacent, facing, direction, block_data, map)
 
         print("Set up area")
         facing, position = movement.explore_area(tree_area, position, facing, movement.force_dig)
-        print(facing)
-        print(position)
-        error("STOP")
+        print("Done exploring: "..facing.." "..position)
         facing, position = movement.navigate(position, facing, start_position)
         movement.turn_to_face(facing, start_facing)
         facing = start_facing

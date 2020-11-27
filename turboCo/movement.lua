@@ -428,7 +428,7 @@ end
 --     end
 -- end
 
-function visit_adjacent(current, adjacent, facing, direction, block_callback, map)
+function visit_adjacent(current, adjacent, facing, block_callback, map)
     -- This calls block_callback with the following data
     -- current: current position of the robot
     -- adjacent: block its looking at

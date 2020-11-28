@@ -54,9 +54,9 @@ local function renderScreenFromRow(screen)
     for j=1,width do
       screen.setCursorPos(cursorX, cursorY)
       screen.write(buffer[i][j])
-      cursorY = cursorY + 1
+      cursorX = cursorX + 1
     end
-    cursorX = cursorX + 1
+    cursorY = cursorY + 1
   end
 end
 

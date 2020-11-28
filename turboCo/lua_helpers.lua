@@ -4,14 +4,15 @@ local lua_helpers = {}
 
 --- Allows creating a constructor for a class.
 -- @param class The prototype instance used as the base for instances of a class.
--- @param setter An optional function that runs setup code as part of the constructor.
+-- @param init An optional function that runs setup code as part of the constructor. The function
+-- provides a single parameter that represents the newly-constructed object.
 -- @return The instance of the class.
-function lua_helpers.constructor(class, setter)
+function lua_helpers.constructor(class, init)
     local object_metatable = {}
     setmetatable(object_metatable, class)
     class.__index = class
 
-    if (setter) then setter() end
+    if (init) then init(object_metatable) end
 
     return object_metatable
 end

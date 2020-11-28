@@ -50,6 +50,7 @@ local function renderScreenFromRow(screen)
   clear(screen)
   for i=startRow,maxHeight do
     for j=1,width do
+      screen.setCursorPos(i,j)
       screen.write(buffer[i][j])
     end
   end

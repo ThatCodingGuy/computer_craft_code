@@ -94,6 +94,7 @@ local function renderScreen(screen)
   local width,height = screen.getSize()
   local buffer = getBuffer(screen)
   local startRow, startCol = getScreenCoords(screen)
+  local maxCol = startCol+width-1
   local maxHeight = startRow+height-1
   local bufferLength = getBufferLength(buffer)
   if maxHeight > bufferLength then
@@ -104,7 +105,7 @@ local function renderScreen(screen)
   for i=startRow,maxHeight do
     if buffer[i] ~= nil then
       local cursorX = 1
-      for j=1,width do
+      for j=startCol,maxCol do
         if buffer[i][j] ~= nil then
           screen.setCursorPos(cursorX, cursorY)
           screen.write(buffer[i][j])

@@ -37,7 +37,7 @@ local function resetScreenBuffer(screen)
   for i=1,height do
     local row = {}
     for j=1,width do
-      table.insert(row, "")
+      table.insert(row, " ")
     end
     table.insert(buffer, row)
   end
@@ -83,11 +83,11 @@ local function writeNewTextToScreenOnRow(screen, text)
   if row == nil then
     row = {}
     for i=1,width do
-      row[i] = ""
+      row[i] = " "
     end
     table.insert(buffer, y, row)
   end
-  local charPos = nil
+  local charPosX = nil
   for i=1,#text do
     charPosX = x + i - 1
     row[charPosX] = safeSubstring(text, i, i)

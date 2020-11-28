@@ -89,6 +89,27 @@ local function safeSubstring(str, startIndex, endIndex)
   return string.sub(str, startIndex, endIndex)
 end
 
+--sets monitor to new color and returns the old color
+local function setMonitorColorIfNeeded(screen, color)
+  if color ~= nil and screen.isColor() then
+    currentColor = screen.getTextColor()
+    screen.setTextColor(color)
+    return currentColor
+  end
+  return nil
+end
+
+local function screenWrite(screen, text, color)
+  local oldColor = setMonitorColorIfNeeded(screen, color)
+  screen.write(text)
+  setMonitorColorIfNeeded(screen, oldColor)
+end
+
+local function writeCharFromBuffer(buffer, row, col)
+  local bufferCharData = buffer[row][col]
+  screenWrite(bufferCharData.char, bufferCharData.color)
+end
+
 
 local function renderScreen(screen)
   local width,height = screen.getSize()
@@ -108,7 +129,7 @@ local function renderScreen(screen)
       for j=startCol,maxCol do
         if buffer[i][j] ~= nil then
           screen.setCursorPos(cursorX, cursorY)
-          screen.write(buffer[i][j])
+          writeCharFromBuffer(buffer, i, j)
         end
         cursorX = cursorX + 1
       end
@@ -119,7 +140,7 @@ end
 
 -- This function assumes that there does not need to be text wrapping
 -- Text wrapping should be handled by write() function
-local function writeNewTextToScreenOnRow(screen, text)
+local function writeNewTextToScreenOnRow(screen, text, color)
   local buffer = getBuffer(screen)
   local x,y = screen.getCursorPos()
   local row = buffer[y]
@@ -130,26 +151,15 @@ local function writeNewTextToScreenOnRow(screen, text)
   local charPosX = nil
   for i=1,#text do
     charPosX = x + i - 1
-    row[charPosX] = safeSubstring(text, i, i)
+    row[charPosX] = { color=color, char=safeSubstring(text, i, i)}
   end
-  screen.write(text)
+  screenWrite(screen, text, color)
 end
 
 local function setCursorToNextLine(screen)
   local x,y = screen.getCursorPos()
   screen.setCursorPos(1, y+1)
 end
-
---sets monitor to new color and returns the old color
-local function setMonitorColorIfNeeded(screen, color)
-  if color ~= nil and screen.isColor() then
-    currentColor = screen.getTextColor()
-    screen.setTextColor(color)
-    return currentColor
-  end
-  return nil
-end
-
 
 --Assuming that you have only one monitor peripheral, returns the only one
 function getInstance()
@@ -162,9 +172,7 @@ function ln(screen)
 end
 
 function write(screen, text, color)
-  local oldColor = setMonitorColorIfNeeded(screen, color)
-  writeNewTextToScreenOnRow(screen, text)
-  setMonitorColorIfNeeded(screen, oldColor)
+  writeNewTextToScreenOnRow(screen, text, color)
 end
 
 --Sets cursor to the beggining of the next line after writing
@@ -225,7 +233,7 @@ end
 --Writes text to the left for a monitor of any size, then enter a new line
 function writeLeftLn(screen, text, color)
   writeLeft(screen, text)
-  setCursorToNextLine(screen, text, color)
+  setCursorToNextLine(screen)
 end
 
 --Writes text to the right for a monitor of any size

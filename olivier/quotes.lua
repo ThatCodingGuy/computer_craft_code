@@ -58,10 +58,9 @@ print("Press UP to scroll up, and DOWN to scroll down")
 
 while true do
   local event, key, isHeld = os.pullEvent("key")
-  local keyName = keys.getName( key )
   if key == keys.up then
-    screen.scroll(-1)
+    monitor.scrollUp(screen)
   elseif key == keys.down then
-    screen.scroll(1)
+    monitor.scrollDown(screen)
   end
 end

@@ -37,7 +37,7 @@ function displayQuote(screen, quote)
     monitor.writeCenterLn(screen, quote['title'], color)
     monitor.writeCenterLn(screen, "Date: " .. quote['date'])
     monitor.ln(screen)
-    monitor.writeLn(screen, quote['content'], color)
+    monitor.writeWrapLn(screen, quote['content'], color)
     monitor.ln(screen)
     monitor.writeLeftLn(screen, "Author: " .. quote['author'])
     monitor.ln(screen)
@@ -62,5 +62,9 @@ while true do
     monitor.scrollUp(screen)
   elseif key == keys.down then
     monitor.scrollDown(screen)
+  elseif key == keys.left then
+    monitor.scrollLeft(screen)
+  elseif key == keys.right then
+    monitor.scrollRight(screen)
   end
 end

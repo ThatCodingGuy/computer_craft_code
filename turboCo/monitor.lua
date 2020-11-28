@@ -1,15 +1,22 @@
 -- This file is intended to provide extensions to the terminal (term) API of computercraft
--- The intention is to create commonly used utility functions that computercraft somehow does not provide
+-- The intention is to create commonly used utility functions that computercraft does not provide
 
-local screenToBufferMap = {}
-local screenToRowMap = {}
+local screenDataMap = {}
 
--- Clears the screen then resets the cursor pointer
-function clear(screen)
-  screen.clear()
-  screen.setCursorPos(1,1)
-  screenToBufferMap[screen] = nil
-  screenToRowMap[screen] = 1
+local function getScreenData(screen)
+  local screenData = screenDataMap[screen]
+  if screenData == nil then
+    screenData = {}
+    screenDataMap[screen] = screenData
+    screenData['buffer'] = {}
+    screenData['coords'] = { row=1, col=1 }
+  end
+  return screenData
+end
+
+local function getBuffer(screen)
+  local screenData = getScreenData(screen)
+  return screenData['buffer']
 end
 
 local function getBufferLength(buffer)
@@ -18,6 +25,57 @@ local function getBufferLength(buffer)
     lastIndex = index
   end
   return lastIndex
+end
+
+local function getScreenCoords(screen)
+  local screenData = getScreenData(screen)
+  local coords = screenData['coords']
+  return coords.row, coords.col
+end
+
+local function setScreenRow(screen, row)
+  local screenData = getScreenData(screen)
+  local coords = screenData['coords']
+  coords.row = row
+end
+
+local function setScreenCol(screen, col)
+  local screenData = getScreenData(screen)
+  local coords = screenData['coords']
+  coords.col = col
+end
+
+local function shiftScreenCoordsLeft(screen)
+  local row, col = getScreenCoords(screen)
+  if col > 1 then
+    setScreenCol(screen, col - 1)
+  end
+end
+
+local function shiftScreenCoordsRight(screen)
+  local row, col = getScreenCoords(screen)
+  setScreenCol(screen, col + 1)
+end
+
+local function shiftScreenCoordsUp(screen)
+  local row, col = getScreenCoords(screen)
+  if row > 1 then
+    setScreenRow(screen, row - 1)
+  end
+end
+
+local function shiftScreenCoordsDown(screen)
+  local row, col = getScreenCoords(screen)
+  if row < getBufferLength(getBuffer(screen)) then
+    setScreenRow(screen, row + 1)
+  end
+end
+
+-- Clears the screen then resets the cursor pointer
+function clear(screen)
+  screen.clear()
+  screen.setCursorPos(1,1)
+  screenDataMap[screen] = nil
 end
 
 local function safeSubstring(str, startIndex, endIndex)
@@ -32,10 +90,10 @@ local function safeSubstring(str, startIndex, endIndex)
 end
 
 
-local function renderScreenFromRow(screen)
+local function renderScreen(screen)
   local width,height = screen.getSize()
-  local buffer = screenToBufferMap[screen]
-  local startRow = screenToRowMap[screen]
+  local buffer = getBuffer(screen)
+  local startRow, startCol = getScreenCoords(screen)
   local maxHeight = startRow+height-1
   local bufferLength = getBufferLength(buffer)
   if maxHeight > bufferLength then
@@ -61,12 +119,7 @@ end
 -- This function assumes that there does not need to be text wrapping
 -- Text wrapping should be handled by write() function
 local function writeNewTextToScreenOnRow(screen, text)
-  local buffer = screenToBufferMap[screen]
-  if buffer == nil then
-    buffer = {}
-    screenToBufferMap[screen] = buffer
-  end
-  local width,height = screen.getSize()
+  local buffer = getBuffer(screen)
   local x,y = screen.getCursorPos()
   local row = buffer[y]
   if row == nil then
@@ -107,28 +160,38 @@ function ln(screen)
   setCursorToNextLine(screen)
 end
 
---Write so that the text wraps to the next line
 function write(screen, text, color)
   local oldColor = setMonitorColorIfNeeded(screen, color)
-  local width,height = screen.getSize()
-  remainingText = text
-  while string.len(remainingText) > 0 do
-    local x,y = screen.getCursorPos()
-    local remainingX = width - x + 1
-    remainingLineText = safeSubstring(remainingText, 1, remainingX)
-    writeNewTextToScreenOnRow(screen, remainingLineText)
-    x,y = screen.getCursorPos()
-    if (x > width) then
-      setCursorToNextLine(screen)
-    end
-    remainingText = safeSubstring(remainingText, remainingX + 1, -1)
-  end
+  writeNewTextToScreenOnRow(screen, text)
   setMonitorColorIfNeeded(screen, oldColor)
 end
 
 --Sets cursor to the beggining of the next line after writing
 function writeLn(screen, text, color)
   write(screen, text, color)
+  setCursorToNextLine(screen)
+end
+
+--Write so that the text wraps to the next line
+function writeWrap(screen, text, color)
+  local width,height = screen.getSize()
+  remainingText = text
+  while string.len(remainingText) > 0 do
+    local x,y = screen.getCursorPos()
+    local remainingX = width - x + 1
+    remainingLineText = safeSubstring(remainingText, 1, remainingX)
+    write(screen, remainingLineText, color)
+    x,y = screen.getCursorPos()
+    if (x > width) then
+      setCursorToNextLine(screen)
+    end
+    remainingText = safeSubstring(remainingText, remainingX + 1, -1)
+  end
+end
+
+--Sets cursor to the beggining of the next line after writing
+function writeWrapLn(screen, text, color)
+  writeWrap(screen, text, color)
   setCursorToNextLine(screen)
 end
 
@@ -182,23 +245,22 @@ function writeRightLn(screen, text, color)
 end
 
 function scrollUp(screen)
-  local currRow = screenToRowMap[screen]
-  if currRow == nil or currRow == 1 then
-    return
-  end
-  currRow = currRow - 1
-  screenToRowMap[screen] = currRow
-  renderScreenFromRow(screen)
+  shiftScreenCoordsUp(screen)
+  renderScreen(screen)
 end
 
 function scrollDown(screen)
-  local currRow = screenToRowMap[screen]
-  local buffer = screenToBufferMap[screen]
-  if buffer == nil or currRow == nil or currRow == getBufferLength(buffer) then
-    return
-  end
-  currRow = currRow + 1
-  screenToRowMap[screen] = currRow
-  renderScreenFromRow(screen)
+  shiftScreenCoordsDown(screen)
+  renderScreen(screen)
+end
+
+function scrollLeft(screen)
+  shiftScreenCoordsLeft(screen)
+  renderScreen(screen)
+end
+
+function scrollRight(screen)
+  shiftScreenCoordsRight(screen)
+  renderScreen(screen)
 end
 

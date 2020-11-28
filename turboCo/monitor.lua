@@ -57,10 +57,9 @@ local function renderScreenFromRow(screen)
    maxHeight = bufferLength
   end
   screen.clear()
-  screen.setCursorPos(1,1)
-  local cursorX = 1
   local cursorY = 1
   for i=startRow,maxHeight do
+    local cursorX = 1
     for j=1,width do
       screen.setCursorPos(cursorX, cursorY)
       screen.write(buffer[i][j])

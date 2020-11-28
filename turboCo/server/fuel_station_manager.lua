@@ -8,17 +8,31 @@ stations[movement.coord(-91, 73, 400)] = {}
 stations[movement.coord(-92, 73, 400)] = {}
 stations[movement.coord(-93, 73, 400)] = {}
 
+local function fuel_request(sender_id, request)
+    print("Refuel request")
+    print("Search near "..request["position"])
 
+    local response = {}
+    response["position"] = movement.coord(-91, 73, 400)
+    return response
+end
+
+local function receive() 
+    while true do
+        senderId, message = rednet.receive(protocol, 10)
+        if senderId then
+            return senderId, message
+        end
+    end
+end
 
 local router = {}
+router["refuel"] = fuel_request
 
 while true do
-    senderId, message = rednet.receive(protocol, 10)
-    if not senderId then
-        goto continue
-    end
-
-    print(senderId, message)
-
-    ::continue::
+    local senderId, message = receive()
+    local request = textutils.unserialize(message)
+    local request_type = request["type"]
+    local response = router[request_type](senderId, request)
+    rednet.send(senderId, textutils.serialize(reponse), protocol)
 end

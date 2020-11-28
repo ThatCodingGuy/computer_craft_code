@@ -55,6 +55,8 @@ if quotes ~= nil then
 end
 
 print("Press UP to scroll up, and DOWN to scroll down")
+print("Press LEFT to scroll left, and RIGHT to scroll right")
+print("Press X to exit cleanly")
 
 while true do
   local event, key, isHeld = os.pullEvent("key")
@@ -66,5 +68,12 @@ while true do
     monitor.scrollLeft(screen)
   elseif key == keys.right then
     monitor.scrollRight(screen)
+  elseif key == keys.pageUp then
+    monitor.pageUp(screen)
+  elseif key == keys.pageDown then
+    monitor.pageDown(screen)
+  elseif key == keys.x then
+    clear(screen)
+    exit()
   end
 end

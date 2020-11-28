@@ -253,6 +253,22 @@ function writeRightLn(screen, text, color)
   setCursorToNextLine(screen)
 end
 
+function pageUp(screen)
+  local width,height = screen.getSize()
+  for i=1,height do
+    shiftScreenCoordsUp(screen)
+  end
+  renderScreen(screen)
+end
+
+function pageDown(screen)
+  local width,height = screen.getSize()
+  for i=1,height do
+    shiftScreenCoordsDown(screen)
+  end
+  renderScreen(screen)
+end
+
 function scrollUp(screen)
   shiftScreenCoordsUp(screen)
   renderScreen(screen)

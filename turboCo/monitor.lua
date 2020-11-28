@@ -105,9 +105,9 @@ local function screenWrite(screen, text, color)
   setMonitorColorIfNeeded(screen, oldColor)
 end
 
-local function writeCharFromBuffer(buffer, row, col)
+local function writeCharFromBuffer(screen, buffer, row, col)
   local bufferCharData = buffer[row][col]
-  screenWrite(bufferCharData.char, bufferCharData.color)
+  screenWrite(screen, bufferCharData.char, bufferCharData.color)
 end
 
 
@@ -129,7 +129,7 @@ local function renderScreen(screen)
       for j=startCol,maxCol do
         if buffer[i][j] ~= nil then
           screen.setCursorPos(cursorX, cursorY)
-          writeCharFromBuffer(buffer, i, j)
+          writeCharFromBuffer(screen, buffer, i, j)
         end
         cursorX = cursorX + 1
       end

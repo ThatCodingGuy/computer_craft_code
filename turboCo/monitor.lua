@@ -12,6 +12,14 @@ function clear(screen)
   screenToRowMap[screen] = 1
 end
 
+local function getBufferLength(buffer)
+  local count = 0
+  for x in pairs(buffer) do
+    count = count + 1
+  end
+  return count
+end
+
 local function safeSubstring(str, startIndex, endIndex)
   local length = string.len(str)
   if startIndex > length then
@@ -44,8 +52,9 @@ local function renderScreenFromRow(screen)
   local buffer = screenToBufferMap[screen]
   local startRow = screenToRowMap[screen]
   local maxHeight = startRow+height-1
-  if maxHeight > #buffer then
-   maxHeight = #buffer
+  local bufferLength = getBufferLength(buffer)
+  if maxHeight > bufferLength then
+   maxHeight = bufferLength
   end
   clear(screen)
   local cursorX = 1

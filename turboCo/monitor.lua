@@ -12,6 +12,17 @@ function clear(screen)
   screenToRowMap[screen] = 1
 end
 
+local function safeSubstring(str, startIndex, endIndex)
+  local length = string.len(str)
+  if startIndex > length then
+    return ""
+  end
+  if endIndex > length then
+    endIndex = -1
+  end
+  return string.sub(str, startIndex, endIndex)
+end
+
 local function resetScreenBuffer(screen)
   local buffer = {}
   local width,height = screen.getSize()
@@ -73,17 +84,6 @@ end
 local function setCursorToNextLine(screen)
   local x,y = screen.getCursorPos()
   screen.setCursorPos(1, y+1)
-end
-
-local function safeSubstring(str, startIndex, endIndex)
-  local length = string.len(str)
-  if startIndex > length then
-    return ""
-  end
-  if endIndex > length then
-    endIndex = -1
-  end
-  return string.sub(str, startIndex, endIndex)
 end
 
 --sets monitor to new color and returns the old color

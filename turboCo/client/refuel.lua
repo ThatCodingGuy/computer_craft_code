@@ -4,7 +4,7 @@ local protocol = "fuel_station"
 
 local function connect()
     local server = rednet.lookup(fuel_station)
-    while server == nil then
+    while not server do
         print("Can't connect to reful server, trying again")
         sleep(5)
         server = rednet.lookup(fuel_station)

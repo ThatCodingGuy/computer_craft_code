@@ -13,11 +13,11 @@ function clear(screen)
 end
 
 local function getBufferLength(buffer)
-  local count = 0
+  local lastIndex = nil
   for index,value in pairs(buffer) do
-    count = count + 1
+    lastIndex = index
   end
-  return count
+  return lastIndex
 end
 
 local function safeSubstring(str, startIndex, endIndex)
@@ -31,15 +31,19 @@ local function safeSubstring(str, startIndex, endIndex)
   return string.sub(str, startIndex, endIndex)
 end
 
+local function resetScreenBufferRow(buffer, rowNum, width)
+  local row = {}
+  for j=1,width do
+    table.insert(row, " ")
+  end
+  table.insert(buffer, rowNum, row)
+end
+
 local function resetScreenBuffer(screen)
   local buffer = {}
   local width,height = screen.getSize()
   for i=1,height do
-    local row = {}
-    for j=1,width do
-      table.insert(row, " ")
-    end
-    table.insert(buffer, row)
+    resetScreenBufferRow(buffer, i, width)
   end
   screenToBufferMap[screen] = buffer
   screenToRowMap[screen] = 1
@@ -61,6 +65,9 @@ local function renderScreenFromRow(screen)
   for i=startRow,maxHeight do
     local cursorX = 1
     for j=1,width do
+      if buffer[i] == nil then
+        resetScreenBufferRow(buffer, i, width)
+      end
       screen.setCursorPos(cursorX, cursorY)
       screen.write(buffer[i][j])
       cursorX = cursorX + 1

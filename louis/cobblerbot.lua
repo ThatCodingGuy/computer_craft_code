@@ -9,8 +9,8 @@ local function emptyInventory()
             turtle.select(i)
             turtle.drop(64)
             
-            sucked = turtle.suck()
-            if (sucked==true) then
+            
+            if (turtle.getItemCount(i)~=0) then
                 print("Oh! Looks like the chess is full!")
                 print("I guess my masters didn't need my cobble...")
                 sleep(600)

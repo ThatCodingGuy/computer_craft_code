@@ -37,7 +37,7 @@ function displayQuote(screen, quote)
     monitor.writeCenterLn(screen, quote['title'], color)
     monitor.writeCenterLn(screen, "Date: " .. quote['date'])
     monitor.ln(screen)
-    monitor.writeLn(screen, quote['content'], color)
+    monitor.writeWrapLn(screen, quote['content'], color)
     monitor.ln(screen)
     monitor.writeLeftLn(screen, "Author: " .. quote['author'])
     monitor.ln(screen)
@@ -55,12 +55,27 @@ if quotes ~= nil then
 end
 
 print("Press UP to scroll up, and DOWN to scroll down")
+print("Press LEFT to scroll left, and RIGHT to scroll right")
+print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
+print("Press X to exit cleanly")
 
-while true do
+local running = true
+while running do
   local event, key, isHeld = os.pullEvent("key")
   if key == keys.up then
     monitor.scrollUp(screen)
   elseif key == keys.down then
     monitor.scrollDown(screen)
+  elseif key == keys.left then
+    monitor.scrollLeft(screen)
+  elseif key == keys.right then
+    monitor.scrollRight(screen)
+  elseif key == keys.pageUp then
+    monitor.pageUp(screen)
+  elseif key == keys.pageDown then
+    monitor.pageDown(screen)
+  elseif key == keys.x then
+    monitor.clear(screen)
+    running = false
   end
 end

@@ -50,7 +50,7 @@ local function renderScreenFromRow(screen)
   clear(screen)
   for i=startRow,maxHeight do
     for j=1,width do
-      screen.write(buffer[j][i])
+      screen.write(buffer[i][j])
     end
   end
 end
@@ -178,7 +178,7 @@ end
 --Writes text to the right for a monitor of any size, then enter a new line
 function writeRightLn(screen, text, color)
   writeRight(screen, text, color)
-  setCursorToNextLine(screen, text, color)
+  setCursorToNextLine(screen)
 end
 
 function scrollUp(screen)

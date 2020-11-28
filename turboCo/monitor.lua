@@ -31,25 +31,6 @@ local function safeSubstring(str, startIndex, endIndex)
   return string.sub(str, startIndex, endIndex)
 end
 
-local function resetScreenBufferRow(buffer, rowNum, width)
-  local row = {}
-  for j=1,width do
-    table.insert(row, " ")
-  end
-  table.insert(buffer, rowNum, row)
-end
-
-local function resetScreenBuffer(screen)
-  local buffer = {}
-  local width,height = screen.getSize()
-  for i=1,height do
-    resetScreenBufferRow(buffer, i, width)
-  end
-  screenToBufferMap[screen] = buffer
-  screenToRowMap[screen] = 1
-  return buffer
-end
-
 
 local function renderScreenFromRow(screen)
   local width,height = screen.getSize()
@@ -63,14 +44,15 @@ local function renderScreenFromRow(screen)
   screen.clear()
   local cursorY = 1
   for i=startRow,maxHeight do
-    local cursorX = 1
-    for j=1,width do
-      if buffer[i] == nil then
-        resetScreenBufferRow(buffer, i, width)
+    if buffer[i] ~= nil then
+      local cursorX = 1
+      for j=1,width do
+        if buffer[i][j] ~= nil then
+          screen.setCursorPos(cursorX, cursorY)
+          screen.write(buffer[i][j])
+        end
+        cursorX = cursorX + 1
       end
-      screen.setCursorPos(cursorX, cursorY)
-      screen.write(buffer[i][j])
-      cursorX = cursorX + 1
     end
     cursorY = cursorY + 1
   end
@@ -78,21 +60,18 @@ end
 
 -- This function assumes that there does not need to be text wrapping
 -- Text wrapping should be handled by write() function
--- Assuming that we don't skip rows
 local function writeNewTextToScreenOnRow(screen, text)
   local buffer = screenToBufferMap[screen]
   if buffer == nil then
-    buffer = resetScreenBuffer(screen)
+    buffer = {}
+    screenToBufferMap[screen] = buffer
   end
   local width,height = screen.getSize()
   local x,y = screen.getCursorPos()
   local row = buffer[y]
   if row == nil then
     row = {}
-    for i=1,width do
-      row[i] = " "
-    end
-    table.insert(buffer, y, row)
+    buffer[y] = row
   end
   local charPosX = nil
   for i=1,#text do
@@ -110,7 +89,7 @@ end
 --sets monitor to new color and returns the old color
 local function setMonitorColorIfNeeded(screen, color)
   if color ~= nil and screen.isColor() then
-    currentColor = screen.getTextColor() 
+    currentColor = screen.getTextColor()
     screen.setTextColor(color)
     return currentColor
   end

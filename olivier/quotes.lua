@@ -59,7 +59,8 @@ print("Press LEFT to scroll left, and RIGHT to scroll right")
 print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
 print("Press X to exit cleanly")
 
-while true do
+local running = true
+while running do
   local event, key, isHeld = os.pullEvent("key")
   if key == keys.up then
     monitor.scrollUp(screen)
@@ -75,6 +76,6 @@ while true do
     monitor.pageDown(screen)
   elseif key == keys.x then
     monitor.clear(screen)
-    exit()
+    running = false
   end
 end

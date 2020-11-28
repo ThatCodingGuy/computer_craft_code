@@ -3,11 +3,11 @@ os.loadAPI("/gitlib/turboCo/movement.lua")
 local protocol = "fuel_station"
 
 local function connect()
-    local server = rednet.lookup(fuel_station)
+    local server = rednet.lookup(protocol)
     while not server do
         print("Can't connect to reful server, trying again")
         sleep(5)
-        server = rednet.lookup(fuel_station)
+        server = rednet.lookup(protocol)
     end
     return server
 end

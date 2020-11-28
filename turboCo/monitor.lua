@@ -14,7 +14,7 @@ end
 
 local function getBufferLength(buffer)
   local count = 0
-  for x in pairs(buffer) do
+  for index,value in pairs(buffer) do
     count = count + 1
   end
   return count
@@ -37,7 +37,7 @@ local function resetScreenBuffer(screen)
   for i=1,height do
     local row = {}
     for j=1,width do
-      row[j] = ""
+      table.insert(row, "")
     end
     table.insert(buffer, row)
   end
@@ -56,7 +56,8 @@ local function renderScreenFromRow(screen)
   if maxHeight > bufferLength then
    maxHeight = bufferLength
   end
-  clear(screen)
+  screen.clear()
+  screen.setCursorPos(1,1)
   local cursorX = 1
   local cursorY = 1
   for i=startRow,maxHeight do

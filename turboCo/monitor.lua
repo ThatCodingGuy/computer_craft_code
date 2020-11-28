@@ -1,6 +1,75 @@
 -- This file is intended to provide extensions to the terminal (term) API of computercraft
 -- The intention is to create commonly used utility functions that computercraft somehow does not provide
 
+local screenToBufferMap = {}
+local screenToRowMap = {}
+
+-- Clears the screen then resets the cursor pointer
+function clear(screen)
+  screen.clear()
+  screen.setCursorPos(1,1)
+  screenToBufferMap[screen] = nil
+  screenToRowMap[screen] = 1
+end
+
+local function resetScreenBuffer(screen)
+  local buffer = {}
+  local width,height = screen.getSize()
+  for i=1,height do
+    local row = {}
+    for j=1,width do
+      row[j] = ""
+    end
+    table.insert(buffer, row)
+  end
+  screenToBufferMap[screen] = buffer
+  screenToRowMap[screen] = 1
+  return buffer
+end
+
+
+local function renderScreenFromRow(screen)
+  local width,height = screen.getSize()
+  local buffer = screenToBufferMap[screen]
+  local startRow = screenToRowMap[screen]
+  local maxHeight = startRow+height-1
+  if maxHeight > #buffer then
+   maxHeight = #buffer
+  end
+  clear(screen)
+  for i=startRow,maxHeight do
+    for j=1,width do
+      screen.write(buffer[j][i])
+    end
+  end
+end
+
+-- This function assumes that there does not need to be text wrapping
+-- Text wrapping should be handled by write() function
+-- Assuming that we don't skip rows
+local function writeNewTextToScreenOnRow(screen, text)
+  local buffer = screenToBufferMap[screen]
+  if buffer == nil then
+    buffer = resetScreenBuffer(screen)
+  end
+  local width,height = screen.getSize()
+  local x,y = screen.getCursorPos()
+  local row = buffer[y]
+  if row == nil then
+    row = {}
+    for i=1,width do
+      row[i] = ""
+    end
+    table.insert(buffer, y, row)
+  end
+  local charPos = nil
+  for i=1,#text do
+    charPosX = x + i - 1
+    row[charPosX] = safeSubstring(text, i, i)
+  end
+  screen.write(text)
+end
+
 local function setCursorToNextLine(screen)
   local x,y = screen.getCursorPos()
   screen.setCursorPos(1, y+1)
@@ -47,7 +116,7 @@ function write(screen, text, color)
     local x,y = screen.getCursorPos()
     local remainingX = width - x + 1
     remainingLineText = safeSubstring(remainingText, 1, remainingX)
-    screen.write(remainingLineText)
+    writeNewTextToScreenOnRow(screen, remainingLineText)
     x,y = screen.getCursorPos()
     if (x > width) then
       setCursorToNextLine(screen)
@@ -112,9 +181,23 @@ function writeRightLn(screen, text, color)
   setCursorToNextLine(screen, text, color)
 end
 
--- Clears the screen then resets the cursor pointer
-function clear(screen)
-  screen.clear()
-  screen.setCursorPos(1,1)
+function scrollUp(screen)
+  local currRow = screenToRowMap[screen]
+  if currRow == nil then
+    return
+  end
+  currRow = currRow - 1
+  screenToRowMap[screen] = currRow
+  renderScreenFromRow(screen)
+end
+
+function scrollDown(screen)
+  local currRow = screenToRowMap[screen]
+  if currRow == nil then
+    return
+  end
+  currRow = currRow + 1
+  screenToRowMap[screen] = currRow
+  renderScreenFromRow(screen)
 end
 

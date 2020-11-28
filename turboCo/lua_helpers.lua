@@ -17,4 +17,18 @@ function lua_helpers.constructor(class, init)
     return object_metatable
 end
 
+--- Allows defining enums without specifyng their values.
+-- This will automatically assign integer values to the enums in ascending order starting from 1
+-- onwards.
+-- @param values The table of names to give to the enums. Specify this as a simple table of strings
+-- without assigning them values.
+-- @return The original enum table, `values`, with its values assigned.
+function lua_helpers.enum(values)
+    local num_values = #values
+    for i = 1, num_values do
+        values[values[i]] = i
+    end
+    return values
+end
+
 return lua_helpers

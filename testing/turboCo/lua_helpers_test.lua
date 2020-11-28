@@ -44,4 +44,16 @@ describe("Lua helpers", function()
             assert.are.equal("more things", instance2.b)
         end)
     end)
+
+    describe("enum", function()
+        it("should return same table with values in acsending order", function()
+            local FakeEnum = lua_helpers.enum {
+                "ONE", "TWO", "THREE"
+            }
+
+            assert.are.equal(1, FakeEnum.ONE)
+            assert.are.equal(2, FakeEnum.TWO)
+            assert.are.equal(3, FakeEnum.THREE)
+        end)
+    end)
 end)

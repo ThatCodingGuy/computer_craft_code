@@ -56,6 +56,7 @@ end
 
 print("Press UP to scroll up, and DOWN to scroll down")
 print("Press LEFT to scroll left, and RIGHT to scroll right")
+print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
 print("Press X to exit cleanly")
 
 while true do

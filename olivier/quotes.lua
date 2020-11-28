@@ -73,7 +73,7 @@ while true do
   elseif key == keys.pageDown then
     monitor.pageDown(screen)
   elseif key == keys.x then
-    clear(screen)
+    monitor.clear(screen)
     exit()
   end
 end

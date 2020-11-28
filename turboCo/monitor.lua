@@ -197,7 +197,7 @@ end
 
 function scrollUp(screen)
   local currRow = screenToRowMap[screen]
-  if currRow == nil then
+  if currRow == nil or currRow == 1 then
     return
   end
   currRow = currRow - 1
@@ -207,7 +207,8 @@ end
 
 function scrollDown(screen)
   local currRow = screenToRowMap[screen]
-  if currRow == nil then
+  local buffer = screenToBufferMap[screen]
+  if buffer == nil or currRow == nil or currRow == getBufferLength(buffer) then
     return
   end
   currRow = currRow + 1

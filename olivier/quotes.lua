@@ -14,6 +14,8 @@ local categoryToColorMap = {
 local running = true
 
 local screen = peripheral.find("monitor")
+screen.clear()
+screen.setCursorPos(1,1)
 screen.write("   TEST   ")
 screen.setCursorPos(1,2)
 screen.write("----------")

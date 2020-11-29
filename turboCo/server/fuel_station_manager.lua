@@ -37,5 +37,7 @@ while true do
     local request = textutils.unserialize(message)
     local request_type = request["type"]
     local response = router[request_type](senderId, request)
-    rednet.send(senderId, textutils.serialize(reponse), protocol)
+    local message = textutils.serialize(reponse)
+    print(message)
+    rednet.send(senderId, message, protocol)
 end

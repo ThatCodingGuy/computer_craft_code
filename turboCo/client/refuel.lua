@@ -23,6 +23,7 @@ function request_refuel(position)
     local server = connect()
 
     while true do
+        print("Looping")
         local request = {}
         request["type"] = "refuel"
         request["position"] = position
@@ -31,6 +32,8 @@ function request_refuel(position)
         rednet.send(server, textutils.serialize(request), protocol)
 
         local server_id, message = rednet.receive(protocol, 5)
+        print(server_id)
+        print(message)
         if server_id then
             break
         end

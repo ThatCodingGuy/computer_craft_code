@@ -20,7 +20,7 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
     if not block_data.name then
         inventory.selectItemWithName("minecraft:birch_sapling")
         turtle.place()
-    elseif block_data.name == "minecraft:birch_sapling")
+    elseif block_data.name == "minecraft:birch_sapling") then
         inventory.selectItemWithName("minecraft:bonemeal")
         turtle.place()
     elseif block_data.name == "minecraft:birch_log" then

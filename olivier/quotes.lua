@@ -3,7 +3,7 @@
 os.loadAPI("./gitlib/turboCo/json.lua")
 os.loadAPI("./gitlib/turboCo/logger.lua")
 os.loadAPI("./gitlib/turboCo/monitor.lua")
-local eventHandler = require("turboCo.eventHandler")
+local eventHandler = require("gitlib.turboCo.eventHandler")
 
 local categoryToColorMap = {
   inspire = colors.green,

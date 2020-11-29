@@ -3,16 +3,11 @@
 
 local lua_helpers = require("turboCo.lua_helpers")
 
-local ScreenBuffer = {
-  screen = nil,
-  xPos = nil,
-  yPos = nil,
-  width = nil,
-  height = nil
-}
-ScreenBuffer.new = lua_helpers.constructor
+local ScreenBuffer = {}
 
-function ScreenBuffer.create(screen, xPos, yPos, width, height)
+local function create(screen, xPos, yPos, width, height)
+
+end
   local screenBuffer = ScreenBuffer:new(
     function(self)
       self.screen = screen

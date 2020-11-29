@@ -83,8 +83,8 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   end
 
   local function clearScreen()
-    for y=self.yStartingPos, self.height do
-      for x=self.xStartingPos, self.width do
+    for y=self.yStartingScreenPos, self.height do
+      for x=self.xStartingScreenPos, self.width do
         self.screen.setCursorPos(x, y)
         self.screen.write(" ")
       end
@@ -99,10 +99,10 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
       maxRow = bufferLength
     end
     clearScreen()
-    local cursorY = self.yStartingPos
+    local cursorY = self.yStartingScreenPos
     for i=self.coords.row,maxRow do
       if self.buffer[i] ~= nil then
-        local cursorX = self.xStartingPos
+        local cursorX = self.xStartingScreenPos
         for j=self.coords.col,maxCol do
           if self.buffer[i][j] ~= nil then
             self.screen.setCursorPos(cursorX, cursorY)

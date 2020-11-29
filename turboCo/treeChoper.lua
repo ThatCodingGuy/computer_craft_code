@@ -3,6 +3,12 @@ os.loadAPI("/gitlib/turboCo/movement.lua")
 os.loadAPI("/gitlib/carlos/inventory.lua")
 os.loadAPI("/gitlib/turboCo/client/refuel.lua")
 
+local tree_blocks = {}
+table.insert(tree_blocks, "minecraft:birch_log")
+table.insert(tree_blocks, "minecraft:birch_leaves")
+
+local cut_tree = movement.dig_only_blocks(tree_blocks)
+
 function treeChop(position, adjacent, facing, direction, block_data, map)
     local start_position = position
     local start_facing = facing
@@ -28,7 +34,7 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
             end
         end
 
-        facing, position = movement.explore_area(tree_area, position, facing, movement.force_dig)
+        facing, position = movement.explore_area(tree_area, position, facing, cut_tree)
         facing, position = movement.navigate(position, facing, start_position)
         facing = movement.turn_to_face(facing, start_facing)
     end

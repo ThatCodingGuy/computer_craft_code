@@ -313,8 +313,21 @@ end
 
 function dig_only_blocks(block_types)
     local function digfunc(current, adjacent, facing, direction, block_data, map)
+        
+        local found = false;
+        for i=1, #block_types, 1 do
+            if block_types[i] == block_data.name then
+                found = true
+            end
+        end
 
+        if not found then
+            return facing, current
+        end
+
+        return force_dig(current, adjacent, facing, direction, block_data, map)
     end
+    return digfunc
 end
 
 function no_dig(current, adjacent, facing, direction, block_data, map)
@@ -346,97 +359,6 @@ function no_dig(current, adjacent, facing, direction, block_data, map)
         error("no direction passed to no_dig")
     end
 end
-
--- function visit_adjacent(current, adjacent, facing, block_callback, map)
---     -- This moves the robot to the adjacent coord specified
---     -- It returns the facing and position. It will call block_callback if there is a block
---     -- then return.
---     --  map is optional, just pass it in if the block_callback needs to use a map
---     local current_x, current_y, current_z = split_coord(current)
---     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
-
---     if current_x == adjacent_x and current_y == adjacent_y and current_z == adjacent_z then
---         return facing, current
---     end
-    
---     if current_y - adjacent_y == 1 then
---         found, block_data = turtle.inspectDown()
---         if found then
---             local moved = block_callback(block_data, current, adjacent, facing, DOWN, map)
---             if moved then 
---                 return facing, adjacent
---             end
---             return facing, current
---         else
---             local moved = turtle.down()
---             if moved then
---                 return facing, adjacent
---             else
---                 return facing, current
---             end
---         end
---     end
---     if current_y - adjacent_y == -1 then
---         found, block_data = turtle.inspectUp()
---         if found then
---             local moved = block_callback(block_data, current, adjacent, facing, UP, map)
---             if moved then 
---                 return facing, adjacent
---             end
---             return facing, current
---         else
---             local moved = turtle.up()
---             if moved then
---                 return facing, adjacent
---             else
---                 return facing, current
---             end
---         end
---     end
-
---     local found = false
---     if current_x - adjacent_x == 1 then
---         turn_to_face(facing, EAST)
---         facing = EAST
---         found = true
---     end
---     if current_x - adjacent_x == -1 then
---         turn_to_face(facing, WEST)
---         facing = WEST
---         found = true
---     end
-
---     if current_z - adjacent_z == 1 then
---         turn_to_face(facing, SOUTH)
---         facing = SOUTH
---         found = true
---     end
---     if current_z - adjacent_z == -1 then
---         turn_to_face(facing, NORTH)
---         facing = NORTH
---         found = true
---     end
-
---     if not found then
---         error("blocks not adjacent, error")
---     end
-
---     found, block_data = turtle.inspect()
---     if found then
---         local moved = block_callback(block_data, current, adjacent, facing, FORWARD, map)
---         if moved then 
---             return facing, adjacent
---         end
---         return facing, current
---     else
---         local moved = turtle.forward()
---         if moved then
---             return facing, adjacent
---         else
---             return facing, current
---         end
---     end
--- end
 
 function visit_adjacent(position, adjacent, facing, block_callback, map)
     -- This calls block_callback with the following data

@@ -45,7 +45,7 @@ local function create()
   end
 
   local pullEvents = function()
-    while self.isListening() do
+    while self.listening do
       local eventData = {os.pullEvent()}
       for index,value in pairs(self.callbackDataList) do
         if value.eventType == eventData[1] then

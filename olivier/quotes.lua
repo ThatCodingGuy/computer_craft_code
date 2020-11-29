@@ -2,6 +2,7 @@
 
 local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
+local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
 
 local categoryToColorMap = {
   inspire = colors.green,
@@ -15,12 +16,16 @@ local running = true
 local screen = peripheral.find("monitor")
 screen.clear()
 
+local eventHandler = EventHandler.create()
+
 local screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight(screen, 3)
 screenTopBuffer.writeFullLineThenResetCursor(" ", colors.lightBlue, colors.gray)
 screenTopBuffer.writeCenterLn("Quotes of the Day", colors.lightBlue, colors.gray)
 screenTopBuffer.writeFullLineLn("-", colors.lightBlue, colors.gray)
 
 local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTop(screen, 3)
+local scrollView = ScrollView.create(screenScrollingBuffer, eventHandler)
+scrollView.makeActive()
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -55,27 +60,6 @@ function displayQuote(quote)
   end
 end
 
-function handleKey(eventData)
-  local key = eventData[2]
-  if key == keys.up then
-    screenScrollingBuffer.scrollUp()
-  elseif key == keys.down then
-    screenScrollingBuffer.scrollDown()
-  elseif key == keys.left then
-    screenScrollingBuffer.scrollLeft()
-  elseif key == keys.right then
-    screenScrollingBuffer.scrollRight()
-  elseif key == keys.pageUp then
-    screenScrollingBuffer.pageUp()
-  elseif key == keys.pageDown then
-    screenScrollingBuffer.pageDown()
-  elseif key == keys.leftCtrl or key == keys.rightCtrl then
-    screenTopBuffer.clear()
-    screenScrollingBuffer.clear()
-    running = false
-  end
-end
-
 quotes = getQuotes()
 if quotes ~= nil then
   for quote in pairs(quotes) do
@@ -87,10 +71,6 @@ print("Press UP to scroll up, and DOWN to scroll down")
 print("Press LEFT to scroll left, and RIGHT to scroll right")
 print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
 print("Press CTRL to exit cleanly")
-
-local eventHandler = EventHandler.create()
-
-eventHandler.addHandle("key", handleKey)
 
 while running do
   eventHandler.pullEvent()

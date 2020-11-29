@@ -15,7 +15,7 @@ local function createFromScreens(screens, eventHandler)
         screen.clear()
         screen.setCursorPos(1,1)
       end
-      shell.exit()
+      error("exiting")
     end
   end
 

@@ -91,11 +91,11 @@ function split_coord(coords)
 end
 
 function error_gps_drift(position)
-    local gps_pos = gps_locate()
-    if gps_pos ~= position then
-        print("Caller "..debug.getinfo(2).name)
-        error("gps drift detected")
-    end
+    -- local gps_pos = gps_locate()
+    -- if gps_pos ~= position then
+    --     print("Caller "..debug.getinfo(2).name)
+    --     error("gps drift detected")
+    -- end
 end
 
 function distance(coord1, coord2)

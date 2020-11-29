@@ -33,7 +33,7 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
         facing = movement.turn_to_face(facing, start_facing)
     end
 
-    print("wait")
+    print("wait: "..block_data.name)
     sleep(1)
 
     return facing, position

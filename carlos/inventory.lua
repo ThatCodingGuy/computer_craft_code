@@ -21,3 +21,8 @@ function countItemWithName(name)
     end
     return total_count
 end
+
+local mod = {}
+mod.selectItemWithName = selectItemWithName
+mod.countItemWithName = countItemWithName
+return mod

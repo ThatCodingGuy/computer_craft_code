@@ -17,6 +17,7 @@ local screen = peripheral.find("monitor")
 screen.write("   TEST   ")
 screen.setCursorPos(1,2)
 screen.write("----------")
+screen.setCursorPos(1,3)
 
 local screenBuffer = ScreenBuffer.createFullScreenFromTop(screen, 2)
 

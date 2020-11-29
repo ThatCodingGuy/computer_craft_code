@@ -4,16 +4,19 @@
 -- 
 --   total_wool: int  -- total amount of wool a bot currently has.
 
+local ExponentialMovingAverage =
+        require("carlos.exponential_moving_average").ExponentialMovingAverage
+
 local cmdline = {...}
 
 local function log(severity, ...)
-    print(severity..":t="..os.clock(), unpack(arg))
+    print(severity..":t=" .. math.floor(os.clock()), unpack(arg))
 end
 
 local function vlog(...)
     for _,v in pairs(cmdline) do
         if v == "-v" then
-            log("V", unpack(arg))
+            log("D", unpack(arg))
             return
         end
     end
@@ -23,14 +26,17 @@ local function ilog(...)
     log("I", unpack(arg))
 end
 
+local function wlog(...)
+    log("W", unpack(arg))
+end
+
 local g_prev_stats_bucket = nil
 local g_prev_stats_time = nil
 
 local g_current_stats_bucket = {}
 local g_current_stats_time = nil
 
-local g_exponential_moving_average_weight = 0.7
-local g_exponential_moving_average = nil
+local g_average_count = ExponentialMovingAverage.new(0.7)
 
 local function collectUpdates(secs_to_wait)
     local end_time = os.clock() + secs_to_wait
@@ -54,8 +60,14 @@ local function backfillStatsForInactiveBots()
     for bot_id,prev_stats in pairs(g_prev_stats_bucket) do
         local current_stats = g_current_stats_bucket[bot_id]
         if current_stats == nil then
-            ilog("No new updates recieved for ID:", bot_id)
+            if prev_stats.num_missed_updates == nil then
+                prev_stats.num_missed_updates = 1
+            else
+                prev_stats.num_missed_updates = prev_stats.num_missed_updates + 1
+            end
             g_current_stats_bucket[bot_id] = prev_stats
+            wlog("No new updates recieved for ID:", bot_id,
+                 "for", prev_stats.num_missed_updates, "cycles")
         end
     end
 end
@@ -87,17 +99,9 @@ local function aggregateBucketsAndPrintUpdate()
         end
     end
 
-    if g_exponential_moving_average == nil then
-        g_exponential_moving_average = total_count
-    else
-        local prev_average = g_exponential_moving_average
-        g_exponential_moving_average =
-                g_exponential_moving_average_weight * total_count +
-                (1 - g_exponential_moving_average_weight) * prev_average
-    end
+    g_average_count:update(total_count)
 
-    ilog("collected", total_count, "wool",
-         "(EMA=" .. g_exponential_moving_average .. ") in",
+    ilog("collected", total_count, "wool", "(EMA=" .. g_average_count.average .. ") in",
          g_current_stats_time - g_prev_stats_time, "seconds")
 end
 
@@ -111,4 +115,5 @@ while 1 do
     g_prev_stats_time = g_current_stats_time
 
     g_current_stats_bucket = {}
+    g_current_stats_time = nil
 end

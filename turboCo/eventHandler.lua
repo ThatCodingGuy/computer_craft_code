@@ -49,7 +49,7 @@ local function create()
 
   local pullEvent = function()
     local eventData = {os.pullEvent()}
-    local callbacks = self.getCallbacks(eventData[1])
+    local callbacks = getCallbacks(eventData[1])
     for index,value in pairs(callbacks) do
       value.callback(eventData)
       if value.clearOnHandle then

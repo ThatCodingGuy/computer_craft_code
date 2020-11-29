@@ -1,31 +1,30 @@
 --qotd = Quote of the Day
 
-os.loadAPI("./gitlib/turboCo/json.lua")
-os.loadAPI("./gitlib/turboCo/logger.lua")
 os.loadAPI("./gitlib/turboCo/monitor.lua")
 
-local categoryToColorMap = {}
-categoryToColorMap['inspire'] = colors.green
-categoryToColorMap['management'] = colors.yellow
-categoryToColorMap['funny'] = colors.orange
-categoryToColorMap['life'] = colors.cyan
-categoryToColorMap['art'] = colors.blue
+local categoryToColorMap = {
+  inspire = colors.green,
+  management = colors.yellow,
+  funny = colors.orange,
+  life = colors.cyan,
+  art = colors.blue
+}
 
 function getQuoteOfTheDay()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
   worked, quoteResponse = pcall(function() return http.get("https://interactive-cv-api.herokuapp.com/quotes/today", {["Content-Type"] = "application/json"}) end)
   if not worked then
-    logger.log(quoteResponse)
+    print(quoteResponse)
     return
   end
   worked, responseStr = pcall(quoteResponse.readAll)
   if not worked then
-    logger.log(responseStr)
+    print(responseStr)
     return
   end
-  worked, responseObject = pcall(json.decode, responseStr)
+  worked, responseObject = pcall(textutils.unserializeJSON, responseStr)
   if not worked then
-    logger.log(responseObject)
+    print(responseObject)
     return
   end
   return responseObject['quote']

@@ -11,7 +11,6 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
         refuel.refuel(position, facing)
     end
 
-    print(block_data)
     if not block_data then
         inventory.selectItemWithName("minecraft:birch_sapling")
         turtle.place()

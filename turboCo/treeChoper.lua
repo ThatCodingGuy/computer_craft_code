@@ -11,7 +11,7 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
         refuel.refuel(position, facing)
     end
 
-    if not block_data then
+    if not block_data.name then
         inventory.selectItemWithName("minecraft:birch_sapling")
         turtle.place()
     elseif block_data.name == "minecraft:birch_log" then
@@ -33,7 +33,7 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
         facing = movement.turn_to_face(facing, start_facing)
     end
 
-    print("wait: "..block_data.name)
+    print("wait")
     sleep(1)
 
     return facing, position

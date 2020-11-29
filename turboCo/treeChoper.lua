@@ -20,6 +20,9 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
     if not block_data.name then
         inventory.selectItemWithName("minecraft:birch_sapling")
         turtle.place()
+    elseif block_data.name == "minecraft:birch_sapling")
+        inventory.selectItemWithName("minecraft:bonemeal")
+        turtle.place()
     elseif block_data.name == "minecraft:birch_log" then
         -- Trees grow up to 7 high, with a width of 5
         -- Tree is in adjacent

@@ -36,7 +36,7 @@ function request_refuel(position)
         end
     end
     
-    local reponse = textutils.unserialize(response) 
+    local reponse = textutils.unserialize(message) 
     closeModems()
 
     return response["position"]

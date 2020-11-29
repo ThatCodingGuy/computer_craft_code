@@ -131,7 +131,6 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
       row[charPosX] = { color=color, bgColor=bgColor, char=safeSubstring(text, i, i)}
     end
     self.xCursorBufferPos = self.xCursorBufferPos + #text
-    screenWrite(screen, text, color)
   end
   
   local setCursorToNextLine = function()

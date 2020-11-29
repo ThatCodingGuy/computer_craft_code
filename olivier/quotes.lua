@@ -76,7 +76,7 @@ end
 quotes = getQuotes()
 if quotes ~= nil then
   for quote in pairs(quotes) do
-    displayQuote(screen, quotes[quote])
+    displayQuote(quotes[quote])
   end
 end
 

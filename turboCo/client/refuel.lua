@@ -34,7 +34,7 @@ function request_refuel(position)
         local server_id, message = rednet.receive(protocol, 5)
         if server_id then
             local reponse = textutils.unserializeJSON(message)
-            closeModems()
+            modem.closeModems()
             return response["position"] 
         end
     end

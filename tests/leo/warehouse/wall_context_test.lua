@@ -1,5 +1,5 @@
-local WallContext = require("leo.warehouse.wall_context")
-local test_setup = require("computercraft.testing.test_setup")
+local WallContext = dofile("./gitlib/leo/warehouse/wall_context.lua")
+local test_setup = dofile("./gitlib/computercraft/testing/test_setup.lua")
 
 describe("Wall context", function()
     local turtle

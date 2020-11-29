@@ -1,7 +1,7 @@
 --Get historical quotes of the day
 
-os.loadAPI("./gitlib/turboCo/monitor.lua")
-local eventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
+local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
+local ScreenBuffer = dofile("./gitlib/turboCo/screenBuffer.lua")
 
 local categoryToColorMap = {
   inspire = colors.green,
@@ -10,10 +10,18 @@ local categoryToColorMap = {
   life = colors.cyan,
   art = colors.blue
 }
-local screen = monitor.getInstance()
-monitor.clear(screen)
 
 local running = true
+
+local screen = peripheral.find("monitor")
+screen.clear()
+screen.setCursorPos(1,1)
+screen.write("   TEST   ")
+screen.setCursorPos(1,2)
+screen.write("----------")
+screen.setCursorPos(1,3)
+
+local screenBuffer = ScreenBuffer.createFullScreenFromTop(screen, 2)
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -35,45 +43,43 @@ function getQuotes()
   return responseObject['quotes']
 end
 
-function displayQuote(screen, quote)
+function displayQuote(quote)
   if quote then
     local color = categoryToColorMap[quote['category']]
-    monitor.writeCenterLn(screen, quote['title'], color)
-    monitor.writeCenterLn(screen, "Date: " .. quote['date'])
-    monitor.ln(screen)
-    monitor.writeWrapLn(screen, quote['content'], color)
-    monitor.ln(screen)
-    monitor.writeLeftLn(screen, "Author: " .. quote['author'])
-    monitor.ln(screen)
+    screenBuffer.writeCenterLn(quote['title'], color)
+    screenBuffer.writeCenterLn("Date: " .. quote['date'])
+    screenBuffer.ln()
+    screenBuffer.writeWrapLn(quote['content'], color)
+    screenBuffer.ln()
+    screenBuffer.writeLeftLn("Author: " .. quote['author'])
+    screenBuffer.ln()
   end
 end
-
 
 function handleKey(eventData)
   local key = eventData[2]
   if key == keys.up then
-    monitor.scrollUp(screen)
+    screenBuffer.scrollUp()
   elseif key == keys.down then
-    monitor.scrollDown(screen)
+    screenBuffer.scrollDown()
   elseif key == keys.left then
-    monitor.scrollLeft(screen)
+    screenBuffer.scrollLeft()
   elseif key == keys.right then
-    monitor.scrollRight(screen)
+    screenBuffer.scrollRight()
   elseif key == keys.pageUp then
-    monitor.pageUp(screen)
+    screenBuffer.pageUp()
   elseif key == keys.pageDown then
-    monitor.pageDown(screen)
+    screenBuffer.pageDown()
   elseif key == keys.x then
-    monitor.clear(screen)
+    screenBuffer.clear()
     running = false
   end
 end
 
-
 quotes = getQuotes()
 if quotes ~= nil then
   for quote in pairs(quotes) do
-    displayQuote(screen, quotes[quote])
+    displayQuote(quotes[quote])
   end
 end
 
@@ -82,10 +88,10 @@ print("Press LEFT to scroll left, and RIGHT to scroll right")
 print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
 print("Press X to exit cleanly")
 
-local eh = eventHandler.create()
+local eventHandler = EventHandler.create()
 
-eh.addHandle("key", handleKey)
+eventHandler.addHandle("key", handleKey)
 
 while running do
-  eh.pullEvent()
+  eventHandler.pullEvent()
 end

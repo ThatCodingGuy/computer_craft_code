@@ -24,7 +24,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
 
   local getBufferLength = function()
     local lastIndex = 0
-    for index,value in pairs(self.buffer) do
+    for index,_ in pairs(self.buffer) do
       lastIndex = index
     end
     return lastIndex
@@ -173,12 +173,10 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   local writeWrap = function(text, color, bgColor)
     local remainingText = text
     while string.len(remainingText) > 0 do
-      local x = self.xCursorBufferPos
-      local remainingX = self.width - x + 1
+      local remainingX = self.width - self.xCursorBufferPos + 1
       local remainingLineText = safeSubstring(remainingText, 1, remainingX)
       writeTextToBuffer(remainingLineText, color, bgColor)
-      x = self.xCursorBufferPos
-      if (x > width) then
+      if (self.xCursorBufferPos > self.width) then
         setCursorToNextLine()
       end
       remainingText = safeSubstring(remainingText, remainingX + 1, -1)
@@ -193,7 +191,6 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
 
   --Writes centered text for a monitor of any size
   local writeCenter = function(text, color, bgColor)
-    local y = self.yCursorBufferPos
     local textSize = string.len(text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then

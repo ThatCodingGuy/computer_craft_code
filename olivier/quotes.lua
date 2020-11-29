@@ -1,7 +1,7 @@
 --Get historical quotes of the day
 
-os.loadAPI("./gitlib/turboCo/monitor.lua")
-local eventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
+local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
+local ScreenBuffer = dofile("./gitlib/turboCo/screenBuffer.lua")
 
 local categoryToColorMap = {
   inspire = colors.green,
@@ -10,10 +10,15 @@ local categoryToColorMap = {
   life = colors.cyan,
   art = colors.blue
 }
-local screen = monitor.getInstance()
-monitor.clear(screen)
 
 local running = true
+
+local monitor = peripheral.find("monitor")
+monitor.write("   TEST   ")
+monitor.setCursorPos(1,2)
+monitor.write("----------")
+
+local screenBuffer = ScreenBuffer.createFullScreenFromTop(monitor, 2)
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -48,27 +53,25 @@ function displayQuote(screen, quote)
   end
 end
 
-
 function handleKey(eventData)
   local key = eventData[2]
   if key == keys.up then
-    monitor.scrollUp(screen)
+    screenBuffer.scrollUp()
   elseif key == keys.down then
-    monitor.scrollDown(screen)
+    screenBuffer.scrollDown()
   elseif key == keys.left then
-    monitor.scrollLeft(screen)
+    screenBuffer.scrollLeft()
   elseif key == keys.right then
-    monitor.scrollRight(screen)
+    screenBuffer.scrollRight()
   elseif key == keys.pageUp then
-    monitor.pageUp(screen)
+    screenBuffer.pageUp()
   elseif key == keys.pageDown then
-    monitor.pageDown(screen)
+    screenBuffer.pageDown()
   elseif key == keys.x then
-    monitor.clear(screen)
+    screenBuffer.clear()
     running = false
   end
 end
-
 
 quotes = getQuotes()
 if quotes ~= nil then
@@ -82,10 +85,10 @@ print("Press LEFT to scroll left, and RIGHT to scroll right")
 print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
 print("Press X to exit cleanly")
 
-local eh = eventHandler.create()
+local eventHandler = EventHandler.create()
 
-eh.addHandle("key", handleKey)
+eventHandler.addHandle("key", handleKey)
 
 while running do
-  eh.pullEvent()
+  eventHandler.pullEvent()
 end

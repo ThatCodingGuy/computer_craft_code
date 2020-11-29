@@ -1,6 +1,7 @@
 
 os.loadAPI("/gitlib/turboCo/movement.lua")
 os.loadAPI("/gitlib/turboCo/modem.lua")
+os.loadAPI("/gitlib/carlos/inventory.lua")
 
 local protocol = "fuel_station"
 

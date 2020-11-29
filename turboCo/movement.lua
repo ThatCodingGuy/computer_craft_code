@@ -675,29 +675,6 @@ function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
 
     error("#unreachable")
 end
--- dropoff_coords is the slot above the chest
-function keepChurning(dropoff_coords, block_callback)
-
-    -- TODO: Add clear nav + exit point
-    local function wrapped(current, adjacent, facing, direction, block_data, map)
-        local chest_distance = distance(current, dropoff_coords)
-        if get_empty_slot_count() <= 1 or turtle.getFuelLevel() < chest_distance * 5 then
-            print("heading to dropoff")
-            local start_position = current
-            local start_facing = facing
-            facing, current = navigate(current, facing, dropoff_coords, {})
-            empty_inventory()
-            refuel()
-            print("back to work")
-            facing, current = navigate(current, facing, start_position, {})
-            turn_to_face(facing, start_facing)
-            facing = start_facing
-        end
-
-        return block_callback(current, adjacent, facing, direction, block_data, map)
-    end
-    return wrapped 
-end
 
 
 function scan_area(width, depth, height, block_callback)

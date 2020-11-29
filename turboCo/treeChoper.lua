@@ -1,13 +1,21 @@
 
 os.loadAPI("/gitlib/turboCo/movement.lua")
 os.loadAPI("/gitlib/carlos/inventory.lua")
+os.loadAPI("/gitlib/turboCo/client/refuel.lua")
 
 function treeChop(position, adjacent, facing, direction, block_data, map)
     local start_position = position
     local start_facing = facing
 
+    if turtle.getFuelLevel() < 1000 then
+        refuel.refuel(position, facing)
+    end
 
-    if block_data.name == "minecraft:birch_log" then
+    
+    if not block_data then
+        inventory.selectItemWithName("minecraft:birch_sapling")
+        turtle.place()
+    elseif block_data.name == "minecraft:birch_log" then
         -- Trees grow up to 7 high, with a width of 5
         -- Tree is in adjacent
 
@@ -21,15 +29,9 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
             end
         end
 
-        print("Set up area")
         facing, position = movement.explore_area(tree_area, position, facing, movement.force_dig)
-        print("Done exploring: "..facing.." "..position)
         facing, position = movement.navigate(position, facing, start_position)
         facing = movement.turn_to_face(facing, start_facing)
-
-
-        inventory.selectItemWithName("minecraft:birch_sapling")
-        turtle.place()
     end
 
     print("wait")
@@ -38,7 +40,7 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
     return facing, position
 end
 
-function run(refuel_coords, tree_spot)
+function run()
     -- Slot 1 is for saplings
 
     local facing = movement.figure_out_facing()
@@ -52,7 +54,9 @@ function run(refuel_coords, tree_spot)
         error("Could not connect to gps")
         return
     end
+    
     local current = movement.coord(start_x, start_y, start_z)
+    local tree_spot = movement.coord(start_x + 1, start_y, start_z)
 
 
     -- We always position ourselves to the south
@@ -69,8 +73,8 @@ function run(refuel_coords, tree_spot)
     end
 end
 
-refuel_x, refuel_y, refuel_z, tree_spot_x, tree_spot_y, tree_spot_z = ...
-run(movement.coord(refuel_x, refuel_y, refuel_z), movement.coord(tree_spot_x, tree_spot_y, tree_spot_z))
+dropoff = movement.coord(-93, 73, 393)
+run(dropoff)
 
 -- -99 65 431
 -- -94 64 425

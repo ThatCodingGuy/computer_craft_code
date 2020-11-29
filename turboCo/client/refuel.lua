@@ -31,7 +31,7 @@ function request_refuel(position)
         request["position"] = position
         
 
-        rednet.send(server, textutils.serialize(request), protocol)
+        rednet.send(server, textutils.serializeJSON(request), protocol)
 
         local server_id, message = rednet.receive(protocol, 5)
         print("server "..server_id)
@@ -43,7 +43,7 @@ function request_refuel(position)
     
     print(server_id)
     print(message)
-    local reponse = textutils.unserialize(message) 
+    local reponse = textutils.unserializeJSON(message) 
     closeModems()
 
     return response["position"]

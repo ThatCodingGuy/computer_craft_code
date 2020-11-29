@@ -34,10 +34,10 @@ router["refuel"] = fuel_request
 
 while true do
     local senderId, message = receive()
-    local request = textutils.unserialize(message)
+    local request = textutils.unserializeJSON(message)
     local request_type = request["type"]
     local response = router[request_type](senderId, request)
-    local message = textutils.serialize(reponse)
+    local message = textutils.serializeJSON(reponse)
     print(message)
     rednet.send(senderId, message, protocol)
 end

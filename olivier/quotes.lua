@@ -16,6 +16,7 @@ local screen = peripheral.find("monitor")
 screen.clear()
 
 local screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight(screen, 2)
+screenTopBuffer.writeFullLineThenResetCursor(" ", colors.lightBlue, colors.gray)
 screenTopBuffer.writeCenterLn("Quotes of the Day", colors.lightBlue, colors.gray)
 screenTopBuffer.writeFullLineLn("-", colors.lightBlue, colors.gray)
 
@@ -69,6 +70,7 @@ function handleKey(eventData)
   elseif key == keys.pageDown then
     screenScrollingBuffer.pageDown()
   elseif key == keys.leftCtrl or key == keys.rightCtrl then
+    screenTopBuffer.clear()
     screenScrollingBuffer.clear()
     running = false
   end

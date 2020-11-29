@@ -185,6 +185,14 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     writeLn(text, color, bgColor)
   end
 
+  --writes line from left to right of a single char, then set cursor to where it was
+  local writeFullLineThenResetCursor = function(text, color, bgColor)
+    local origX,origY = self.xCursorBufferPos,self.yCursorBufferPos
+    writeFullLineLn(text, color, bgColor)
+    self.xCursorBufferPos = origX
+    self.yCursorBufferPos = origY
+  end
+
     --Write so that the text wraps to the next line
   local writeWrap = function(text, color, bgColor)
     local remainingText = text
@@ -304,6 +312,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     write=write,
     writeLn=writeLn,
     writeFullLineLn=writeFullLineLn,
+    writeFullLineThenResetCursor=writeFullLineThenResetCursor,
     writeWrap=writeWrap,
     writeWrapLn=writeWrapLn,
     writeCenter=writeCenter,

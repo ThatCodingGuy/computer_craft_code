@@ -2,7 +2,7 @@
 -- dropping shears on the ground will shear any sheep in that square. Spinning
 -- and placing don't require fuel.
  
-local inventory = require("carlos.inventory")
+local inventory = require("inventory")
 
 local SECONDS_BETWEEN_EXPORTS = 20
 

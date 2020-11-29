@@ -5,7 +5,7 @@
 --   total_wool: int  -- total amount of wool a bot currently has.
 
 local ExponentialMovingAverage =
-        require("carlos.exponential_moving_average").ExponentialMovingAverage
+        require("exponential_moving_average").ExponentialMovingAverage
 
 local cmdline = {...}
 

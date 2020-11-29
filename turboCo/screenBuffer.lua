@@ -197,7 +197,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
 
     --Writes centered text for a monitor of any size, then enter a new line
   local writeCenterLn = function(text, color, bgColor)
-    writeCenter(text, color)
+    writeCenter(text, color, bgColor)
     setCursorToNextLine()
   end
 

@@ -9,7 +9,7 @@ local categoryToColorMap = {
   art = colors.blue
 }
 
-local screen = monitor.getInstance()
+local screen = peripheral.find("monitor")
 local screenBuffer = ScreenBuffer.createFullScreen(screen)
 
 function getQuoteOfTheDay()

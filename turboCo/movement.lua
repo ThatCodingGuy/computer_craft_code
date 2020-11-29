@@ -450,13 +450,7 @@ end
 
 function follow_path(position, path, facing, block_callback, walkable_map)
     for i = 1, #path, 1 do
-        facing, position = visit_adjacent(position, path[i], facing, no_dig, walkable_map)
-        if position ~= path[i] then
-            -- A block was added to the path.
-            -- # YOLO
-            facing, position = navigate(position, facing, path[#path])
-            return facing, position
-        end
+        facing, position = visit_adjacent(position, path[i], facing, force_dig, walkable_map)
     end
     return facing, position
 end

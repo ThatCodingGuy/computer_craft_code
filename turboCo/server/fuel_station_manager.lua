@@ -39,7 +39,7 @@ while true do
     local request_type = request["type"]
     local response = router[request_type](senderId, request)
     print(response)
-    local message = textutils.serializeJSON(reponse)
+    local message = textutils.serializeJSON(response)
     print(message)
     rednet.send(senderId, message, protocol)
 end

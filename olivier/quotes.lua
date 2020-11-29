@@ -3,13 +3,19 @@
 os.loadAPI("./gitlib/turboCo/json.lua")
 os.loadAPI("./gitlib/turboCo/logger.lua")
 os.loadAPI("./gitlib/turboCo/monitor.lua")
+os.loadAPI("./gitlib/turboCo/eventHandler.lua")
 
-local categoryToColorMap = {}
-categoryToColorMap['inspire'] = colors.green
-categoryToColorMap['management'] = colors.yellow
-categoryToColorMap['funny'] = colors.orange
-categoryToColorMap['life'] = colors.cyan
-categoryToColorMap['art'] = colors.blue
+local categoryToColorMap = {
+  inspire = colors.green,
+  management = colors.yellow,
+  funny = colors.orange,
+  life = colors.cyan,
+  art = colors.blue
+}
+local screen = monitor.getInstance()
+monitor.clear(screen)
+
+local running = true
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -44,24 +50,9 @@ function displayQuote(screen, quote)
   end
 end
 
-local screen = monitor.getInstance()
-monitor.clear(screen)
 
-quotes = getQuotes()
-if quotes ~= nil then
-  for quote in pairs(quotes) do
-    displayQuote(screen, quotes[quote])
-  end
-end
-
-print("Press UP to scroll up, and DOWN to scroll down")
-print("Press LEFT to scroll left, and RIGHT to scroll right")
-print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
-print("Press X to exit cleanly")
-
-local running = true
-while running do
-  local event, key, isHeld = os.pullEvent("key")
+function handleKey(eventData)
+  local key = eventData[2]
   if key == keys.up then
     monitor.scrollUp(screen)
   elseif key == keys.down then
@@ -78,4 +69,23 @@ while running do
     monitor.clear(screen)
     running = false
   end
+end
+
+
+quotes = getQuotes()
+if quotes ~= nil then
+  for quote in pairs(quotes) do
+    displayQuote(screen, quotes[quote])
+  end
+end
+
+print("Press UP to scroll up, and DOWN to scroll down")
+print("Press LEFT to scroll left, and RIGHT to scroll right")
+print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
+print("Press X to exit cleanly")
+
+eventHandler.addHandle("key", handleKey)
+
+while running do
+  eventHandle.pullEvent()
 end

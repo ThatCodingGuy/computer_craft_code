@@ -17,10 +17,11 @@ end
 
 
 function request_refuel(position)
+    openModems()
+    
     local id = os.getComputerID()
     local server = connect()
 
-    openModems()
     while true do
         local request = {}
         request["type"] = "refuel"

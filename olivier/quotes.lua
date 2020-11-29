@@ -28,7 +28,7 @@ local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTop(screen, 3)
 local scrollView = ScrollView.create(screenScrollingBuffer, eventHandler)
 scrollView.makeActive()
 
-local exitHandle = ExitHandle.createFromScreen(screen, eventHandler)
+local exitHandle = ExitHandle.createFromScreens({term.current(), screen}, eventHandler)
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil

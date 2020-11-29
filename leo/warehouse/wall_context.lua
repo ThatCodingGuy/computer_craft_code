@@ -1,5 +1,5 @@
-local lua_helpers = require("turboCo.lua_helpers")
-local dashboard = require("turboCo.dashboard")
+local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
+local dashboard = dofile("./gitlib/turboCo/dashboard.lua")
 
 local class = lua_helpers.class
 local enum = lua_helpers.enum

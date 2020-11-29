@@ -1,4 +1,4 @@
-local lua_helpers = require("turboCo.lua_helpers")
+local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
 local class = lua_helpers.class
 local enum = lua_helpers.enum
 

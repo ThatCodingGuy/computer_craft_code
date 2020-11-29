@@ -3,7 +3,7 @@
 os.loadAPI("./gitlib/turboCo/json.lua")
 os.loadAPI("./gitlib/turboCo/logger.lua")
 os.loadAPI("./gitlib/turboCo/monitor.lua")
-os.loadAPI("./gitlib/turboCo/eventHandler.lua")
+local eventHandler = require("turboCo.eventHandler")
 
 local categoryToColorMap = {
   inspire = colors.green,
@@ -84,8 +84,10 @@ print("Press LEFT to scroll left, and RIGHT to scroll right")
 print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
 print("Press X to exit cleanly")
 
-eventHandler.addHandle("key", handleKey)
+local eh = eventHandler.create()
+
+eh.addHandle("key", handleKey)
 
 while running do
-  eventHandler.pullEvent()
+  eh.pullEvent()
 end

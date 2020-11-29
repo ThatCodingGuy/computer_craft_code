@@ -1,7 +1,7 @@
 --Get historical quotes of the day
 
 local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
-local ScreenBuffer = dofile("./gitlib/turboCo/screenBuffer.lua")
+local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 
 local categoryToColorMap = {
   inspire = colors.green,
@@ -12,16 +12,14 @@ local categoryToColorMap = {
 }
 
 local running = true
-
 local screen = peripheral.find("monitor")
 screen.clear()
-screen.setCursorPos(1,1)
-screen.write("   TEST   ")
-screen.setCursorPos(1,2)
-screen.write("----------")
-screen.setCursorPos(1,3)
 
-local screenBuffer = ScreenBuffer.createFullScreenFromTop(screen, 2)
+local screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight(screen, 2)
+screenTopBuffer.writeCenterLn("Quotes of the Day", colors.lightBlue, colors.gray)
+screenTopBuffer.writeFullLineLn("-", colors.lightBlue, colors.gray)
+
+local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTop(screen, 2)
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -46,32 +44,32 @@ end
 function displayQuote(quote)
   if quote then
     local color = categoryToColorMap[quote['category']]
-    screenBuffer.writeCenterLn(quote['title'], color)
-    screenBuffer.writeCenterLn("Date: " .. quote['date'])
-    screenBuffer.ln()
-    screenBuffer.writeWrapLn(quote['content'], color)
-    screenBuffer.ln()
-    screenBuffer.writeLeftLn("Author: " .. quote['author'])
-    screenBuffer.ln()
+    screenScrollingBuffer.writeCenterLn(quote['title'], color)
+    screenScrollingBuffer.writeCenterLn("Date: " .. quote['date'])
+    screenScrollingBuffer.ln()
+    screenScrollingBuffer.writeWrapLn(quote['content'], color)
+    screenScrollingBuffer.ln()
+    screenScrollingBuffer.writeLeftLn("Author: " .. quote['author'])
+    screenScrollingBuffer.ln()
   end
 end
 
 function handleKey(eventData)
   local key = eventData[2]
   if key == keys.up then
-    screenBuffer.scrollUp()
+    screenScrollingBuffer.scrollUp()
   elseif key == keys.down then
-    screenBuffer.scrollDown()
+    screenScrollingBuffer.scrollDown()
   elseif key == keys.left then
-    screenBuffer.scrollLeft()
+    screenScrollingBuffer.scrollLeft()
   elseif key == keys.right then
-    screenBuffer.scrollRight()
+    screenScrollingBuffer.scrollRight()
   elseif key == keys.pageUp then
-    screenBuffer.pageUp()
+    screenScrollingBuffer.pageUp()
   elseif key == keys.pageDown then
-    screenBuffer.pageDown()
-  elseif key == keys.x then
-    screenBuffer.clear()
+    screenScrollingBuffer.pageDown()
+  elseif key == keys.leftCtrl or key == keys.rightCtrl then
+    screenScrollingBuffer.clear()
     running = false
   end
 end
@@ -86,7 +84,7 @@ end
 print("Press UP to scroll up, and DOWN to scroll down")
 print("Press LEFT to scroll left, and RIGHT to scroll right")
 print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
-print("Press X to exit cleanly")
+print("Press CTRL to exit cleanly")
 
 local eventHandler = EventHandler.create()
 

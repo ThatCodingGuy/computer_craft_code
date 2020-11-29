@@ -1,6 +1,5 @@
 --qotd = Quote of the Day
-
-os.loadAPI("./gitlib/turboCo/monitor.lua")
+local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 
 local categoryToColorMap = {
   inspire = colors.green,
@@ -9,6 +8,9 @@ local categoryToColorMap = {
   life = colors.cyan,
   art = colors.blue
 }
+
+local screen = monitor.getInstance()
+local screenBuffer = ScreenBuffer.createFullScreen(screen)
 
 function getQuoteOfTheDay()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -30,23 +32,23 @@ function getQuoteOfTheDay()
   return responseObject['quote']
 end
 
-function displayQuote(screen, quote)
+function displayQuote(quote)
   if quote then
     local color = categoryToColorMap[quote['category']]
-    monitor.clear(screen)
-    monitor.writeCenterLn(screen, "TurboCo Motivational Billboard")
-    monitor.ln(screen)
-    monitor.writeCenterLn(screen, quote['title'], color)
-    monitor.writeCenterLn(screen, "Date: " .. quote['date'])
-    monitor.ln(screen)
-    monitor.writeWrapLn(screen, quote['content'], color)
-    monitor.ln(screen)
-    monitor.writeLeftLn(screen, "Author: " .. quote['author'])
+    screenBuffer.clear()
+    screenBuffer.writeCenterLn("TurboCo Motivational Billboard")
+    screenBuffer.ln()
+    screenBuffer.writeCenterLn(quote['title'], color)
+    screenBuffer.writeCenterLn("Date: " .. quote['date'])
+    screenBuffer.ln()
+    screenBuffer.writeWrapLn(quote['content'], color)
+    screenBuffer.ln()
+    screenBuffer.writeLeftLn("Author: " .. quote['author'])
+    screenBuffer.ln()
   end
 end
 
 local timePassed = 0
-local screen = monitor.getInstance()
 local quote = nil
 
 while true do
@@ -54,7 +56,7 @@ while true do
   if quote == nil then
     quote = getQuoteOfTheDay()
   end
-  displayQuote(screen, quote)
+  displayQuote(quote)
   sleep(30) --Refresh monitor once per 30 seconds because apparently text doesn't stick long
   timePassed = timePassed + 30
   --Get a new quote once per hour

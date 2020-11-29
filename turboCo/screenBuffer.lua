@@ -250,32 +250,28 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   end
 
   local pageUp = function()
-    local _,height = self.screen.getSize()
-    for i=1,height do
+    for i=1,self.height do
       shiftScreenCoordsUp()
     end
     renderScreen()
   end
   
   local pageDown = function()
-    local _,height = self.screen.getSize()
-    for i=1,height do
+    for i=1,self.height do
       shiftScreenCoordsDown()
     end
     renderScreen()
   end
   
   local pageLeft = function()
-    local width,_ = self.screen.getSize()
-    for i=1,width do
+    for i=1,self.width do
       shiftScreenCoordsLeft()
     end
     renderScreen()
   end
   
   local pageRight = function()
-    local width,_ = self.screen.getSize()
-    for i=1,width do
+    for i=1,self.width do
       shiftScreenCoordsRight()
     end
     renderScreen()

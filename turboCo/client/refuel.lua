@@ -36,6 +36,8 @@ function request_refuel(position)
         end
     end
     
+    print(server_id)
+    print(message)
     local reponse = textutils.unserialize(message) 
     closeModems()
 

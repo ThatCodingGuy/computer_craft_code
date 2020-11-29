@@ -90,14 +90,6 @@ function split_coord(coords)
     return result[1], result[2], result[3]
 end
 
-function error_gps_drift(position)
-    -- local gps_pos = gps_locate()
-    -- if gps_pos ~= position then
-    --     print("Caller "..debug.getinfo(2).name)
-    --     error("gps drift detected")
-    -- end
-end
-
 function distance(coord1, coord2)
     local x1, y1, z1 = split_coord(coord1)
     local x2, y2, z2 = split_coord(coord2)
@@ -415,9 +407,7 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
         direction = FORWARD
     end
 
-    error_gps_drift(position)
     facing, position = block_callback(position, adjacent, facing, direction, block_data, map)
-    error_gps_drift(position)
     return facing, position
 end
 
@@ -425,7 +415,6 @@ function visit(position, target, facing, block_callback, walkable_map)
     -- This moves the robot the coord specific
     -- It returns the facing and position. 
     -- If we're besides the node just visit it
-    error_gps_drift(position)
     if distance(position, target) > 1 then
         -- If we're not, find an adjacent empty block we've visisted,
         -- then go there before digging it.
@@ -440,11 +429,9 @@ function visit(position, target, facing, block_callback, walkable_map)
         -- Still there after. 
         local path = pathfind_with_map(position, target, walkable_map) 
         facing, position = follow_path(position, path, facing, block_callback, walkable_map)
-        error_gps_drift(position)
     end
 
     facing, position = visit_adjacent(position, target, facing, block_callback, walkable_map)
-    error_gps_drift(position)
     return facing, position
 end
 
@@ -463,9 +450,13 @@ end
 
 function follow_path(position, path, facing, block_callback, walkable_map)
     for i = 1, #path, 1 do
-        print("Path: "..path[i])
-        facing, position = visit_adjacent(position, path[i], facing, force_dig, walkable_map)
-        error_gps_drift(position)
+        facing, position = visit_adjacent(position, path[i], facing, no_dig, walkable_map)
+        if position ~= path[i] then
+            -- A block was added to the path.
+            -- # YOLO
+            facing, position = navigate(position, facing, path[#path])
+            return facing, position
+        end
     end
     return facing, position
 end
@@ -489,8 +480,6 @@ function explore_area(area, position, facing, block_callback)
     end
 
     while #to_explore > 0 do
-
-        error_gps_drift(position)
 
         local node = table.remove(to_explore, 1)
         local function is_empty(x) return explored[x] == EMPTY end
@@ -520,7 +509,7 @@ function explore_area(area, position, facing, block_callback)
     return facing, position
 end
 
-function navigate(current, facing, destination, map_NOT_USED_RIGHT_NOW)
+function navigate(current, facing, destination)
     -- FIXME: A path needs to exist, or the robot will forever explore
 
     print("Navigating to "..destination)

@@ -18,7 +18,7 @@ local function fuel_request(sender_id, request)
         if v == 0 then
             local station_distance = movement.distance(k, request["position"])
             if station_distance < distance then
-                print("Station distance: "..station_distance)
+                print("Station distance: "..station_distance.." "..k)
                 nearest = k
                 distance = station_distance
             end
@@ -28,7 +28,7 @@ local function fuel_request(sender_id, request)
     if nearest then 
         local response = {}
         response["status"] = "success"
-        response["position"] = movement.coord(-91, 73, 400)
+        response["position"] = nearest
         stations[nearest] = sender_id
         return response
     end

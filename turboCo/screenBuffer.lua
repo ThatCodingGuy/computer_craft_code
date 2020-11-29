@@ -213,8 +213,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
 
   --Writes text to the left for a monitor of any size
   local writeLeft = function(text, color, bgColor)
-    local x,y = self.screen.getCursorPos()
-    self.screen.setCursorPos(1, y)
+    self.xCursorBufferPos = 1
     write(text, color, bgColor)
   end
 

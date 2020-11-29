@@ -66,7 +66,7 @@ function refuel(position, facing)
     local start_pos = position
     local start_facing = facing
 
-    local target = request_refuel()
+    local target = request_refuel(position)
     position, facing = movement.navigate(position, facing, target)
     turtle.suckDown(64)
     turtle.refuel()

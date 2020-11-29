@@ -15,6 +15,7 @@ local function createFromScreens(screens, eventHandler)
         screen.clear()
         screen.setCursorPos(1,1)
       end
+      os.exit()
     end
   end
 

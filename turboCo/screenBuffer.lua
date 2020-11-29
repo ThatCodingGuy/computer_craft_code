@@ -127,18 +127,25 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   -- Text wrapping should be handled by writeWrap() function
   local writeTextToBuffer = function(text, color, bgColor)
     local buffer = self.buffer
-    local x,y = self.xCursorBufferPos, self.yCursorBufferPos
-    local row = buffer[y]
+    local row = buffer[self.yCursorBufferPos]
     if row == nil then
       row = {}
-      buffer[y] = row
+      buffer[self.yCursorBufferPos] = row
     end
-    local charPosX = nil
+    local cursorX = self.xStartingScreenPos + self.xCursorBufferPos - 1
+    local cursorY = self.yStartingScreenPos + self.yCursorBufferPos - 1
+    self.screen.setCursorPos(cursorX, cursorY)
+
     for i=1,#text do
-      charPosX = x + i - 1
-      row[charPosX] = { color=color, bgColor=bgColor, char=safeSubstring(text, i, i)}
+      local char = safeSubstring(text, i, i)
+      row[self.xCursorBufferPos] = { color=color, bgColor=bgColor, char=char}
+      --Making sure that we are in our buffer's space before we actually write to screen
+      --If we are not, we just buffer the text without writing
+      if self.yCursorBufferPos <= self.height and self.xCursorBufferPos <= self.width then
+        screenWrite(char, color, bgColor)
+      end
+      self.xCursorBufferPos = self.xCursorBufferPos + 1
     end
-    self.xCursorBufferPos = self.xCursorBufferPos + #text
   end
   
   local setCursorToNextLine = function()
@@ -160,7 +167,6 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   
   local write = function(text, color, bgColor)
     writeTextToBuffer(text, color, bgColor)
-    renderScreen()
   end
   
   --Sets cursor to the beggining of the next line after writing

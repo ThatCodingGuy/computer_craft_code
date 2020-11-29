@@ -57,23 +57,14 @@ function run()
     
     local current = movement.coord(start_x, start_y, start_z)
     local tree_spot = movement.coord(start_x + 1, start_y, start_z)
-
-
-    -- We always position ourselves to the south
     local turtle_x, turtle_y, turtle_z = movement.split_coord(tree_spot)
-    local turtle_spot = movement.coord(turtle_x + 1, turtle_y, turtle_z)
-
-
-    facing, current = movement.navigate(current, facing, refuel_coords)
-    movement.refuel()
-    facing, current = movement.navigate(current, facing, turtle_spot)
 
     while true do
         facing, current = movement.visit_adjacent(current, tree_spot, facing, treeChop, {})
     end
 end
 
-dropoff = movement.coord(-93, 73, 393)
+local dropoff = movement.coord(-93, 73, 393)
 run(dropoff)
 
 -- -99 65 431

@@ -23,7 +23,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   end
 
   local getBufferLength = function()
-    local lastIndex = nil
+    local lastIndex = 0
     for index,value in pairs(self.buffer) do
       lastIndex = index
     end

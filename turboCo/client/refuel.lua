@@ -21,8 +21,6 @@ function request_refuel(position)
 
     local id = os.getComputerID()
     local server = connect()
-    local server_id
-    local message
 
     while true do
         print("Looping")
@@ -34,17 +32,14 @@ function request_refuel(position)
         rednet.send(server, textutils.serializeJSON(request), protocol)
 
         local server_id, message = rednet.receive(protocol, 5)
-        print("server "..server_id)
-        print("message "..message)
         if server_id then
-            break
+            local reponse = textutils.unserializeJSON(message)
+            closeModems()
+            return response["position"] 
         end
     end
     
-    print(server_id)
-    print(message)
-    local reponse = textutils.unserializeJSON(message) 
-    closeModems()
+    
 
-    return response["position"]
+    
 end

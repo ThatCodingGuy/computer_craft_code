@@ -15,12 +15,12 @@ local running = true
 local screen = peripheral.find("monitor")
 screen.clear()
 
-local screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight(screen, 2)
+local screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight(screen, 3)
 screenTopBuffer.writeFullLineThenResetCursor(" ", colors.lightBlue, colors.gray)
 screenTopBuffer.writeCenterLn("Quotes of the Day", colors.lightBlue, colors.gray)
 screenTopBuffer.writeFullLineLn("-", colors.lightBlue, colors.gray)
 
-local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTop(screen, 2)
+local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTop(screen, 3)
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil

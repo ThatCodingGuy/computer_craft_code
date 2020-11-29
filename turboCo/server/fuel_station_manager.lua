@@ -1,4 +1,7 @@
 os.loadAPI("/gitlib/turboCo/movement.lua")
+os.loadAPI("/gitlib/turboCo/modem.lua")
+
+modem.openModems()
 
 local protocol = "fuel_station"
 rednet.host(protocol, "fuel_station_host")

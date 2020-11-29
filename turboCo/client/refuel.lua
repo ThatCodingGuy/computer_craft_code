@@ -1,9 +1,12 @@
 
 os.loadAPI("/gitlib/turboCo/movement.lua")
+os.loadAPI("/gitlib/turboCo/modem.lua")
+
 local protocol = "fuel_station"
 
 local function connect()
-    local server = rednet.lookup(protocol)
+    
+    local server = rednet.lookup(protocol, "fuel_station_host")
     while not server do
         print("Can't connect to reful server, trying again")
         sleep(5)
@@ -17,6 +20,7 @@ function request_refuel(position)
     local id = os.getComputerID()
     local server = connect()
 
+    openModems()
     while true do
         local request = {}
         request["type"] = "refuel"
@@ -25,12 +29,14 @@ function request_refuel(position)
 
         rednet.send(server, textutils.serialize(request), protocol)
 
-        local server_id, message = redent.receive(protocol, 5)
+        local server_id, message = rednet.receive(protocol, 5)
         if server_id then
             break
         end
     end
     
     local reponse = textutils.unserialize(response) 
+    closeModems()
+
     return response["position"]
 end

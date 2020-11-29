@@ -70,7 +70,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
       if color ~= nil then
         self.screen.setTextColor(color)
       end
-      local currentBgColor = self.screen.getTextColor()
+      local currentBgColor = self.screen.getBackgroundColor()
       if bgColor ~= nil then
         self.screen.setBackgroundColor(bgColor)
       end

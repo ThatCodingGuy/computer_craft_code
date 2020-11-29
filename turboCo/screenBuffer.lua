@@ -1,18 +1,18 @@
 -- This file is intended to provide extensions to the terminal (term) API of computercraft
 -- The intention is to create commonly used utility functions that computercraft does not provide
-
 local lua_helpers = require("turboCo.lua_helpers")
 
-local ScreenBuffer = {
-  screen = nil,
-  xPos = nil,
-  yPos = nil,
-  width = nil,
-  height = nil
-}
-ScreenBuffer.new = lua_helpers.constructor
+local screenBuffer = {}
 
-function ScreenBuffer.create(screen, xPos, yPos, width, height)
+local function create(screen, xPos, yPos, width, height)
+
+end
+
+local function createFullScreen(screen)
+  local width,height = screen.getSize()
+  return create(screen, 1, 1, width, height)
+end
+
   local screenBuffer = ScreenBuffer:new(
     function(self)
       self.screen = screen
@@ -24,10 +24,7 @@ function ScreenBuffer.create(screen, xPos, yPos, width, height)
   )
 end
 
-function ScreenBuffer.createFullScreen(screen)
-  local width,height = screen.getSize()
-  return ScreenBuffer.create(screen, 1, 1, width, height)
-end
+
 
 local function getScreenBuffer(screen)
   local screenData = screenDataMap[screen]

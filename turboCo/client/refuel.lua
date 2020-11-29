@@ -1,6 +1,7 @@
 
 os.loadAPI("/gitlib/turboCo/movement.lua")
 os.loadAPI("/gitlib/turboCo/modem.lua")
+os.loadAPI("/gitlib/carlos/inventory.lua")
 
 local protocol = "fuel_station"
 
@@ -65,10 +66,10 @@ end
 function refuel(position, facing)
     local start_pos = position
     local start_facing = facing
-
     local target = request_refuel(position)
     facing, position = movement.navigate(position, facing, target)
     turtle.suckDown(64)
+    inventory.selectItemWithName("minecraft:coal")
     turtle.refuel()
     done_refuel()
     facing, position = movement.navigate(position, facing, start_pos)

@@ -35,3 +35,9 @@ function updateRobot()
         }
     }
 end
+
+return {
+    alert = alert,
+    log = log,
+    updateRobot = updateRobot,
+}

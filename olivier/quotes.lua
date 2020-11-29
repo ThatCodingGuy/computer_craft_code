@@ -1,9 +1,7 @@
 --Get historical quotes of the day
 
-os.loadAPI("./gitlib/turboCo/json.lua")
-os.loadAPI("./gitlib/turboCo/logger.lua")
 os.loadAPI("./gitlib/turboCo/monitor.lua")
-local eventHandler = require("turboCo.eventHandler")
+local eventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
 
 local categoryToColorMap = {
   inspire = colors.green,
@@ -21,17 +19,17 @@ function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
   worked, quoteResponse = pcall(function() return http.get("https://interactive-cv-api.herokuapp.com/quotes", {["Content-Type"] = "application/json"}) end)
   if not worked then
-    logger.log(quoteResponse)
+    print(quoteResponse)
     return
   end
   worked, responseStr = pcall(quoteResponse.readAll)
   if not worked then
-    logger.log(responseStr)
+    print(responseStr)
     return
   end
-  worked, responseObject = pcall(json.decode, responseStr)
+  worked, responseObject = pcall(textutils.unserializeJSON, responseStr)
   if not worked then
-    logger.log(responseObject)
+    print(responseObject)
     return
   end
   return responseObject['quotes']

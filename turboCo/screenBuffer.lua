@@ -200,7 +200,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     local textSize = string.len(text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then
-      self.xCursorBufferPos = (emptySpace / 2) + 1
+      self.xCursorBufferPos = math.floor(emptySpace / 2) + 1
     end
     writeTextToBuffer(text, color, bgColor)
   end

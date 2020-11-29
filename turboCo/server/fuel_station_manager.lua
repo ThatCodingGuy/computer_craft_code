@@ -17,6 +17,7 @@ local function fuel_request(sender_id, request)
 
     local response = {}
     response["position"] = movement.coord(-91, 73, 400)
+    print(response)
     return response
 end
 
@@ -37,6 +38,7 @@ while true do
     local request = textutils.unserializeJSON(message)
     local request_type = request["type"]
     local response = router[request_type](senderId, request)
+    print(response)
     local message = textutils.serializeJSON(reponse)
     print(message)
     rednet.send(senderId, message, protocol)

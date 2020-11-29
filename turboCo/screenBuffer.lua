@@ -63,18 +63,26 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     return string.sub(str, startIndex, endIndex)
   end
 
-    --sets monitor to new color and returns the old color
-  local setMonitorColorIfNeeded = function(screen, color)
-    if color ~= nil and screen.isColor() then
-      currentColor = screen.getTextColor()
-      screen.setTextColor(color)
-      return currentColor
+    --sets monitor to new colors and returns the old colors
+  local setMonitorColorIfNeeded = function(color, bgColor)
+    if self.screen.isColor() then
+      local currentColor = self.screen.getTextColor()
+      if color ~= nil then
+        self.screen.setTextColor(color)
+      end
+      local currentBgColor = self.screen.getTextColor()
+      if bgColor ~= nil then
+        self.screen.setBackgroundColor(bgColor)
+      end
+      return currentColor, currentBgColor
     end
-    return nil
+    return nil, nil
   end
 
   local screenWrite = function(text, color, bgColor)
-    self.screen.blit(text, color, bgColor)
+    local oldColor, oldBgColor = setMonitorColorIfNeeded(color, bgColor)
+    self.screen.write(text)
+    setMonitorColorIfNeeded(oldColor, oldBgColor)
   end
 
   local writeCharFromBuffer = function(row, col)

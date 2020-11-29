@@ -106,6 +106,10 @@ end
 
 function gps_locate()
     local x, y, z = gps.locate()
+    while x == nil do
+        print("Lossy gps signal, trying again")
+        x, y, z = gps.locate()
+    end
     return coord(x, y, z)
 end
 

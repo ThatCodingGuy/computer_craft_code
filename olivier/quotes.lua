@@ -13,12 +13,12 @@ local categoryToColorMap = {
 
 local running = true
 
-local monitor = peripheral.find("monitor")
-monitor.write("   TEST   ")
-monitor.setCursorPos(1,2)
-monitor.write("----------")
+local screen = peripheral.find("monitor")
+screen.write("   TEST   ")
+screen.setCursorPos(1,2)
+screen.write("----------")
 
-local screenBuffer = ScreenBuffer.createFullScreenFromTop(monitor, 2)
+local screenBuffer = ScreenBuffer.createFullScreenFromTop(screen, 2)
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -40,16 +40,16 @@ function getQuotes()
   return responseObject['quotes']
 end
 
-function displayQuote(screen, quote)
+function displayQuote(quote)
   if quote then
     local color = categoryToColorMap[quote['category']]
-    monitor.writeCenterLn(screen, quote['title'], color)
-    monitor.writeCenterLn(screen, "Date: " .. quote['date'])
-    monitor.ln(screen)
-    monitor.writeWrapLn(screen, quote['content'], color)
-    monitor.ln(screen)
-    monitor.writeLeftLn(screen, "Author: " .. quote['author'])
-    monitor.ln(screen)
+    screenBuffer.writeCenterLn(quote['title'], color)
+    screenBuffer.writeCenterLn("Date: " .. quote['date'])
+    screenBuffer.ln()
+    screenBuffer.writeWrapLn(quote['content'], color)
+    screenBuffer.ln()
+    screenBuffer.writeLeftLn("Author: " .. quote['author'])
+    screenBuffer.ln()
   end
 end
 

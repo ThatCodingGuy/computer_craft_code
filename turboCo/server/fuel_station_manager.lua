@@ -16,10 +16,9 @@ local function fuel_request(sender_id, request)
     local nearest = nil;
     for k, v in pairs(stations) do
         if v == 0 then
-            print(k)
-            print(request["position"])
             local station_distance = movement.distance(k, request["position"])
             if station_distance < distance then
+                print("Station distance: "..station_distance)
                 nearest = k
                 distance = station_distance
             end

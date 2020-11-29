@@ -175,13 +175,33 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     setCursorToNextLine()
   end
 
+  --writes line from left to right of a single char
+  local writeFullLineLn = function(text, color, bgColor)
+    local char = safeSubstring(text, 1, 1)
+    local text = ""
+    for i=self.xCursorBufferPos,self.width do
+      text = text .. char
+    end
+    writeLn(text, color, bgColor)
+  end
+
+  --writes line from left to right of a single char, then set cursor to where it was
+  local writeFullLineThenResetCursor = function(text, color, bgColor)
+    local origX,origY = self.xCursorBufferPos,self.yCursorBufferPos
+    writeFullLineLn(text, color, bgColor)
+    self.xCursorBufferPos = origX
+    self.yCursorBufferPos = origY
+  end
+
     --Write so that the text wraps to the next line
   local writeWrap = function(text, color, bgColor)
     local remainingText = text
     while string.len(remainingText) > 0 do
       local remainingX = self.width - self.xCursorBufferPos + 1
-      local remainingLineText = safeSubstring(remainingText, 1, remainingX)
-      writeTextToBuffer(remainingLineText, color, bgColor)
+      if remainingX > 1 then
+        local remainingLineText = safeSubstring(remainingText, 1, remainingX)
+        writeTextToBuffer(remainingLineText, color, bgColor)
+      end
       if (self.xCursorBufferPos > self.width) then
         setCursorToNextLine()
       end
@@ -200,7 +220,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     local textSize = string.len(text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then
-      self.xCursorBufferPos = (emptySpace / 2) + 1
+      self.xCursorBufferPos = math.floor(emptySpace / 2) + 1
     end
     writeTextToBuffer(text, color, bgColor)
   end
@@ -291,6 +311,8 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     ln=ln,
     write=write,
     writeLn=writeLn,
+    writeFullLineLn=writeFullLineLn,
+    writeFullLineThenResetCursor=writeFullLineThenResetCursor,
     writeWrap=writeWrap,
     writeWrapLn=writeWrapLn,
     writeCenter=writeCenter,
@@ -314,14 +336,19 @@ local function createFullScreen(screen)
   return create(screen, 1, 1, width, height)
 end
 
+local function createFullScreenAtTopWithHeight(screen, desiredHeight)
+  local width,_ = screen.getSize()
+  return create(screen, 1, 1, width, desiredHeight)
+end
+
 local function createFullScreenFromTop(screen, topOffset)
   local width,height = screen.getSize()
   return create(screen, 1, topOffset + 1, width, height)
 end
 
-local function createFullScreenFromBottom(screen, bottomOffset)
+local function createFullScreenAtBottomWithHeight(screen, desiredHeight)
   local width,height = screen.getSize()
-  return create(screen, 1, height-bottomOffset, width, height)
+  return create(screen, 1, height-desiredHeight, width, desiredHeight)
 end
 
 local function createFullScreenFromTopAndBottom(screen, topOffset, bottomOffset)
@@ -331,8 +358,9 @@ end
 
 screenBuffer.create = create
 screenBuffer.createFullScreen = createFullScreen
+screenBuffer.createFullScreenAtTopWithHeight = createFullScreenAtTopWithHeight
 screenBuffer.createFullScreenFromTop = createFullScreenFromTop
-screenBuffer.createFullScreenFromBottom = createFullScreenFromBottom
+screenBuffer.createFullScreenAtBottomWithHeight = createFullScreenAtBottomWithHeight
 screenBuffer.createFullScreenFromTopAndBottom = createFullScreenFromTopAndBottom
 
 return screenBuffer

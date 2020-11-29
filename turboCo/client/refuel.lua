@@ -17,8 +17,8 @@ end
 
 
 function request_refuel(position)
-    openModems()
-    
+    modem.openModems()
+
     local id = os.getComputerID()
     local server = connect()
 

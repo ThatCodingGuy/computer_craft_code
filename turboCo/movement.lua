@@ -460,12 +460,8 @@ end
 function follow_path(position, path, facing, block_callback, walkable_map)
     for i = 1, #path, 1 do
         print("Path: "..path[i])
-        facing, position = visit_adjacent(position, path[i], facing, block_callback, walkable_map)
+        facing, position = visit_adjacent(position, path[i], facing, force_dig, walkable_map)
         error_gps_drift(position)
-        if not node == position then
-            facing, position = visit_adjacent(position, path[i], facing, force_dig, walkable_map)
-            error_gps_drift(position)
-        end
     end
     return facing, position
 end

@@ -1,9 +1,8 @@
 -- This file is intended to provide extensions to the terminal (term) API of computercraft
 -- The intention is to create commonly used utility functions that computercraft does not provide
-
 local lua_helpers = require("turboCo.lua_helpers")
 
-local ScreenBuffer = {}
+local screenBuffer = {}
 
 local function create(screen, xPos, yPos, width, height)
 

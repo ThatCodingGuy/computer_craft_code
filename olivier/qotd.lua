@@ -40,7 +40,7 @@ function displayQuote(screen, quote)
     monitor.writeCenterLn(screen, quote['title'], color)
     monitor.writeCenterLn(screen, "Date: " .. quote['date'])
     monitor.ln(screen)
-    monitor.writeLn(screen, quote['content'], color)
+    monitor.writeWrapLn(screen, quote['content'], color)
     monitor.ln(screen)
     monitor.writeLeftLn(screen, "Author: " .. quote['author'])
   end

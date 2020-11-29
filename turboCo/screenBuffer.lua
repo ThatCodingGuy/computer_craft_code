@@ -1,9 +1,35 @@
 -- This file is intended to provide extensions to the terminal (term) API of computercraft
 -- The intention is to create commonly used utility functions that computercraft does not provide
 
-local screenDataMap = {}
+local lua_helpers = require("turboCo.lua_helpers")
 
-local function getScreenData(screen)
+local ScreenBuffer = {
+  screen = nil,
+  xPos = nil,
+  yPos = nil,
+  width = nil,
+  height = nil
+}
+ScreenBuffer.new = lua_helpers.constructor
+
+function ScreenBuffer.create(screen, xPos, yPos, width, height)
+  local screenBuffer = ScreenBuffer:new(
+    function(self)
+      self.screen = screen
+      self.xPos = xPos
+      self.yPos = yPos
+      self.width = width
+      self.height = height
+    end
+  )
+end
+
+function ScreenBuffer.createFullScreen(screen)
+  local width,height = screen.getSize()
+  return ScreenBuffer.create(screen, 1, 1, width, height)
+end
+
+local function getScreenBuffer(screen)
   local screenData = screenDataMap[screen]
   if screenData == nil then
     screenData = {}
@@ -72,7 +98,7 @@ local function shiftScreenCoordsDown(screen)
 end
 
 -- Clears the screen then resets the cursor pointer
-function clear(screen)
+function ScreenBuffer.clear(screen)
   screen.clear()
   screen.setCursorPos(1,1)
   screenDataMap[screen] = nil
@@ -111,7 +137,7 @@ local function writeCharFromBuffer(screen, buffer, row, col)
 end
 
 
-local function renderScreen(screen)
+local function renderScreen(screenBuffer)
   local width,height = screen.getSize()
   local buffer = getBuffer(screen)
   local startRow, startCol = getScreenCoords(screen)
@@ -167,22 +193,22 @@ function getInstance()
 end
 
 --Sets cursor to the beggining of the next line
-function ln(screen)
+function ScreenBuffer.ln(screen)
   setCursorToNextLine(screen)
 end
 
-function write(screen, text, color)
+function ScreenBuffer.write(screen, text, color)
   writeNewTextToScreenOnRow(screen, text, color)
 end
 
 --Sets cursor to the beggining of the next line after writing
-function writeLn(screen, text, color)
+function ScreenBuffer.writeLn(screen, text, color)
   write(screen, text, color)
   setCursorToNextLine(screen)
 end
 
 --Write so that the text wraps to the next line
-function writeWrap(screen, text, color)
+function ScreenBuffer.writeWrap(screen, text, color)
   local width,height = screen.getSize()
   remainingText = text
   while string.len(remainingText) > 0 do
@@ -199,13 +225,13 @@ function writeWrap(screen, text, color)
 end
 
 --Sets cursor to the beggining of the next line after writing
-function writeWrapLn(screen, text, color)
+function ScreenBuffer.writeWrapLn(screen, text, color)
   writeWrap(screen, text, color)
   setCursorToNextLine(screen)
 end
 
 --Writes centered text for a monitor of any size
-function writeCenter(screen, text, color)
+function ScreenBuffer.writeCenter(screen, text, color)
   local width,height = screen.getSize()
   local x,y = screen.getCursorPos()
   local textSize = string.len(text)
@@ -218,26 +244,26 @@ function writeCenter(screen, text, color)
 end
 
 --Writes centered text for a monitor of any size, then enter a new line
-function writeCenterLn(screen, text, color)
+function ScreenBuffer.writeCenterLn(screen, text, color)
   writeCenter(screen, text, color)
   setCursorToNextLine(screen, text)
 end
 
 --Writes text to the left for a monitor of any size
-function writeLeft(screen, text, color)
+function ScreenBuffer.writeLeft(screen, text, color)
   local x,y = screen.getCursorPos()
   screen.setCursorPos(1, y)
   write(screen, text, color)
 end
 
 --Writes text to the left for a monitor of any size, then enter a new line
-function writeLeftLn(screen, text, color)
+function ScreenBuffer.writeLeftLn(screen, text, color)
   writeLeft(screen, text)
   setCursorToNextLine(screen)
 end
 
 --Writes text to the right for a monitor of any size
-function writeRight(screen, text, color)
+function ScreenBuffer.writeRight(screen, text, color)
   local width,height = screen.getSize()
   local x,y = screen.getCursorPos()
   local textLen = string.len(text)
@@ -248,32 +274,32 @@ function writeRight(screen, text, color)
 end
 
 --Writes text to the right for a monitor of any size, then enter a new line
-function writeRightLn(screen, text, color)
+function ScreenBuffer.writeRightLn(screen, text, color)
   writeRight(screen, text, color)
   setCursorToNextLine(screen)
 end
 
-function scrollUp(screen)
+function ScreenBuffer.scrollUp(screen)
   shiftScreenCoordsUp(screen)
   renderScreen(screen)
 end
 
-function scrollDown(screen)
+function ScreenBuffer.scrollDown(screen)
   shiftScreenCoordsDown(screen)
   renderScreen(screen)
 end
 
-function scrollLeft(screen)
+function ScreenBuffer.scrollLeft(screen)
   shiftScreenCoordsLeft(screen)
   renderScreen(screen)
 end
 
-function scrollRight(screen)
+function ScreenBuffer.scrollRight(screen)
   shiftScreenCoordsRight(screen)
   renderScreen(screen)
 end
 
-function pageUp(screen)
+function ScreenBuffer.pageUp(screen)
   local width,height = screen.getSize()
   for i=1,height do
     shiftScreenCoordsUp(screen)
@@ -281,7 +307,7 @@ function pageUp(screen)
   renderScreen(screen)
 end
 
-function pageDown(screen)
+function ScreenBuffer.pageDown(screen)
   local width,height = screen.getSize()
   for i=1,height do
     shiftScreenCoordsDown(screen)
@@ -289,7 +315,7 @@ function pageDown(screen)
   renderScreen(screen)
 end
 
-function pageLeft(screen)
+function ScreenBuffer.pageLeft(screen)
   local width,height = screen.getSize()
   for i=1,width do
     shiftScreenCoordsLeft(screen)
@@ -297,7 +323,7 @@ function pageLeft(screen)
   renderScreen(screen)
 end
 
-function pageRight(screen)
+function ScreenBuffer.pageRight(screen)
   local width,height = screen.getSize()
   for i=1,width do
     shiftScreenCoordsRight(screen)
@@ -305,3 +331,4 @@ function pageRight(screen)
   renderScreen(screen)
 end
 
+return ScreenBuffer

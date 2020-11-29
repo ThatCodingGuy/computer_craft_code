@@ -3,13 +3,19 @@
 os.loadAPI("./gitlib/turboCo/json.lua")
 os.loadAPI("./gitlib/turboCo/logger.lua")
 os.loadAPI("./gitlib/turboCo/monitor.lua")
+local eventHandler = require("turboCo.eventHandler")
 
-local categoryToColorMap = {}
-categoryToColorMap['inspire'] = colors.green
-categoryToColorMap['management'] = colors.yellow
-categoryToColorMap['funny'] = colors.orange
-categoryToColorMap['life'] = colors.cyan
-categoryToColorMap['art'] = colors.blue
+local categoryToColorMap = {
+  inspire = colors.green,
+  management = colors.yellow,
+  funny = colors.orange,
+  life = colors.cyan,
+  art = colors.blue
+}
+local screen = monitor.getInstance()
+monitor.clear(screen)
+
+local running = true
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -37,15 +43,34 @@ function displayQuote(screen, quote)
     monitor.writeCenterLn(screen, quote['title'], color)
     monitor.writeCenterLn(screen, "Date: " .. quote['date'])
     monitor.ln(screen)
-    monitor.writeLn(screen, quote['content'], color)
+    monitor.writeWrapLn(screen, quote['content'], color)
     monitor.ln(screen)
     monitor.writeLeftLn(screen, "Author: " .. quote['author'])
     monitor.ln(screen)
   end
 end
 
-local screen = monitor.getInstance()
-monitor.clear(screen)
+
+function handleKey(eventData)
+  local key = eventData[2]
+  if key == keys.up then
+    monitor.scrollUp(screen)
+  elseif key == keys.down then
+    monitor.scrollDown(screen)
+  elseif key == keys.left then
+    monitor.scrollLeft(screen)
+  elseif key == keys.right then
+    monitor.scrollRight(screen)
+  elseif key == keys.pageUp then
+    monitor.pageUp(screen)
+  elseif key == keys.pageDown then
+    monitor.pageDown(screen)
+  elseif key == keys.x then
+    monitor.clear(screen)
+    running = false
+  end
+end
+
 
 quotes = getQuotes()
 if quotes ~= nil then
@@ -55,13 +80,14 @@ if quotes ~= nil then
 end
 
 print("Press UP to scroll up, and DOWN to scroll down")
+print("Press LEFT to scroll left, and RIGHT to scroll right")
+print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
+print("Press X to exit cleanly")
 
-while true do
-  local event, key, isHeld = os.pullEvent("key")
-  local keyName = keys.getName( key )
-  if key == keys.up then
-    screen.scroll(-1)
-  elseif key == keys.down then
-    screen.scroll(1)
-  end
+local eh = eventHandler.create()
+
+eh.addHandle("key", handleKey)
+
+while running do
+  eh.pullEvent()
 end

@@ -7,7 +7,8 @@ local eventHandler = {}
 local function create()
   local self = {
     callbackDataList={},
-    currId=1
+    currId=1,
+    listening=true
   }
 
   local addAnyHandle = function(eventType, callback, clearOnHandle)
@@ -35,13 +36,23 @@ local function create()
     end
   end
 
-  local pullEvent = function()
-    local eventData = {os.pullEvent()}
-    for index,value in pairs(self.callbackDataList) do
-      if value.eventType == eventData[1] then
-        value.callback(eventData)
-        if value.clearOnHandle then
-          table.remove(self.callbackDataList, index)
+  local isListening = function()
+    return self.listening
+  end
+
+  local setListening = function(listening)
+    self.listening = listening
+  end
+
+  local pullEvents = function()
+    while self.isListening() do
+      local eventData = {os.pullEvent()}
+      for index,value in pairs(self.callbackDataList) do
+        if value.eventType == eventData[1] then
+          value.callback(eventData)
+          if value.clearOnHandle then
+            table.remove(self.callbackDataList, index)
+          end
         end
       end
     end
@@ -51,7 +62,9 @@ local function create()
     addOneTimeHandle=addOneTimeHandle,
     addHandle=addHandle,
     removeHandle=removeHandle,
-    pullEvent=pullEvent
+    pullEvents=pullEvents,
+    isListening=isListening,
+    setListening=setListening
   }
 end
 

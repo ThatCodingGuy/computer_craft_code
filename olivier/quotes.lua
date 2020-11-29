@@ -13,7 +13,6 @@ local categoryToColorMap = {
   art = colors.blue
 }
 
-local running = true
 local screen = peripheral.find("monitor")
 screen.clear()
 
@@ -75,6 +74,5 @@ print("Press LEFT to scroll left, and RIGHT to scroll right")
 print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
 print("Press END to exit cleanly")
 
-while running do
-  eventHandler.pullEvent()
-end
+--Loops until exit handle quits it
+eventHandler.pullEvents()

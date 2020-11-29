@@ -202,7 +202,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     if emptySpace > 1 then
       self.xCursorBufferPos = (emptySpace / 2) + 1
     end
-    write(text, color, bgColor)
+    writeTextToBuffer(text, color, bgColor)
   end
 
     --Writes centered text for a monitor of any size, then enter a new line

@@ -87,5 +87,5 @@ print("Press X to exit cleanly")
 eventHandler.addHandle("key", handleKey)
 
 while running do
-  eventHandle.pullEvent()
+  eventHandler.pullEvent()
 end

@@ -1,6 +1,7 @@
 
 --Event Handling library that allows the listening of multiple different os.pullEvent at the same time
 --callback functions must take the table of arguments passed by os.pullEvent as a parameter
+--view olivier/quotes.lua as an example of usage
 local eventTypeToCallbackData = {}
 
 local function getCallbacks(eventType)

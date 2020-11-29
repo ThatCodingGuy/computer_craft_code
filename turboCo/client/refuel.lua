@@ -71,6 +71,8 @@ function refuel(position, facing)
     turtle.suckDown(64)
     turtle.refuel()
     done_refuel()
+    print(position)
+    print(facing)
     position, facing = movement.navigate(position, facing, start_pos)
     movement.turn_to_face(facing, start_facing)
 end

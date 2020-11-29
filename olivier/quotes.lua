@@ -3,6 +3,7 @@
 local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
+local ExitHandle = dofile("./gitlib/turboCo/ui/exitHandle.lua")
 
 local categoryToColorMap = {
   inspire = colors.green,
@@ -26,6 +27,8 @@ screenTopBuffer.writeFullLineLn("-", colors.lightBlue, colors.gray)
 local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTop(screen, 3)
 local scrollView = ScrollView.create(screenScrollingBuffer, eventHandler)
 scrollView.makeActive()
+
+local exitHandle = ExitHandle.createFromScreen(screen, eventHandler)
 
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -70,7 +73,7 @@ end
 print("Press UP to scroll up, and DOWN to scroll down")
 print("Press LEFT to scroll left, and RIGHT to scroll right")
 print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
-print("Press CTRL to exit cleanly")
+print("Press END to exit cleanly")
 
 while running do
   eventHandler.pullEvent()

@@ -4,7 +4,7 @@ while true do
     local input = read()
 
     if y < 120 then
-        local delta = 200 - y
+        local delta = 222 - y
         for i = 1, delta, 1 do
             turtle.up()
         end

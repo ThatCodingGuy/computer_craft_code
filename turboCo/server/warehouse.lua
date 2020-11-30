@@ -3,6 +3,14 @@ os.loadAPI("/gitlib/turboCo/modem.lua")
 
 modem.openModems()
 
+-- There are many roles in the warehouse.
+--
+-- Warehouse server: Keeps the master record of item counts in each chest
+-- Dropers: Brings items from dropoff chests to storage chest.
+--          Calls the deposit API
+-- Pickers: Brings items from storage chest to pickup chest.
+--          Calls the withdrawal API
+
 
 -- db contains a map of item label -> {
 --    "storage_chests": [
@@ -24,4 +32,8 @@ else
     data = {}
 end
 
+
+local function deposit(item_name, quantity)
+    
+end
 

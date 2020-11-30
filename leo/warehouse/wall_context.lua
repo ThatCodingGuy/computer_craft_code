@@ -56,6 +56,10 @@ WallContext = class({
             turtle.turnRight()
             self.current_block = 1
             self.current_wall_side = compute_next_wall()
+
+            if self.current_wall_side == WallSide.NORTH then
+                turtle.up()
+            end
         end
 
         turtle.forward()

@@ -47,4 +47,14 @@ describe("Wall context", function()
         assert.stub(turtle.turnRight).was.called(4)
         assert.stub(turtle.forward).was.called(31)
     end)
+
+    it("should elevate by one block every cycle", function()
+        local context = WallContext.new(2, 3)
+
+        for _ = 1, 7 do
+            context.advance()
+        end
+
+        assert.stub(turtle.up).was.called(1)
+    end)
 end)

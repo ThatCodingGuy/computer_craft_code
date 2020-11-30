@@ -20,6 +20,8 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   local resetScreenBuffer = function()
     self.buffer = {}
     self.coords = { row=1, col=1 }
+    self.xCursorBufferPos = 1
+    self.yCursorBufferPos = 1
   end
 
   local getBufferLength = function()

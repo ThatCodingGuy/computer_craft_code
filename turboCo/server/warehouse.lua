@@ -59,8 +59,8 @@ end
 
 
 for item_name, storage_data in pairs(data) do
-    for i = 1, #storage_data["chests"], 1 do
-        local spot = storage_data["chests"][i]["position"]
+    for i = 1, #storage_data["chest_data"], 1 do
+        local spot = storage_data["chest_data"][i]["position"]
         chest_spots[spot] = 1
     end
 end

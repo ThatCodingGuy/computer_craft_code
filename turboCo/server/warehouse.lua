@@ -50,7 +50,7 @@ for y = min_y, max_y, 1 do
     for x = min_x, max_x, 1 do
         for z = min_z, max_z, 1 do
             local spot = movement.coord(x, y, z)
-            if x % 2 == 0 and z % 2 == 0 do
+            if x % 2 == 0 and z % 2 == 0 then
                 chest_spots[spot] = 0
             end
         end

@@ -12,10 +12,8 @@ local function create(screenBuffer, eventHandler, text, textColor, backgroundCol
     leftClickCallback=leftClickCallback,
     rightClickCallback=rightClickCallback,
     monitorTouchKeyHandlerId = nil,
-    mouseClickKeyHandlerId = nil,
+    mouseClickKeyHandlerId = nil
   }
-
-  self.currentScreenPos.x, self.currentScreenPos.y = screenBuffer.getScreenCursorPos()
 
   local wasClicked = function(x, y)
     local maxPosX = self.currentScreenPos.x + #text
@@ -39,6 +37,11 @@ local function create(screenBuffer, eventHandler, text, textColor, backgroundCol
       end
     end
   end
+  
+  local screenMovedCallback = function(x, y)
+    self.currentScreenPos.x = self.currentScreenPos.x + x
+    self.currentScreenPos.y = self.currentScreenPos.y + y
+  end
 
   local makeActive = function()
     if self.monitorTouchKeyHandlerId == nil then
@@ -57,6 +60,11 @@ local function create(screenBuffer, eventHandler, text, textColor, backgroundCol
       self.eventHandler.removeHandle(self.mouseClickKeyHandlerId)
     end
   end
+
+  self.currentScreenPos.x, self.currentScreenPos.y = screenBuffer.getScreenCursorPos()
+  screenBuffer.write(text, textColor, backgroundColor)
+  screenBuffer.registerCallback(screenMovedCallback)
+  makeActive()
 
   return {
     makeActive=makeActive,

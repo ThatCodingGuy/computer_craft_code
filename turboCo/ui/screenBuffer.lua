@@ -14,10 +14,11 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
       buffer={},
       renderPos={ x=1, y=1 },
       cursorPos={ x=1, y=1 }
-    }
+    },
+    callbacks = {}
   }
 
-  local resetScreenBuffer = function()
+  local resetScreenState = function()
     self.screenState = {
       buffer={},
       renderPos={ x=1, y=1 },
@@ -33,26 +34,36 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     return lastIndex
   end
 
-  local shiftScreenCoordsLeft = function()
+  local shiftScreenCoordsLeft = function(movementOffset)
     if self.screenState.renderPos.x > 1 then
       self.screenState.renderPos.x = self.screenState.renderPos.x - 1
+      movementOffset.x = movementOffset.x - 1
     end
+    return false
   end
 
-  local shiftScreenCoordsRight = function()
+  local shiftScreenCoordsRight = function(movementOffset)
     self.screenState.renderPos.x = self.screenState.renderPos.x + 1
+    movementOffset.x = movementOffset.x + 1
+    return true
   end
 
-  local shiftScreenCoordsUp = function()
+  local shiftScreenCoordsUp = function(movementOffset)
     if self.screenState.renderPos.y > 1 then
       self.screenState.renderPos.y = self.screenState.renderPos.y - 1
+      movementOffset.y = movementOffset.y - 1
+      return true
     end
+    return false
   end
 
-  local shiftScreenCoordsDown = function()
+  local shiftScreenCoordsDown = function(movementOffset)
     if self.screenState.renderPos.y < getBufferLength() then
       self.screenState.renderPos.y = self.screenState.renderPos.y + 1
+      movementOffset.y = movementOffset.y + 1
+      return true
     end
+    return false
   end
 
   local safeSubstring = function(str, startIndex, endIndex)
@@ -153,7 +164,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
 
   -- Clears the screen for the screenBuffer then resets the cursor pointer
   local clear = function()
-    resetScreenBuffer()
+    resetScreenState()
     clearScreen()
   end
 
@@ -256,56 +267,92 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   end
 
   local scrollUp = function()
-    shiftScreenCoordsUp()
+    local movementOffset = { x=0, y=0 }
+    shiftScreenCoordsUp(movementOffset)
     renderScreen()
+    for _,callback in pairs(self.callbacks) do
+      callback(movementOffset.x, movementOffset.y)
+    end
   end
 
   local scrollDown = function()
-    shiftScreenCoordsDown()
+    local movementOffset = { x=0, y=0 }
+    shiftScreenCoordsDown(movementOffset)
     renderScreen()
+    for _,callback in pairs(self.callbacks) do
+      callback(movementOffset.x, movementOffset.y)
+    end
   end
 
   local scrollLeft = function()
-    shiftScreenCoordsLeft()
+    local movementOffset = { x=0, y=0 }
+    shiftScreenCoordsLeft(movementOffset)
     renderScreen()
+    for _,callback in pairs(self.callbacks) do
+      callback(movementOffset.x, movementOffset.y)
+    end
   end
 
   local scrollRight = function()
-    shiftScreenCoordsRight()
+    local movementOffset = { x=0, y=0 }
+    shiftScreenCoordsRight(movementOffset)
     renderScreen()
+    for _,callback in pairs(self.callbacks) do
+      callback(movementOffset.x, movementOffset.y)
+    end
   end
 
   local pageUp = function()
+    local movementOffset = { x=0, y=0 }
     for i=1,self.height do
-      shiftScreenCoordsUp()
+      shiftScreenCoordsUp(movementOffset)
     end
     renderScreen()
+    for _,callback in pairs(self.callbacks) do
+      callback(movementOffset.x, movementOffset.y)
+    end
   end
 
   local pageDown = function()
+    local movementOffset = { x=0, y=0 }
     for i=1,self.height do
-      shiftScreenCoordsDown()
+      shiftScreenCoordsDown(movementOffset)
     end
     renderScreen()
+    for _,callback in pairs(self.callbacks) do
+      callback(movementOffset.x, movementOffset.y)
+    end
   end
 
   local pageLeft = function()
+    local movementOffset = { x=0, y=0 }
     for i=1,self.width do
-      shiftScreenCoordsLeft()
+      shiftScreenCoordsLeft(movementOffset)
     end
     renderScreen()
+    for _,callback in pairs(self.callbacks) do
+      callback(movementOffset.x, movementOffset.y)
+    end
   end
 
   local pageRight = function()
+    local movementOffset = { x=0, y=0 }
     for i=1,self.width do
-      shiftScreenCoordsRight()
+      shiftScreenCoordsRight(movementOffset)
     end
     renderScreen()
+    for _,callback in pairs(self.callbacks) do
+      callback(movementOffset.x, movementOffset.y)
+    end
   end
 
   local getScreenCursorPos = function()
     return self.screenStartingPos.x + self.screenState.cursorPos.x - 1,
            self.screenStartingPos.y + self.screenState.cursorPos.y - 1
+  end
+
+  local registerCallback = function(callback)
+    table.insert(self.callbacks, callback)
   end
 
   return {
@@ -331,7 +378,8 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     pageDown=pageDown,
     pageLeft=pageLeft,
     pageRight=pageRight,
-    getScreenCursorPos=getScreenCursorPos
+    getScreenCursorPos=getScreenCursorPos,
+    registerCallback=registerCallback
   }
 end
 

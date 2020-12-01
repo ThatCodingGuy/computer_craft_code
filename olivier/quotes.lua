@@ -3,6 +3,7 @@
 local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
+local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local ExitHandle = dofile("./gitlib/turboCo/ui/exitHandle.lua")
 
 local categoryToColorMap = {
@@ -12,6 +13,10 @@ local categoryToColorMap = {
   life = colors.cyan,
   art = colors.blue
 }
+
+pageNumber = 1
+numResults = 4
+numPages = nil
 
 local screen = peripheral.find("monitor")
 screen.clear()
@@ -24,15 +29,14 @@ screenTopBuffer.writeCenterLn("Quotes of the Day", colors.lightBlue, colors.gray
 screenTopBuffer.writeFullLineLn("-", colors.lightBlue, colors.gray)
 screenTopBuffer.renderScreen()
 
-local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTop(screen, 3)
+local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTopAndBottom(screen, 3, 1)
 local scrollView = ScrollView.create(screenScrollingBuffer, eventHandler)
 scrollView.makeActive()
 
-local exitHandle = ExitHandle.createFromScreens({term.current(), screen}, eventHandler)
-
 function getQuotes()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
-  worked, quoteResponse = pcall(function() return http.get("https://interactive-cv-api.herokuapp.com/quotes", {["Content-Type"] = "application/json"}) end)
+  local url = string.format("https://interactive-cv-api.herokuapp.com/quotes?page_number=%s&num_results=%s", pageNumber, numResults)
+  worked, quoteResponse = pcall(function() return http.get(url, {["Content-Type"] = "application/json"}) end)
   if not worked then
     print(quoteResponse)
     return
@@ -47,7 +51,22 @@ function getQuotes()
     print(responseObject)
     return
   end
-  return responseObject['quotes']
+  numPages = responseObject['num_pages']
+  return responseObject
+end
+
+function getPreviousQuotes()
+  if pageNumber > 1 then
+    pageNumber = pageNumber - 1
+  end
+  local quotesResponse = getQuotes()
+end
+
+function getNextQuotes()
+  if pageNumber < numPages then
+    pageNumber = pageNumber + 1
+  end
+  local quotesResponse = getQuotes()
 end
 
 function writeQuote(quote)
@@ -63,13 +82,21 @@ function writeQuote(quote)
   end
 end
 
-quotes = getQuotes()
-if quotes ~= nil then
+quotesResponse = getQuotes()
+if quotesResponse ~= nil then
+  quotes = quotesResponse['quotes']
   for quote in pairs(quotes) do
     writeQuote(quotes[quote])
   end
 end
 screenScrollingBuffer.renderScreen()
+
+
+local screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight(screen, 1)
+screenBottomBuffer.writeFullLineThenResetCursor(" ", colors.lightBlue, colors.gray)
+local prevButton = Button.create(screenBottomBuffer, eventHandler, "<-Prev")
+
+local exitHandle = ExitHandle.createFromScreens({term.current(), screen}, eventHandler)
 
 print("Press UP to scroll up, and DOWN to scroll down")
 print("Press LEFT to scroll left, and RIGHT to scroll right")

@@ -66,7 +66,7 @@ for item_name, storage_data in pairs(data) do
 end
 
 local function save_db()
-    local db = fs.open("/db", w)
+    local db = fs.open("/db", "w")
     local raw_data = textutils.serializeJSON(data)
     db.write(raw_data)
 end

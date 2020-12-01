@@ -110,6 +110,7 @@ end
 
 function deposit(item_name, quantity)
     if not data[item_name] then
+        init_item_entry(item_name)
         local spot = get_next_chest_spot()
         dispatch_chest(spot, item_name)
     end

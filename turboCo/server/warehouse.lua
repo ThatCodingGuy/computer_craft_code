@@ -75,10 +75,11 @@ local function get_next_chest_spot()
     local shortest_distance = 9999999999
     local best_spot = nil
     for position, is_taken in pairs(chest_spots) do
-        print(position)
         if not is_taken then
             local distance = movement.distance(chest_chest, position)
+            print(distance)
             if distance < shortest_distance then
+                print("BEST")
                 best_spot = position
             end
         end

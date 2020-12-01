@@ -38,7 +38,7 @@ local chest_chest = movement.coord(-94, 63, 445)
 
 local data
 if fs.exists("/db") then
-    local db = fs.open("/db", r)
+    local db = fs.open("/db", "r")
     local raw_data = db.readAll()
     data = textutils.unserializeJSON(raw_data)
 else

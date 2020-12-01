@@ -75,6 +75,7 @@ local function get_next_chest_spot()
     local shortest_distance = 9999999999
     local best_spot = nil
     for position, is_taken in pairs(chest_spots) do
+        print(position)
         if not is_taken then
             local distance = movement.distance(chest_chest, position)
             if distance < shortest_distance then
@@ -109,7 +110,7 @@ end
 function deposit(item_name, quantity)
     if not data[item_name] then
         local spot = get_next_chest_spot()
-        dispatch_chest(spot)
+        dispatch_chest(spot, item_name)
     end
 
     save_db()

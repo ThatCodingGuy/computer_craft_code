@@ -22,6 +22,7 @@ local screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight(screen, 3)
 screenTopBuffer.writeFullLineThenResetCursor(" ", colors.lightBlue, colors.gray)
 screenTopBuffer.writeCenterLn("Quotes of the Day", colors.lightBlue, colors.gray)
 screenTopBuffer.writeFullLineLn("-", colors.lightBlue, colors.gray)
+screenTopBuffer.renderScreen()
 
 local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTop(screen, 3)
 local scrollView = ScrollView.create(screenScrollingBuffer, eventHandler)
@@ -59,6 +60,7 @@ function displayQuote(quote)
     screenScrollingBuffer.ln()
     screenScrollingBuffer.writeLeftLn("Author: " .. quote['author'])
     screenScrollingBuffer.ln()
+    screenScrollingBuffer.renderScreen()
   end
 end
 

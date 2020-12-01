@@ -1,7 +1,7 @@
 -- This file is intended to provide extensions to the terminal (term) API of computercraft
 -- Basically you create a screen buffer that is meant to track a certain part of the screen (or all of it)
 -- Operations such as writing and wrapping around are provided, as well as the ability to scroll through text
-
+-- Always call renderScreen() when you actually want it displayed
 local screenBuffer = {}
 
 local function create(screen, xStartingScreenPos, yStartingScreenPos, width, height)
@@ -92,7 +92,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     screenWrite(bufferCharData.char, bufferCharData.color, bufferCharData.bgColor)
   end
 
-  local function clearScreen()
+  local clearScreen = function()
     for y=self.yStartingScreenPos, self.height do
       for x=self.xStartingScreenPos, self.width do
         self.screen.setCursorPos(x, y)
@@ -141,11 +141,6 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     for i=1,#text do
       local char = safeSubstring(text, i, i)
       row[self.xCursorBufferPos] = { color=color, bgColor=bgColor, char=char}
-      --Making sure that we are in our buffer's space before we actually write to screen
-      --If we are not, we just buffer the text without writing
-      if self.yCursorBufferPos <= self.height and self.xCursorBufferPos <= self.width then
-        screenWrite(char, color, bgColor)
-      end
       self.xCursorBufferPos = self.xCursorBufferPos + 1
     end
   end
@@ -159,7 +154,6 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   local clear = function()
     resetScreenBuffer()
     clearScreen()
-    renderScreen()
   end
   
   --Sets cursor to the beggining of the next line
@@ -309,6 +303,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   end
 
   return {
+    renderScreen=renderScreen,
     clear=clear,
     ln=ln,
     write=write,

@@ -7,50 +7,51 @@ local screenBuffer = {}
 local function create(screen, xStartingScreenPos, yStartingScreenPos, width, height)
   local self = {
     screen = screen,
-    xStartingScreenPos = xStartingScreenPos,
-    yStartingScreenPos = yStartingScreenPos,
+    screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
     width = width,
     height = height,
-    buffer={},
-    coords={ row=1, col=1 },
-    xCursorBufferPos = 1,
-    yCursorBufferPos = 1
+    screenState = {
+      buffer={},
+      renderPos={ x=1, y=1 },
+      cursorPos={ x=1, y=1 }
+    }
   }
 
   local resetScreenBuffer = function()
-    self.buffer = {}
-    self.coords = { row=1, col=1 }
-    self.xCursorBufferPos = 1
-    self.yCursorBufferPos = 1
+    self.screenState = {
+      buffer={},
+      renderPos={ x=1, y=1 },
+      cursorPos={ x=1, y=1 }
+    }
   end
 
   local getBufferLength = function()
     local lastIndex = 0
-    for index,_ in pairs(self.buffer) do
+    for index,_ in pairs(self.screenState.buffer) do
       lastIndex = index
     end
     return lastIndex
   end
-  
+
   local shiftScreenCoordsLeft = function()
-    if self.coords.col > 1 then
-      self.coords.col = self.coords.col - 1
+    if self.screenState.renderPos.x > 1 then
+      self.screenState.renderPos.x = self.screenState.renderPos.x - 1
     end
   end
-  
+
   local shiftScreenCoordsRight = function()
-    self.coords.col = self.coords.col + 1
+    self.screenState.renderPos.x = self.screenState.renderPos.x + 1
   end
-  
+
   local shiftScreenCoordsUp = function()
-    if self.coords.row > 1 then
-      self.coords.row = self.coords.row - 1
+    if self.screenState.renderPos.y > 1 then
+      self.screenState.renderPos.y = self.screenState.renderPos.y - 1
     end
   end
-  
+
   local shiftScreenCoordsDown = function()
-    if self.coords.row < getBufferLength() then
-      self.coords.row = self.coords.row + 1
+    if self.screenState.renderPos.y < getBufferLength() then
+      self.screenState.renderPos.y = self.screenState.renderPos.y + 1
     end
   end
 
@@ -88,13 +89,13 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   end
 
   local writeCharFromBuffer = function(row, col)
-    local bufferCharData = self.buffer[row][col]
+    local bufferCharData = self.screenState.buffer[row][col]
     screenWrite(bufferCharData.char, bufferCharData.color, bufferCharData.bgColor)
   end
 
   local clearScreen = function()
-    for y=self.yStartingScreenPos, self.height do
-      for x=self.xStartingScreenPos, self.width do
+    for y=self.screenStartingPos.y, self.height do
+      for x=self.screenStartingPos.x, self.width do
         self.screen.setCursorPos(x, y)
         self.screen.write(" ")
       end
@@ -102,19 +103,19 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   end
 
   local renderScreen = function()
-    local maxCol = self.coords.col + self.width - 1
-    local maxRow = self.coords.row + self.height - 1
+    local maxCol = self.screenState.renderPos.x + self.width - 1
+    local maxRow = self.screenState.renderPos.y + self.height - 1
     local bufferLength = getBufferLength()
     if maxRow > bufferLength then
       maxRow = bufferLength
     end
     clearScreen()
-    local cursorY = self.yStartingScreenPos
-    for i=self.coords.row,maxRow do
-      if self.buffer[i] ~= nil then
-        local cursorX = self.xStartingScreenPos
-        for j=self.coords.col,maxCol do
-          if self.buffer[i][j] ~= nil then
+    local cursorY = self.screenStartingPos.y
+    for i=self.screenState.renderPos.y,maxRow do
+      if self.screenState.buffer[i] ~= nil then
+        local cursorX = self.screenStartingPos.x
+        for j=self.screenState.renderPos.x,maxCol do
+          if self.screenState.buffer[i][j] ~= nil then
             self.screen.setCursorPos(cursorX, cursorY)
             writeCharFromBuffer(i, j)
           end
@@ -124,30 +125,30 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
       cursorY = cursorY + 1
     end
   end
-  
+
   -- This function assumes that there does not need to be text wrapping
   -- Text wrapping should be handled by writeWrap() function
   local writeTextToBuffer = function(text, color, bgColor)
-    local buffer = self.buffer
-    local row = buffer[self.yCursorBufferPos]
+    local buffer = self.screenState.buffer
+    local row = buffer[self.screenState.cursorPos.y]
     if row == nil then
       row = {}
-      buffer[self.yCursorBufferPos] = row
+      buffer[self.screenState.cursorPos.y] = row
     end
-    local cursorX = self.xStartingScreenPos + self.xCursorBufferPos - 1
-    local cursorY = self.yStartingScreenPos + self.yCursorBufferPos - 1
+    local cursorX = self.screenStartingPos.x + self.screenState.cursorPos.x - 1
+    local cursorY = self.screenStartingPos.y + self.screenState.cursorPos.y - 1
     self.screen.setCursorPos(cursorX, cursorY)
 
     for i=1,#text do
       local char = safeSubstring(text, i, i)
-      row[self.xCursorBufferPos] = { color=color, bgColor=bgColor, char=char}
-      self.xCursorBufferPos = self.xCursorBufferPos + 1
+      row[self.screenState.cursorPos.x] = { color=color, bgColor=bgColor, char=char}
+      self.screenState.cursorPos.x = self.screenState.cursorPos.x + 1
     end
   end
-  
+
   local setCursorToNextLine = function()
-    self.xCursorBufferPos = 1
-    self.yCursorBufferPos = self.yCursorBufferPos + 1
+    self.screenState.cursorPos.x = 1
+    self.screenState.cursorPos.y = self.screenState.cursorPos.y + 1
   end
 
   -- Clears the screen for the screenBuffer then resets the cursor pointer
@@ -155,16 +156,16 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     resetScreenBuffer()
     clearScreen()
   end
-  
+
   --Sets cursor to the beggining of the next line
   local ln = function()
     setCursorToNextLine()
   end
-  
+
   local write = function(text, color, bgColor)
     writeTextToBuffer(text, color, bgColor)
   end
-  
+
   --Sets cursor to the beggining of the next line after writing
   local writeLn = function(text, color, bgColor)
     write(text, color, bgColor)
@@ -175,7 +176,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   local writeFullLineLn = function(text, color, bgColor)
     local char = safeSubstring(text, 1, 1)
     local text = ""
-    for i=self.xCursorBufferPos,self.width do
+    for i=self.screenState.cursorPos.x,self.width do
       text = text .. char
     end
     writeLn(text, color, bgColor)
@@ -183,22 +184,22 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
 
   --writes line from left to right of a single char, then set cursor to where it was
   local writeFullLineThenResetCursor = function(text, color, bgColor)
-    local origX,origY = self.xCursorBufferPos,self.yCursorBufferPos
+    local origX,origY = self.screenState.cursorPos.x,self.screenState.cursorPos.y
     writeFullLineLn(text, color, bgColor)
-    self.xCursorBufferPos = origX
-    self.yCursorBufferPos = origY
+    self.screenState.cursorPos.x = origX
+    self.screenState.cursorPos.y = origY
   end
 
     --Write so that the text wraps to the next line
   local writeWrap = function(text, color, bgColor)
     local remainingText = text
     while string.len(remainingText) > 0 do
-      local remainingX = self.width - self.xCursorBufferPos + 1
+      local remainingX = self.width - self.screenState.cursorPos.x + 1
       if remainingX > 1 then
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
         writeTextToBuffer(remainingLineText, color, bgColor)
       end
-      if (self.xCursorBufferPos > self.width) then
+      if (self.screenState.cursorPos.x > self.width) then
         setCursorToNextLine()
       end
       remainingText = safeSubstring(remainingText, remainingX + 1, -1)
@@ -216,7 +217,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     local textSize = string.len(text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then
-      self.xCursorBufferPos = math.floor(emptySpace / 2) + 1
+      self.screenState.cursorPos.x = math.floor(emptySpace / 2) + 1
     end
     writeTextToBuffer(text, color, bgColor)
   end
@@ -229,7 +230,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
 
   --Writes text to the left for a monitor of any size
   local writeLeft = function(text, color, bgColor)
-    self.xCursorBufferPos = 1
+    self.screenState.cursorPos.x = 1
     write(text, color, bgColor)
   end
 
@@ -280,26 +281,31 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     end
     renderScreen()
   end
-  
+
   local pageDown = function()
     for i=1,self.height do
       shiftScreenCoordsDown()
     end
     renderScreen()
   end
-  
+
   local pageLeft = function()
     for i=1,self.width do
       shiftScreenCoordsLeft()
     end
     renderScreen()
   end
-  
+
   local pageRight = function()
     for i=1,self.width do
       shiftScreenCoordsRight()
     end
     renderScreen()
+  end
+
+  local getScreenCursorPos = function()
+    return self.screenStartingPos.x + self.screenState.cursorPos.x - 1,
+           self.screenStartingPos.y + self.screenState.cursorPos.y - 1
   end
 
   return {
@@ -324,7 +330,8 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     pageUp=pageUp,
     pageDown=pageDown,
     pageLeft=pageLeft,
-    pageRight=pageRight
+    pageRight=pageRight,
+    getScreenCursorPos=getScreenCursorPos
   }
 end
 

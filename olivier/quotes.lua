@@ -50,7 +50,7 @@ function getQuotes()
   return responseObject['quotes']
 end
 
-function displayQuote(quote)
+function writeQuote(quote)
   if quote then
     local color = categoryToColorMap[quote['category']]
     screenScrollingBuffer.writeCenterLn(quote['title'], color)
@@ -60,16 +60,16 @@ function displayQuote(quote)
     screenScrollingBuffer.ln()
     screenScrollingBuffer.writeLeftLn("Author: " .. quote['author'])
     screenScrollingBuffer.ln()
-    screenScrollingBuffer.renderScreen()
   end
 end
 
 quotes = getQuotes()
 if quotes ~= nil then
   for quote in pairs(quotes) do
-    displayQuote(quotes[quote])
+    writeQuote(quotes[quote])
   end
 end
+screenScrollingBuffer.renderScreen()
 
 print("Press UP to scroll up, and DOWN to scroll down")
 print("Press LEFT to scroll left, and RIGHT to scroll right")

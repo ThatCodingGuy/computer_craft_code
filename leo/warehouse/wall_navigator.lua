@@ -15,9 +15,11 @@ local WallSide = enum {
 -- warehouse.
 -- @param east_west_length The length of the walls on the eastern and western sides of the
 -- warehouse.
+-- @param completed_revolution A callback for the navigator to call once a single revolution has
+-- been executed around the wall.
 --
-WallContext = class({
-}, function(north_south_length, east_west_length)
+WallNavigator = class({
+}, function(north_south_length, east_west_length, completed_revolution)
     local self = {
         current_wall_side = WallSide.NORTH,
         current_block = 1,
@@ -46,11 +48,16 @@ WallContext = class({
     --- Advances the turtle along the wall by one block.
     --
     -- If the turtle reaches a corner, this will also ensure that the turtle properly navigates it.
+    -- @return False if the turtle has more wall to navigate, otherwise true.
     --
     local function advance()
         if self.current_block > current_wall_length() then
             dashboard.log("wtf", "Turtle has exceeded the length of the wall.")
+            return
         end
+
+        turtle.forward()
+        self.current_block = self.current_block + 1
 
         if self.current_block == current_wall_length() then
             turtle.turnRight()
@@ -58,12 +65,9 @@ WallContext = class({
             self.current_wall_side = compute_next_wall()
 
             if self.current_wall_side == WallSide.NORTH then
-                turtle.up()
+                completed_revolution()
             end
         end
-
-        turtle.forward()
-        self.current_block = self.current_block + 1
     end
 
     return {
@@ -71,4 +75,4 @@ WallContext = class({
     }
 end)
 
-return WallContext
+return WallNavigator

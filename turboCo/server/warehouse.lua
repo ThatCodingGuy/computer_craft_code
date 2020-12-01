@@ -79,6 +79,7 @@ local function get_next_chest_spot()
             local distance = movement.distance(chest_chest, position)
             if distance < shortest_distance then
                 print(distance)
+                shortest_distance = distance
                 best_spot = position
             end
         end

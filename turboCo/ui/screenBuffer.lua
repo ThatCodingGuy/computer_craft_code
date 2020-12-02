@@ -105,8 +105,10 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   end
 
   local clearScreen = function()
-    for y=self.screenStartingPos.y, self.height do
-      for x=self.screenStartingPos.x, self.width do
+    local maxPosX = self.screenStartingPos.x + self.width - 1
+    local maxPosY = self.screenStartingPos.y + self.height - 1
+    for y=self.screenStartingPos.y, maxPosY do
+      for x=self.screenStartingPos.x, maxPosX do
         self.screen.setCursorPos(x, y)
         self.screen.write(" ")
       end

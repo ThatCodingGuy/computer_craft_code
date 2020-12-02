@@ -405,7 +405,7 @@ end
 
 local function createFullScreenFromTopAndBottom(screen, topOffset, bottomOffset)
   local width,height = screen.getSize()
-  return create(screen, topOffset + 1, height-bottomOffset, width, height)
+  return create(screen, 1, topOffset + 1, width, height-bottomOffset)
 end
 
 screenBuffer.create = create

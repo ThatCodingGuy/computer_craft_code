@@ -1,6 +1,5 @@
 -- This file is intended to provide extensions to the terminal (term) API of computercraft
--- Basically you create a screen buffer that is meant to track a certain part of the screen (or all of it)
--- Operations such as writing and wrapping around are provided, as well as the ability to scroll through text
+-- 
 
 local function create(screenBuffer, eventHandler)
   local self = {
@@ -27,6 +26,10 @@ local function create(screenBuffer, eventHandler)
     end
   end
 
+  local changeScreenBuffer = function(screenBuffer)
+    self.screenBuffer = screenBuffer
+  end
+
   --allows the key strokes to scroll the screen
   local makeActive = function()
     if self.keyHandlerId == nil then
@@ -38,10 +41,12 @@ local function create(screenBuffer, eventHandler)
   local makeInactive = function()
     if self.keyHandlerId ~= nil then
       eventHandler.remove(self.keyHandlerId)
+      self.keyHandlerId = nil
     end
   end
 
   return {
+    changeScreenBuffer=changeScreenBuffer,
     makeActive=makeActive,
     makeInactive=makeInactive,
   }

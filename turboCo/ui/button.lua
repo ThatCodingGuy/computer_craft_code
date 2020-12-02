@@ -55,9 +55,11 @@ local function create(screenBuffer, eventHandler, text, textColor, backgroundCol
   local makeInactive = function()
     if self.monitorTouchKeyHandlerId ~= nil then
       self.eventHandler.removeHandle(self.monitorTouchKeyHandlerId)
+      self.monitorTouchKeyHandlerId = nil
     end
     if self.mouseClickKeyHandlerId ~= nil then
       self.eventHandler.removeHandle(self.mouseClickKeyHandlerId)
+      self.mouseClickKeyHandlerId = nil
     end
   end
 

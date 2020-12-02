@@ -1,15 +1,20 @@
---A Page View is a list of screenBuffers where one is displayed at a time
--- All screen buffers should be of the same dimensions and 
+--A Page View is a list of pages where one is displayed at a time
+-- All screen buffers should be of the same dimensions and positions
 
 local function create(eventHandler)
   local self = {
     pages = {},
     currPage = 0,
-    eventHandler = eventHandler
+    eventHandler = eventHandler,
+    scrollHandler = nil
   }
 
-  local addPage = function(screenBuffer)
-    table.insert(self.pages, screenBuffer)
+  local setScrollHandler = function(scrollHandler)
+    self.scrollHandler = scrollHandler
+  end
+
+  local addPage = function(page)
+    table.insert(self.pages, page)
   end
 
   local getPage = function()
@@ -29,31 +34,33 @@ local function create(eventHandler)
   end
 
   local switchToPage = function(index)
+    if self.currPage > 0 then
+      local page = self.pages[self.currPage]
+      page.makeInactive()
+    end
     self.currPage = index
     local page = self.pages[self.currPage]
-    page.renderScreen()
+    page.makeActive()
+    if self.scrollHandler ~= nil then
+      self.scrollHandler.changeScreenBuffer(page.getScreenBuffer())
+    end
     return page
   end
 
   local switchToPreviousPage = function()
     if hasPreviousPage() then
-      self.currPage = self.currPage - 1
+      return switchToPage(self.currPage - 1)
     end
-    local page = self.pages[self.currPage]
-    page.renderScreen()
-    return page
   end
 
   local switchToNextPage = function()
     if hasNextPage() then
-      self.currPage = self.currPage + 1
+      return switchToPage(self.currPage + 1)
     end
-    switchToPage(self.currPage)
   end
 
-  
-
   return {
+    setScrollHandler=setScrollHandler,
     addPage=addPage,
     getPage=getPage,
     getPageIndex=getPageIndex,

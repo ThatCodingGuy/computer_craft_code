@@ -14,13 +14,13 @@ local function create(screenBuffer)
   end
 
   local makeInactive = function()
-    for _, button in self.buttons do
+    for _, button in pairs(self.buttons) do
       button.makeInactive()
     end
   end
 
   local makeActive = function()
-    for _, button in self.buttons do
+    for _, button in pairs(self.buttons) do
       button.makeActive()
     end
     screenBuffer.renderScreen()

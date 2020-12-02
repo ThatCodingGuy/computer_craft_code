@@ -400,7 +400,7 @@ end
 
 local function createFullScreenAtBottomWithHeight(screen, desiredHeight)
   local width,height = screen.getSize()
-  return create(screen, 1, height-desiredHeight, width, desiredHeight)
+  return create(screen, 1, height-desiredHeight+1, width, desiredHeight)
 end
 
 local function createFullScreenFromTopAndBottom(screen, topOffset, bottomOffset)

@@ -77,8 +77,8 @@ function writeQuotes(screenBuffer)
   quotesResponse = getQuotes()
   if quotesResponse ~= nil then
     quotes = quotesResponse['quotes']
-    for quote in pairs(quotes) do
-      writeQuote(screenBuffer, quotes[quote])
+    for _,quote in pairs(quotes) do
+      writeQuote(screenBuffer, quote)
     end
   end
 end
@@ -104,7 +104,6 @@ end
 writeQuotes(screenScrollingBuffer)
 pageViewManager.addPage(Page.create(screenScrollingBuffer))
 pageViewManager.switchToNextPage()
-
 
 local screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight(screen, 1)
 screenBottomBuffer.writeFullLineThenResetCursor(" ", colors.lightBlue, colors.gray)

@@ -146,9 +146,6 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
       row = {}
       buffer[self.screenState.cursorPos.y] = row
     end
-    local cursorX = self.screenStartingPos.x + self.screenState.cursorPos.x - 1
-    local cursorY = self.screenStartingPos.y + self.screenState.cursorPos.y - 1
-    self.screen.setCursorPos(cursorX, cursorY)
 
     for i=1,#text do
       local char = safeSubstring(text, i, i)

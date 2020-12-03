@@ -23,7 +23,7 @@ local function create(args)
     for _, button in pairs(self.buttons) do
       button.makeActive()
     end
-    screenBuffer.render()
+    self.screenBuffer.render()
   end
 
   return {

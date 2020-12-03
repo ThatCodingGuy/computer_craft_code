@@ -13,7 +13,7 @@ local function create(args)
     currentScreenPos= { x=0, y=0 },
     text=args.text,
     textColor=args.textColor,
-    backgroundColor=args.backgroundColor,
+    backgroundColor=args.bgColor,
     leftClickCallback=args.leftClickCallback,
     rightClickCallback=args.rightClickCallback,
     monitorTouchKeyHandlerId = nil,
@@ -72,7 +72,7 @@ local function create(args)
     end
   end
 
-  local writeData = self.screenBufferWriteFunc{text=args.text, color=textColor, bgColor=backgroundColor}
+  local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}
   self.currentScreenPos = writeData.screenCursorPosBefore
   self.screenBuffer.registerCallback(screenBufferCallback)
   makeActive()

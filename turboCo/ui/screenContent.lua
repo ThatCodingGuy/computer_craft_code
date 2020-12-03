@@ -20,7 +20,7 @@ local function create(args)
     screenBuffer.render()
   end
 
-  local writeData = self.screenBufferWriteFunc{text=args.text, color=textColor, bgColor=backgroundColor}
+  local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}
   self.currentBufferPos = writeData.screenCursorPosBefore
   self.screenBuffer.registerCallback(screenBufferCallback)
 

@@ -129,7 +129,7 @@ pageCounterContent = ScreenContent.create{
 }
   
 local nextButton = Button.create{screenBuffer=screenBottomBuffer,
-  screenBufferWriteFunc=screenBottomBuffer.writeRight
+  screenBufferWriteFunc=screenBottomBuffer.writeRight,
   eventHandler=eventHandler, 
   text="Next->", 
   textColor=colors.gray, 

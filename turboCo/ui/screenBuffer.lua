@@ -119,6 +119,7 @@ local function create(args)
   local writeTextToBuffer = function(args)
     local text, color, bgColor, bufferCursorPos = args.text, args.color, args.bgColor, args.bufferCursorPos
     if bufferCursorPos == nil then
+      --need to clone
       bufferCursorPos = {
         x=self.screenState.cursorPos.x,
         y=self.screenState.cursorPos.y
@@ -126,7 +127,11 @@ local function create(args)
     end
     local screenCursor = {
       screenCursorPosBefore = getScreenCursorPos(),
-      bufferCursorPosBefore = bufferCursorPos
+      --need to clone
+      bufferCursorPosBefore = {
+        x=self.screenState.cursorPos.x,
+        y=self.screenState.cursorPos.y
+      }
     }
     local buffer = self.screenState.buffer
     local row = buffer[bufferCursorPos.y]

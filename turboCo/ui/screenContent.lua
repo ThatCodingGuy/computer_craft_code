@@ -25,6 +25,7 @@ local function create(args)
   self.screenBuffer.registerCallback(screenBufferCallback)
 
   return {
+    updateText=updateText
     makeActive=makeActive,
     makeInactive=makeInactive
   }

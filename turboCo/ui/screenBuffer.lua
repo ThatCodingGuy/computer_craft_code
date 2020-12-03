@@ -126,10 +126,10 @@ local function create(args)
       bufferCursorPosBefore = bufferCursorPos
     }
     local buffer = self.screenState.buffer
-    local row = buffer[bufferCursorPos]
+    local row = buffer[bufferCursorPos.y]
     if row == nil then
       row = {}
-      buffer[bufferCursorPos] = row
+      buffer[bufferCursorPos.y] = row
     end
 
     for i=1,#text do

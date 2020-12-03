@@ -91,19 +91,21 @@ function getPreviousQuotesAndSwitchPage()
     pageNumber = pageNumber - 1
   end
   pageViewManager.switchToPreviousPage()
-  pageCounterContent.updateText(" %s/%s ", pageNumber, numPages)
+  pageCounterContent.updateText(string.format(" %s/%s ", pageNumber, numPages))
 end
 
 function getNextQuotesAndSwitchPage()
   if pageNumber == 0 or pageNumber < numPages then
     pageNumber = pageNumber + 1
   end
-  local newPageScreenBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
-  local newPage = Page.create{screenBuffer=newPageScreenBuffer}
-  pageViewManager.addPage(newPage)
-  writeQuotes(newPageScreenBuffer)
+  if not pageViewManager.hasNextPage() then
+    local newPageScreenBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
+    local newPage = Page.create{screenBuffer=newPageScreenBuffer}
+    pageViewManager.addPage(newPage)
+    writeQuotes(newPageScreenBuffer)
+  end
   pageViewManager.switchToNextPage()
-  pageCounterContent.updateText(" %s/%s ", pageNumber, numPages)
+  pageCounterContent.updateText(string.format(" %s/%s ", pageNumber, numPages))
 end
 
 local screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}

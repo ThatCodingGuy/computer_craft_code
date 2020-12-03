@@ -446,7 +446,7 @@ local function createFullScreen(args)
 end
 
 local function createFullScreenAtTopWithHeight(args)
-  local screen,height = args.screeen,args.height
+  local screen,height = args.screen,args.height
   local width,_ = screen.getSize()
   return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=1, width=width, height=height}
 end

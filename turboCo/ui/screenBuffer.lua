@@ -461,7 +461,7 @@ end
 local function createFullScreenAtBottomWithHeight(args)
   local screen,desiredHeight = args.screen, args.height
   local width,height = screen.getSize()
-  return create(screen, 1, height-desiredHeight+1, width, desiredHeight)
+  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=height-desiredHeight+1, width=width, height=desiredHeight}
 end
 
 local function createFullScreenFromTopAndBottom(args)

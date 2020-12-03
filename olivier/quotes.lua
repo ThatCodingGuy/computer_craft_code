@@ -121,6 +121,7 @@ function getNextQuotesAndSwitchPage()
       textColor=colors.gray,
       bgColor=colors.lightBlue
     }
+    screenBottomBuffer.render()
   else
     pageCounterContent.updateText(createPageTrackerString())
   end

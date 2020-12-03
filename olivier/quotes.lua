@@ -22,6 +22,7 @@ local numResults = 4
 local numPages = nil
 
 local pageCounterContent = nil
+local screenBottomBuffer = nil
 
 local screen = peripheral.find("monitor")
 screen.clear()
@@ -34,7 +35,6 @@ screenTopBuffer.writeCenterLn{text="Quotes of the Day", color=colors.lightBlue, 
 screenTopBuffer.writeFullLineLn{text="-", color=colors.lightBlue, bgColor=colors.gray}
 screenTopBuffer.render()
 
-local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
 local scrollHandler = ScrollHandler.create(screenScrollingBuffer, eventHandler)
 scrollHandler.makeActive()
 
@@ -127,7 +127,7 @@ function getNextQuotesAndSwitchPage()
   end
 end
 
-local screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}
+screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}
 screenBottomBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
 
 local prevButton = Button.create{screenBuffer=screenBottomBuffer,
@@ -148,7 +148,7 @@ local nextButton = Button.create{screenBuffer=screenBottomBuffer,
 screenBottomBuffer.render()
 
 --Get the initial quote
-getNextQuotesAndSwitchPage(screenScrollingBuffer)
+getNextQuotesAndSwitchPage()
 
 local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
 

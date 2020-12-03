@@ -23,7 +23,6 @@ local function create(args)
 
   local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}
   self.currentBufferPos = writeData.bufferCursorPosBefore
-  self.screenBuffer.registerCallback(screenBufferCallback)
 
   return {
     updateText=updateText,

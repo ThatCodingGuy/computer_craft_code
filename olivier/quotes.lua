@@ -140,7 +140,7 @@ local prevButton = Button.create{screenBuffer=screenBottomBuffer,
 local nextButton = Button.create{screenBuffer=screenBottomBuffer,
   screenBufferWriteFunc=screenBottomBuffer.writeRight,
   eventHandler=eventHandler, 
-  text=" Next->", 
+  text=" Next-> ", 
   textColor=colors.gray, 
   bgColor=colors.lightBlue, 
   leftClickCallback=getNextQuotesAndSwitchPage

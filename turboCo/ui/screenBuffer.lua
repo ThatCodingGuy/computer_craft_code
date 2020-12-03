@@ -257,6 +257,7 @@ local function create(args)
   end
 
   local writeWrapImpl = function(args)
+    local text, color, bgColor = args.text, args.color, args.bgColor
     local remainingText = text
     local writeData = nil
     while string.len(remainingText) > 0 do

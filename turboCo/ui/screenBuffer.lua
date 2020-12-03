@@ -119,7 +119,10 @@ local function create(args)
   local writeTextToBuffer = function(args)
     local text, color, bgColor, bufferCursorPos = args.text, args.color, args.bgColor, args.bufferCursorPos
     if bufferCursorPos == nil then
-      bufferCursorPos = self.screenState.cursorPos
+      bufferCursorPos = {
+        x=self.screenState.cursorPos.x,
+        y=self.screenState.cursorPos.y
+      }
     end
     local screenCursor = {
       screenCursorPosBefore = getScreenCursorPos(),

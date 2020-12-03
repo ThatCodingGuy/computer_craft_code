@@ -1,10 +1,11 @@
 -- This file is intended to provide extensions to the terminal (term) API of computercraft
 -- Basically you create a screen buffer that is meant to track a certain part of the screen (or all of it)
 -- Operations such as writing and wrapping around are provided, as well as the ability to scroll through text
--- Always call renderScreen() when you actually want it displayed
+-- Always call render() when you actually want it displayed
 local screenBuffer = {}
 
-local function create(screen, xStartingScreenPos, yStartingScreenPos, width, height)
+local function create(args)
+  local screen,xStartingScreenPos,yStartingScreenPos,width,height = args.screen, args.xStartingScreenPos, args.yStartingScreenPos, args.width, args.height
   local self = {
     screen = screen,
     screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
@@ -18,11 +19,10 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     callbacks = {}
   }
 
-  local resetScreenState = function()
-    self.screenState = {
-      buffer={},
-      renderPos={ x=1, y=1 },
-      cursorPos={ x=1, y=1 }
+  local getScreenCursorPos = function()
+    return {
+      x=self.screenStartingPos.x + self.screenState.cursorPos.x - 1,
+      y=self.screenStartingPos.y + self.screenState.cursorPos.y - 1,
     }
   end
 
@@ -34,33 +34,70 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     return lastIndex
   end
 
-  local shiftScreenCoordsLeft = function(movementOffset)
+  local getBufferDimensions = function()
+    local width = 0
+    local height = 0
+    for rowIndex,row in pairs(self.screenState.buffer) do
+      if rowIndex > height then
+        height = rowIndex
+      end
+      for colIndex,col in pairs(row) do
+        if colIndex > width then
+          width = colIndex
+        end
+      end
+    end
+    return {width=width, height=height}
+  end
+
+  local createCallbackData = function()
+    return {
+      movementOffset = {x=0, y=0}
+      dimensions = getBufferDimensions()
+    }
+  end
+
+  local sendCallbackData = function(callbackData)
+    for _,callback in pairs(self.callbacks) do
+      callback(callbackData)
+    end
+  end
+
+  local resetScreenState = function()
+    self.screenState = {
+      buffer={},
+      renderPos={ x=1, y=1 },
+      cursorPos={ x=1, y=1 }
+    }
+  end
+
+  local shiftScreenCoordsLeft = function(callbackData)
     if self.screenState.renderPos.x > 1 then
       self.screenState.renderPos.x = self.screenState.renderPos.x - 1
-      movementOffset.x = movementOffset.x - 1
+      callbackData.movementOffset.x = callbackData.movementOffset.x - 1
     end
     return false
   end
 
-  local shiftScreenCoordsRight = function(movementOffset)
+  local shiftScreenCoordsRight = function(callbackData)
     self.screenState.renderPos.x = self.screenState.renderPos.x + 1
-    movementOffset.x = movementOffset.x + 1
+    callbackData.movementOffset.x = callbackData.movementOffset.x + 1
     return true
   end
 
-  local shiftScreenCoordsUp = function(movementOffset)
+  local shiftScreenCoordsUp = function(callbackData)
     if self.screenState.renderPos.y > 1 then
       self.screenState.renderPos.y = self.screenState.renderPos.y - 1
-      movementOffset.y = movementOffset.y - 1
+      callbackData.movementOffset.y = callbackData.movementOffset.y - 1
       return true
     end
     return false
   end
 
-  local shiftScreenCoordsDown = function(movementOffset)
+  local shiftScreenCoordsDown = function(callbackData)
     if self.screenState.renderPos.y < getBufferLength() then
       self.screenState.renderPos.y = self.screenState.renderPos.y + 1
-      movementOffset.y = movementOffset.y + 1
+      callbackData.movementOffset.y = callbackData.movementOffset.y + 1
       return true
     end
     return false
@@ -75,6 +112,32 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
       endIndex = -1
     end
     return string.sub(str, startIndex, endIndex)
+  end
+
+  -- This function assumes that there does not need to be text wrapping
+  -- Text wrapping should be handled by writeWrap() function
+  local writeTextToBuffer = function(args)
+    local text, color, bgColor, bufferCursorPos = args.text, args.color, args.bgColor, args.bufferCursorPos
+    if bufferCursorPos == nil then
+      bufferCursorPos = self.screenState.cursorPos
+    end
+    local screenCursor = {
+      screenCursorPosBefore = getScreenCursorPos()
+      bufferCursorPosBefore = bufferCursorPos
+    }
+    local buffer = self.screenState.buffer
+    local row = buffer[bufferCursorPos]
+    if row == nil then
+      row = {}
+      buffer[bufferCursorPos] = row
+    end
+
+    for i=1,#text do
+      local char = safeSubstring(text, i, i)
+      row[bufferCursorPos.x] = { color=color, bgColor=bgColor, char=char}
+      bufferCursorPos.x = bufferCursorPos.x + 1
+    end
+    return screenCursor
   end
 
     --sets monitor to new colors and returns the old colors
@@ -115,7 +178,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     end
   end
 
-  local renderScreen = function()
+  local render = function()
     local maxCol = self.screenState.renderPos.x + self.width - 1
     local maxRow = self.screenState.renderPos.y + self.height - 1
     local bufferLength = getBufferLength()
@@ -139,23 +202,6 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
     end
   end
 
-  -- This function assumes that there does not need to be text wrapping
-  -- Text wrapping should be handled by writeWrap() function
-  local writeTextToBuffer = function(text, color, bgColor)
-    local buffer = self.screenState.buffer
-    local row = buffer[self.screenState.cursorPos.y]
-    if row == nil then
-      row = {}
-      buffer[self.screenState.cursorPos.y] = row
-    end
-
-    for i=1,#text do
-      local char = safeSubstring(text, i, i)
-      row[self.screenState.cursorPos.x] = { color=color, bgColor=bgColor, char=char}
-      self.screenState.cursorPos.x = self.screenState.cursorPos.x + 1
-    end
-  end
-
   local setCursorToNextLine = function()
     self.screenState.cursorPos.x = 1
     self.screenState.cursorPos.y = self.screenState.cursorPos.y + 1
@@ -165,189 +211,200 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   local clear = function()
     resetScreenState()
     clearScreen()
+    sendCallbackData(createCallbackData())
   end
 
   --Sets cursor to the beggining of the next line
   local ln = function()
     setCursorToNextLine()
+    sendCallbackData(createCallbackData())
   end
 
-  local write = function(text, color, bgColor)
-    writeTextToBuffer(text, color, bgColor)
+  local write = function(args)
+    local writeData = writeTextToBuffer(args)
+    sendCallbackData(createCallbackData())
+    return writeData
   end
 
   --Sets cursor to the beggining of the next line after writing
-  local writeLn = function(text, color, bgColor)
-    write(text, color, bgColor)
+  local writeLn = function(args)
+    local writeData = writeTextToBuffer(args)
     setCursorToNextLine()
+    sendCallbackData(createCallbackData())
+    return writeData
   end
 
   --writes line from left to right of a single char
-  local writeFullLineLn = function(text, color, bgColor)
-    local char = safeSubstring(text, 1, 1)
-    local text = ""
+  local writeFullLineLn = function(args)
+    local char = safeSubstring(args.text, 1, 1)
+    args.text = ""
     for i=self.screenState.cursorPos.x,self.width do
-      text = text .. char
+      args.text = args.text .. char
     end
-    writeLn(text, color, bgColor)
+    local writeData = writeLn(args)
+    sendCallbackData(createCallbackData())
+    return writeData
   end
 
   --writes line from left to right of a single char, then set cursor to where it was
-  local writeFullLineThenResetCursor = function(text, color, bgColor)
+  local writeFullLineThenResetCursor = function(args)
     local origX,origY = self.screenState.cursorPos.x,self.screenState.cursorPos.y
-    writeFullLineLn(text, color, bgColor)
+    local writeData = writeFullLineLn(args)
     self.screenState.cursorPos.x = origX
     self.screenState.cursorPos.y = origY
+    sendCallbackData(createCallbackData())
+    return writeData
   end
 
-    --Write so that the text wraps to the next line
-  local writeWrap = function(text, color, bgColor)
+  local writeWrapImpl = function(args)
     local remainingText = text
+    local writeData = nil
     while string.len(remainingText) > 0 do
       local remainingX = self.width - self.screenState.cursorPos.x + 1
       if remainingX > 1 then
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
-        writeTextToBuffer(remainingLineText, color, bgColor)
+        local tempWriteData = writeTextToBuffer(remainingLineText, color, bgColor)
+        if writeData ~= nil then
+          writeData = tempWriteData
+        end
       end
       if (self.screenState.cursorPos.x > self.width) then
         setCursorToNextLine()
       end
       remainingText = safeSubstring(remainingText, remainingX + 1, -1)
     end
+    return writeData
+  end
+
+  --Write so that the text wraps to the next line
+  local writeWrap = function(args)
+    local writeData = writeWrapImpl(text, color, bgColor)
+    sendCallbackData(createCallbackData())
+    return writeData
   end
 
   --Sets cursor to the beggining of the next line after writing
-  local writeWrapLn = function(text, color, bgColor)
-    writeWrap(text, color, bgColor)
+  local writeWrapLn = function(args)
+    local writeData = writeWrapImpl(text, color, bgColor)
     setCursorToNextLine()
+    sendCallbackData(createCallbackData())
+    return writeData
   end
 
   --Writes centered text for a monitor of any size
-  local writeCenter = function(text, color, bgColor)
+  local writeCenter = function(args)
     local textSize = string.len(text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then
       self.screenState.cursorPos.x = math.floor(emptySpace / 2) + 1
     end
-    writeTextToBuffer(text, color, bgColor)
+    sendCallbackData(createCallbackData())
+    return writeTextToBuffer(args)
   end
 
     --Writes centered text for a monitor of any size, then enter a new line
-  local writeCenterLn = function(text, color, bgColor)
-    writeCenter(text, color, bgColor)
+  local writeCenterLn = function(args)
+    local writeData = writeCenter(args)
     setCursorToNextLine()
+    sendCallbackData(createCallbackData())
+    return writeData
   end
 
   --Writes text to the left for a monitor of any size
-  local writeLeft = function(text, color, bgColor)
+  local writeLeft = function(args)
     self.screenState.cursorPos.x = 1
-    write(text, color, bgColor)
+    sendCallbackData(createCallbackData())
+    return writeTextToBuffer(args)
   end
 
   --Writes text to the left for a monitor of any size, then enter a new line
-  local writeLeftLn = function(text, color, bgColor)
-    writeLeft(text, color, bgColor)
+  local writeLeftLn = function(args)
+    local writeData = writeLeft(args)
     setCursorToNextLine()
+    sendCallbackData(createCallbackData())
+    return writeData
   end
 
   --Writes text to the right for a monitor of any size
-  local writeRight = function(text, color, bgColor)
+  local writeRight = function(args)
+    local text = args.text
     local textLen = string.len(text)
     if textLen <= self.width then
-      self.xStartingPos = self.width - string.len(text)+1
+      self.screenState.cursorPos.x = self.width - textLen + 1
     end
-    write(text, color, bgColor)
+    sendCallbackData(createCallbackData())
+    return writeTextToBuffer(args)
   end
 
   --Writes text to the right for a monitor of any size, then enter a new line
-  local writeRightLn = function(text, color, bgColor)
-    writeRight(text, color, bgColor)
+  local writeRightLn = function(args)
+    local writeData = writeRight(args)
     setCursorToNextLine()
+    return writeData
   end
 
   local scrollUp = function()
-    local movementOffset = { x=0, y=0 }
-    shiftScreenCoordsUp(movementOffset)
-    renderScreen()
-    for _,callback in pairs(self.callbacks) do
-      callback(movementOffset.x, movementOffset.y)
-    end
+    local callbackData = createCallbackData()
+    shiftScreenCoordsUp(callbackData)
+    render()
+    sendCallbackData(callbackData)
   end
 
   local scrollDown = function()
-    local movementOffset = { x=0, y=0 }
-    shiftScreenCoordsDown(movementOffset)
-    renderScreen()
-    for _,callback in pairs(self.callbacks) do
-      callback(movementOffset.x, movementOffset.y)
-    end
+    local callbackData = createCallbackData()
+    shiftScreenCoordsDown(callbackData)
+    render()
+    sendCallbackData(callbackData)
   end
 
   local scrollLeft = function()
-    local movementOffset = { x=0, y=0 }
-    shiftScreenCoordsLeft(movementOffset)
-    renderScreen()
-    for _,callback in pairs(self.callbacks) do
-      callback(movementOffset.x, movementOffset.y)
-    end
+    local callbackData = createCallbackData()
+    shiftScreenCoordsLeft(callbackData)
+    render()
+    sendCallbackData(callbackData)
   end
 
   local scrollRight = function()
-    local movementOffset = { x=0, y=0 }
-    shiftScreenCoordsRight(movementOffset)
-    renderScreen()
-    for _,callback in pairs(self.callbacks) do
-      callback(movementOffset.x, movementOffset.y)
-    end
+    local callbackData = createCallbackData()
+    shiftScreenCoordsRight(callbackData)
+    render()
+    sendCallbackData(callbackData)
   end
 
   local pageUp = function()
-    local movementOffset = { x=0, y=0 }
+    local callbackData = createCallbackData()
     for i=1,self.height do
-      shiftScreenCoordsUp(movementOffset)
+      shiftScreenCoordsUp(callbackData)
     end
-    renderScreen()
-    for _,callback in pairs(self.callbacks) do
-      callback(movementOffset.x, movementOffset.y)
-    end
+    render()
+    sendCallbackData(callbackData)
   end
 
   local pageDown = function()
-    local movementOffset = { x=0, y=0 }
+    local callbackData = createCallbackData()
     for i=1,self.height do
-      shiftScreenCoordsDown(movementOffset)
+      shiftScreenCoordsDown(callbackData)
     end
-    renderScreen()
-    for _,callback in pairs(self.callbacks) do
-      callback(movementOffset.x, movementOffset.y)
-    end
+    render()
+    sendCallbackData(callbackData)
   end
 
   local pageLeft = function()
-    local movementOffset = { x=0, y=0 }
+    local callbackData = createCallbackData()
     for i=1,self.width do
-      shiftScreenCoordsLeft(movementOffset)
+      shiftScreenCoordsLeft(callbackData)
     end
-    renderScreen()
-    for _,callback in pairs(self.callbacks) do
-      callback(movementOffset.x, movementOffset.y)
-    end
+    render()
+    sendCallbackData(callbackData)
   end
 
   local pageRight = function()
-    local movementOffset = { x=0, y=0 }
+    local callbackData = createCallbackData()
     for i=1,self.width do
-      shiftScreenCoordsRight(movementOffset)
+      shiftScreenCoordsRight(callbackData)
     end
-    renderScreen()
-    for _,callback in pairs(self.callbacks) do
-      callback(movementOffset.x, movementOffset.y)
-    end
-  end
-
-  local getScreenCursorPos = function()
-    return self.screenStartingPos.x + self.screenState.cursorPos.x - 1,
-           self.screenStartingPos.y + self.screenState.cursorPos.y - 1
+    render()
+    sendCallbackData(callbackData)
   end
 
   local registerCallback = function(callback)
@@ -355,7 +412,7 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   end
 
   return {
-    renderScreen=renderScreen,
+    render=render,
     clear=clear,
     ln=ln,
     write=write,
@@ -382,29 +439,34 @@ local function create(screen, xStartingScreenPos, yStartingScreenPos, width, hei
   }
 end
 
-local function createFullScreen(screen)
+local function createFullScreen(args)
+  local screen = args.screen
   local width,height = screen.getSize()
-  return create(screen, 1, 1, width, height)
+  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=1, width=width, height=height}
 end
 
-local function createFullScreenAtTopWithHeight(screen, desiredHeight)
+local function createFullScreenAtTopWithHeight(args)
+  local screen,height = args.screeen,args.height
   local width,_ = screen.getSize()
-  return create(screen, 1, 1, width, desiredHeight)
+  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=1, width=width, height=height}
 end
 
-local function createFullScreenFromTop(screen, topOffset)
+local function createFullScreenFromTop(args)
+  local screen,topOffset = args.screen, args.topOffset
   local width,height = screen.getSize()
-  return create(screen, 1, topOffset + 1, width, height)
+  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=topOffset + 1, width=width, height=height-topOffset}
 end
 
-local function createFullScreenAtBottomWithHeight(screen, desiredHeight)
+local function createFullScreenAtBottomWithHeight(args)
+  local screen,desiredHeight = args.screen, args.height
   local width,height = screen.getSize()
   return create(screen, 1, height-desiredHeight+1, width, desiredHeight)
 end
 
-local function createFullScreenFromTopAndBottom(screen, topOffset, bottomOffset)
+local function createFullScreenFromTopAndBottom(args)
+  local screen,topOffset,bottomOffset = args.screen, args.topOffset, args.bottomOffset
   local width,height = screen.getSize()
-  return create(screen, 1, topOffset + 1, width, height-topOffset-bottomOffset)
+  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=topOffset + 1, width=width, height=height-topOffset-bottomOffset}
 end
 
 screenBuffer.create = create

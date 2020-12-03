@@ -1,8 +1,8 @@
 
-local function create(screenBuffer)
+local function create(args)
   local self = {
-    screenBuffer=screenBuffer,
-    buttons = {}
+    screenBuffer=args.screenBuffer,
+    buttons = args.buttons or {}
   }
 
   local getScreenBuffer = function()
@@ -23,7 +23,7 @@ local function create(screenBuffer)
     for _, button in pairs(self.buttons) do
       button.makeActive()
     end
-    screenBuffer.renderScreen()
+    screenBuffer.render()
   end
 
   return {

@@ -1,16 +1,21 @@
 --Creates a button on your screenBuffer
 --Has mouse hover, mouse click, and mouse
 
-local function create(screenBuffer, eventHandler, text, textColor, backgroundColor, leftClickCallback, rightClickCallback)
+local function create(args)
+  if args.screenBufferWriteFunc == nil then
+    args.screenBufferWriteFunc = args.screenBuffer.write
+  end
+
   local self = {
-    screenBuffer=screenBuffer,
-    eventHandler=eventHandler,
+    screenBuffer=args.screenBuffer,
+    screenBufferWriteFunc=args.screenBufferWriteFunc,
+    eventHandler=args.eventHandler,
     currentScreenPos= { x=0, y=0 },
-    text=text,
-    textColor=textColor,
-    backgroundColor=backgroundColor,
-    leftClickCallback=leftClickCallback,
-    rightClickCallback=rightClickCallback,
+    text=args.text,
+    textColor=args.textColor,
+    backgroundColor=args.backgroundColor,
+    leftClickCallback=args.leftClickCallback,
+    rightClickCallback=args.rightClickCallback,
     monitorTouchKeyHandlerId = nil,
     mouseClickKeyHandlerId = nil
   }
@@ -38,9 +43,9 @@ local function create(screenBuffer, eventHandler, text, textColor, backgroundCol
     end
   end
   
-  local screenMovedCallback = function(x, y)
-    self.currentScreenPos.x = self.currentScreenPos.x + x
-    self.currentScreenPos.y = self.currentScreenPos.y + y
+  local screenBufferCallback = function(callbackData)
+    self.currentScreenPos.x = self.currentScreenPos.x + callbackData.movementOffset.x
+    self.currentScreenPos.y = self.currentScreenPos.y + callbackData.movementOffset.y
   end
 
   local makeActive = function()
@@ -63,9 +68,9 @@ local function create(screenBuffer, eventHandler, text, textColor, backgroundCol
     end
   end
 
-  self.currentScreenPos.x, self.currentScreenPos.y = screenBuffer.getScreenCursorPos()
-  screenBuffer.write(text, textColor, backgroundColor)
-  screenBuffer.registerCallback(screenMovedCallback)
+  local writeData = self.screenBufferWriteFunc{text=args.text, color=textColor, bgColor=backgroundColor}
+  self.currentScreenPos = writeData.screenCursorPosBefore
+  screenBuffer.registerCallback(screenBufferCallback)
   makeActive()
 
   return {

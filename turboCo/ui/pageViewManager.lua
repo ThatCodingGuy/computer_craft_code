@@ -13,10 +13,6 @@ local function create(eventHandler)
     self.scrollHandler = scrollHandler
   end
 
-  local addPage = function(page)
-    table.insert(self.pages, page)
-  end
-
   local getPage = function()
     return self.pages[self.currPage]
   end
@@ -59,16 +55,26 @@ local function create(eventHandler)
     end
   end
 
+  local addPage = function(page)
+    table.insert(self.pages, page)
+  end
+
+  local addAndSwitchToPage = function(page)
+    addPage(page)
+    switchToPage(#self.pages)
+  end
+
   return {
     setScrollHandler=setScrollHandler,
-    addPage=addPage,
     getPage=getPage,
     getPageIndex=getPageIndex,
     hasPreviousPage=hasPreviousPage,
     hasNextPage=hasNextPage,
     switchToPage=switchToPage,
     switchToPreviousPage=switchToPreviousPage,
-    switchToNextPage=switchToNextPage
+    switchToNextPage=switchToNextPage,
+    addPage=addPage,
+    addAndSwitchToPage=addAndSwitchToPage
   }
 end
 

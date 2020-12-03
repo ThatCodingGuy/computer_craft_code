@@ -6,6 +6,7 @@ local ScrollHandler = dofile("./gitlib/turboCo/ui/scrollHandler.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local Page = dofile("./gitlib/turboCo/ui/page.lua")
 local PageViewManager = dofile("./gitlib/turboCo/ui/pageViewManager.lua")
+local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 
 local categoryToColorMap = {
@@ -16,22 +17,24 @@ local categoryToColorMap = {
   art = colors.blue
 }
 
-pageNumber = 1
-numResults = 4
-numPages = nil
+local pageNumber = 1
+local numResults = 4
+local numPages = nil
+
+local pageCounterContent = nil
 
 local screen = peripheral.find("monitor")
 screen.clear()
 
 local eventHandler = EventHandler.create()
 
-local screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight(screen, 3)
-screenTopBuffer.writeFullLineThenResetCursor(" ", colors.lightBlue, colors.gray)
-screenTopBuffer.writeCenterLn("Quotes of the Day", colors.lightBlue, colors.gray)
-screenTopBuffer.writeFullLineLn("-", colors.lightBlue, colors.gray)
-screenTopBuffer.renderScreen()
+local screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=3}
+screenTopBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer.writeCenterLn{text="Quotes of the Day", color=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer.writeFullLineLn{text="-", color=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer.render()
 
-local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTopAndBottom(screen, 3, 1)
+local screenScrollingBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
 local scrollHandler = ScrollHandler.create(screenScrollingBuffer, eventHandler)
 scrollHandler.makeActive()
 
@@ -63,12 +66,12 @@ end
 function writeQuote(screenBuffer, quote)
   if quote then
     local color = categoryToColorMap[quote['category']]
-    screenBuffer.writeCenterLn(quote['title'], color)
-    screenBuffer.writeCenterLn("Date: " .. quote['date'])
+    screenBuffer.writeCenterLn{text=quote['title'], color=color}
+    screenBuffer.writeCenterLn{text="Date: " .. quote['date']}
     screenBuffer.ln()
-    screenBuffer.writeWrapLn(quote['content'], color)
+    screenBuffer.writeWrapLn{text=quote['content'], color=color}
     screenBuffer.ln()
-    screenBuffer.writeLeftLn("Author: " .. quote['author'])
+    screenBuffer.writeLeftLn{text="Author: " .. quote['author']}
     screenBuffer.ln()
   end
 end
@@ -88,28 +91,52 @@ function getPreviousQuotesAndSwitchPage()
     pageNumber = pageNumber - 1
   end
   pageViewManager.switchToPreviousPage()
+  pageCounterContent.updateText("%s/%s", pageNumber, numPages)
 end
 
 function getNextQuotesAndSwitchPage()
   if pageNumber < numPages then
     pageNumber = pageNumber + 1
   end
-  local newPageScreenBuffer = ScreenBuffer.createFullScreenFromTopAndBottom(screen, 3, 1)
-  local newPage = Page.create(newPageScreenBuffer)
+  local newPageScreenBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
+  local newPage = Page.create{screenBuffer=newPageScreenBuffer}
   pageViewManager.addPage(newPage)
   writeQuotes(newPageScreenBuffer)
   pageViewManager.switchToNextPage()
+  pageCounterContent.updateText("%s/%s", pageNumber, numPages)
 end
 
 writeQuotes(screenScrollingBuffer)
-pageViewManager.addPage(Page.create(screenScrollingBuffer))
+pageViewManager.addPage(Page.create{screenBuffer=screenScrollingBuffer})
 pageViewManager.switchToNextPage()
 
-local screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight(screen, 1)
-screenBottomBuffer.writeFullLineThenResetCursor(" ", colors.lightBlue, colors.gray)
-local prevButton = Button.create(screenBottomBuffer, eventHandler, "<-Prev", colors.gray, colors.lightBlue, getPreviousQuotesAndSwitchPage)
-local nextButton = Button.create(screenBottomBuffer, eventHandler, "Next->", colors.gray, colors.lightBlue, getNextQuotesAndSwitchPage)
-screenBottomBuffer.renderScreen()
+local screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}
+screenBottomBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
+
+local prevButton = Button.create{screenBuffer=screenBottomBuffer,
+  eventHandler=eventHandler, 
+  text="<-Prev", 
+  textColor=colors.gray, 
+  bgColor=colors.lightBlue, 
+  leftClickCallback=getPreviousQuotesAndSwitchPage}
+
+pageCounterContent = ScreenContent.create{
+  screenBuffer=screenBottomBuffer,
+  screenBufferWriteFunc=screenBottomBuffer.writeCenter,
+  text="0/0",
+  textColor=colors.gray,
+  bgColor=colors.lightBlue
+}
+  
+local nextButton = Button.create{screenBuffer=screenBottomBuffer,
+  screenBufferWriteFunc=screenBottomBuffer.writeRight
+  eventHandler=eventHandler, 
+  text="Next->", 
+  textColor=colors.gray, 
+  bgColor=colors.lightBlue, 
+  leftClickCallback=getNextQuotesAndSwitchPage
+}
+screenBottomBuffer.render()
 
 local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
 

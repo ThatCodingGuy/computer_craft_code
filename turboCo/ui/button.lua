@@ -74,7 +74,7 @@ local function create(args)
 
   local writeData = self.screenBufferWriteFunc{text=args.text, color=textColor, bgColor=backgroundColor}
   self.currentScreenPos = writeData.screenCursorPosBefore
-  screenBuffer.registerCallback(screenBufferCallback)
+  self.screenBuffer.registerCallback(screenBufferCallback)
   makeActive()
 
   return {

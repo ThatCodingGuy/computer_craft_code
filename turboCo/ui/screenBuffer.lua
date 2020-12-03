@@ -122,7 +122,7 @@ local function create(args)
       bufferCursorPos = self.screenState.cursorPos
     end
     local screenCursor = {
-      screenCursorPosBefore = getScreenCursorPos()
+      screenCursorPosBefore = getScreenCursorPos(),
       bufferCursorPosBefore = bufferCursorPos
     }
     local buffer = self.screenState.buffer

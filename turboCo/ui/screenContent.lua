@@ -17,7 +17,7 @@ local function create(args)
 
   local updateText = function(newText)
     self.text = newText
-    self.screenBuffer.write{text=self.text, color=self.textColor, bgColor=bgColor, bufferCursorPos=self.currentBufferPos}
+    self.screenBuffer.write{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
     self.screenBuffer.render()
   end
 

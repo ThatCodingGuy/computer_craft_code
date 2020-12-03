@@ -135,14 +135,6 @@ local prevButton = Button.create{screenBuffer=screenBottomBuffer,
   textColor=colors.gray, 
   bgColor=colors.lightBlue, 
   leftClickCallback=getPreviousQuotesAndSwitchPage}
-
-pageCounterContent = ScreenContent.create{
-  screenBuffer=screenBottomBuffer,
-  screenBufferWriteFunc=screenBottomBuffer.writeCenter,
-  text=" 0/0 ",
-  textColor=colors.gray,
-  bgColor=colors.lightBlue
-}
   
 local nextButton = Button.create{screenBuffer=screenBottomBuffer,
   screenBufferWriteFunc=screenBottomBuffer.writeRight,

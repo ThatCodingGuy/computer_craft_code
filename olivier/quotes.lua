@@ -138,8 +138,6 @@ screenBottomBuffer.render()
 
 --Get the initial quote
 getNextQuotesAndSwitchPage(screenScrollingBuffer)
-pageViewManager.addPage(Page.create{screenBuffer=screenScrollingBuffer})
-pageViewManager.switchToNextPage()
 
 local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
 

@@ -91,7 +91,7 @@ function getPreviousQuotesAndSwitchPage()
     pageNumber = pageNumber - 1
   end
   pageViewManager.switchToPreviousPage()
-  pageCounterContent.updateText("%s/%s", pageNumber, numPages)
+  pageCounterContent.updateText(" %s/%s ", pageNumber, numPages)
 end
 
 function getNextQuotesAndSwitchPage()
@@ -103,7 +103,7 @@ function getNextQuotesAndSwitchPage()
   pageViewManager.addPage(newPage)
   writeQuotes(newPageScreenBuffer)
   pageViewManager.switchToNextPage()
-  pageCounterContent.updateText("%s/%s", pageNumber, numPages)
+  pageCounterContent.updateText(" %s/%s ", pageNumber, numPages)
 end
 
 writeQuotes(screenScrollingBuffer)
@@ -123,7 +123,7 @@ local prevButton = Button.create{screenBuffer=screenBottomBuffer,
 pageCounterContent = ScreenContent.create{
   screenBuffer=screenBottomBuffer,
   screenBufferWriteFunc=screenBottomBuffer.writeCenter,
-  text="0/0",
+  text=" 0/0 ",
   textColor=colors.gray,
   bgColor=colors.lightBlue
 }

@@ -13,7 +13,7 @@ local function create(args)
     currentScreenPos= { x=0, y=0 },
     text=args.text,
     textColor=args.textColor,
-    backgroundColor=args.bgColor,
+    bgColor=args.bgColor,
     leftClickCallback=args.leftClickCallback,
     rightClickCallback=args.rightClickCallback,
     monitorTouchKeyHandlerId = nil,

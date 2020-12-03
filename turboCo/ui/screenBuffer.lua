@@ -263,7 +263,7 @@ local function create(args)
       local remainingX = self.width - self.screenState.cursorPos.x + 1
       if remainingX > 1 then
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
-        local tempWriteData = writeTextToBuffer(remainingLineText, color, bgColor)
+        local tempWriteData = writeTextToBuffer{text=remainingLineText, color=color, bgColor=bgColor}
         if writeData ~= nil then
           writeData = tempWriteData
         end
@@ -278,14 +278,14 @@ local function create(args)
 
   --Write so that the text wraps to the next line
   local writeWrap = function(args)
-    local writeData = writeWrapImpl(text, color, bgColor)
+    local writeData = writeWrapImpl(args)
     sendCallbackData(createCallbackData())
     return writeData
   end
 
   --Sets cursor to the beggining of the next line after writing
   local writeWrapLn = function(args)
-    local writeData = writeWrapImpl(text, color, bgColor)
+    local writeData = writeWrapImpl(args)
     setCursorToNextLine()
     sendCallbackData(createCallbackData())
     return writeData
@@ -293,7 +293,7 @@ local function create(args)
 
   --Writes centered text for a monitor of any size
   local writeCenter = function(args)
-    local textSize = string.len(text)
+    local textSize = string.len(args.text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then
       self.screenState.cursorPos.x = math.floor(emptySpace / 2) + 1

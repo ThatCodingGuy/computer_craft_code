@@ -17,7 +17,7 @@ local categoryToColorMap = {
   art = colors.blue
 }
 
-local pageNumber = 1
+local pageNumber = 0
 local numResults = 4
 local numPages = nil
 
@@ -95,7 +95,7 @@ function getPreviousQuotesAndSwitchPage()
 end
 
 function getNextQuotesAndSwitchPage()
-  if pageNumber < numPages then
+  if pageNumber == 0 or pageNumber < numPages then
     pageNumber = pageNumber + 1
   end
   local newPageScreenBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
@@ -105,10 +105,6 @@ function getNextQuotesAndSwitchPage()
   pageViewManager.switchToNextPage()
   pageCounterContent.updateText(" %s/%s ", pageNumber, numPages)
 end
-
-writeQuotes(screenScrollingBuffer)
-pageViewManager.addPage(Page.create{screenBuffer=screenScrollingBuffer})
-pageViewManager.switchToNextPage()
 
 local screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}
 screenBottomBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
@@ -137,6 +133,11 @@ local nextButton = Button.create{screenBuffer=screenBottomBuffer,
   leftClickCallback=getNextQuotesAndSwitchPage
 }
 screenBottomBuffer.render()
+
+--Get the initial quote
+getNextQuotesAndSwitchPage(screenScrollingBuffer)
+pageViewManager.addPage(Page.create{screenBuffer=screenScrollingBuffer})
+pageViewManager.switchToNextPage()
 
 local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
 

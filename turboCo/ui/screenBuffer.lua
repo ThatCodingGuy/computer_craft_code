@@ -52,7 +52,7 @@ local function create(args)
 
   local createCallbackData = function()
     return {
-      movementOffset = {x=0, y=0}
+      movementOffset = {x=0, y=0},
       dimensions = getBufferDimensions()
     }
   end

@@ -16,12 +16,12 @@ local function create(args)
   }
 
   local updateText = function(text)
-    screenBuffer.write{text=text, color=textColor, bgColor=bgColor, bufferCursorPos=self.currentBufferPos}
-    screenBuffer.render()
+    self.screenBuffer.write{text=text, color=textColor, bgColor=bgColor, bufferCursorPos=self.currentBufferPos}
+    self.screenBuffer.render()
   end
 
   local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}
-  self.currentBufferPos = writeData.screenCursorPosBefore
+  self.currentBufferPos = writeData.bufferCursorPosBefore
   self.screenBuffer.registerCallback(screenBufferCallback)
 
   return {

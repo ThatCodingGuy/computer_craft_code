@@ -92,7 +92,7 @@ function createPageTrackerString()
   for i=1,numCharsMissing do
     pageNumberStr = "0" .. pageNumberStr
   end
-  string.format(" %s/%s ", pageNumberStr, numPages)
+  return string.format(" %s/%s ", pageNumberStr, numPages)
 end
 
 function getPreviousQuotesAndSwitchPage()

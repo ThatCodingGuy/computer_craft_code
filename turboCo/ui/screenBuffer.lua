@@ -434,6 +434,7 @@ local function create(args)
     writeCenterLn=writeCenterLn,
     writeLeft=writeLeft,
     writeLeftLn=writeLeftLn,
+    writeRight=writeRight,
     writeRightLn=writeRightLn,
     scrollUp=scrollUp,
     scrollDown=scrollDown,

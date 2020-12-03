@@ -29,6 +29,8 @@ local function create(args)
     local x, y = eventData[3], eventData[4]
     if wasClicked(x, y) then
       self.leftClickCallback()
+      redstone.setOutput("back", true)
+      redstone.setOutput("back", false)
     end
   end
 
@@ -37,6 +39,8 @@ local function create(args)
     if self.currentScreenPos.x == x and self.currentScreenPos.y == y then
       if button == 1 then
         self.leftClickCallback()
+        redstone.setOutput("back", true)
+        redstone.setOutput("back", false)
       elseif button == 2 then
         self.rightClickCallback()
       end

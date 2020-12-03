@@ -124,6 +124,12 @@ local function create(args)
         x=self.screenState.cursorPos.x,
         y=self.screenState.cursorPos.y
       }
+    else
+      --need to clone
+      bufferCursorPos = {
+        x=bufferCursorPos.x,
+        y=bufferCursorPos.y
+      }
     end
     local screenCursor = {
       screenCursorPosBefore = getScreenCursorPos(),

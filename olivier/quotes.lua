@@ -113,7 +113,7 @@ screenBottomBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue
 
 local prevButton = Button.create{screenBuffer=screenBottomBuffer,
   eventHandler=eventHandler, 
-  text="<-Prev", 
+  text="<-Prev ", 
   textColor=colors.gray, 
   bgColor=colors.lightBlue, 
   leftClickCallback=getPreviousQuotesAndSwitchPage}
@@ -129,7 +129,7 @@ pageCounterContent = ScreenContent.create{
 local nextButton = Button.create{screenBuffer=screenBottomBuffer,
   screenBufferWriteFunc=screenBottomBuffer.writeRight,
   eventHandler=eventHandler, 
-  text="Next->", 
+  text=" Next->", 
   textColor=colors.gray, 
   bgColor=colors.lightBlue, 
   leftClickCallback=getNextQuotesAndSwitchPage

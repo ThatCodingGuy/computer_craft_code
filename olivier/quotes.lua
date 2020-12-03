@@ -86,12 +86,21 @@ function writeQuotes(screenBuffer)
   end
 end
 
+function createPageTrackerString()
+  local numCharsMissing = #tostring(numPages) - #tostring(pageNumber)
+  local pageNumberStr = tostring(pageNumber)
+  for i=1,numCharsMissing do
+    pageNumberStr = "0" .. pageNumberStr
+  end
+  string.format(" %s/%s ", pageNumberStr, numPages)
+end
+
 function getPreviousQuotesAndSwitchPage()
   if pageNumber > 1 then
     pageNumber = pageNumber - 1
   end
   pageViewManager.switchToPreviousPage()
-  pageCounterContent.updateText(string.format(" %s/%s ", pageNumber, numPages))
+  pageCounterContent.updateText(createPageTrackerString())
 end
 
 function getNextQuotesAndSwitchPage()
@@ -105,7 +114,7 @@ function getNextQuotesAndSwitchPage()
     writeQuotes(newPageScreenBuffer)
   end
   pageViewManager.switchToNextPage()
-  pageCounterContent.updateText(string.format(" %s/%s ", pageNumber, numPages))
+  pageCounterContent.updateText(createPageTrackerString())
 end
 
 local screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}

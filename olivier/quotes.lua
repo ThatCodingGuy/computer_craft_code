@@ -108,6 +108,15 @@ function getNextQuotesAndSwitchPage()
     pageNumber = pageNumber + 1
   end
   if not pageViewManager.hasNextPage() then
+    if pageCounterContent == nil then
+      pageCounterContent = ScreenContent.create{
+        screenBuffer=screenBottomBuffer,
+        screenBufferWriteFunc=screenBottomBuffer.writeCenter,
+        text=createPageTrackerString(),
+        textColor=colors.gray,
+        bgColor=colors.lightBlue
+      }
+    end
     local newPageScreenBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
     local newPage = Page.create{screenBuffer=newPageScreenBuffer}
     pageViewManager.addPage(newPage)
@@ -122,7 +131,7 @@ screenBottomBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue
 
 local prevButton = Button.create{screenBuffer=screenBottomBuffer,
   eventHandler=eventHandler, 
-  text="<-Prev ", 
+  text=" <-Prev ", 
   textColor=colors.gray, 
   bgColor=colors.lightBlue, 
   leftClickCallback=getPreviousQuotesAndSwitchPage}

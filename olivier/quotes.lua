@@ -113,7 +113,6 @@ function getNextQuotesAndSwitchPage()
     pageViewManager.addPage(newPage)
     writeQuotes(newPageScreenBuffer)
   end
-  pageViewManager.switchToNextPage()
   if pageCounterContent == nil then
     pageCounterContent = ScreenContent.create{
       screenBuffer=screenBottomBuffer,
@@ -125,6 +124,7 @@ function getNextQuotesAndSwitchPage()
   else
     pageCounterContent.updateText(createPageTrackerString())
   end
+  pageViewManager.switchToNextPage()
 end
 
 screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}

@@ -128,7 +128,7 @@ screenBottomBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue
 scrollHandler = ScrollHandler.create{eventHandler=eventHandler}
 scrollHandler.makeActive()
 
-local pageViewManager = PageViewManager.create{
+pageViewManager = PageViewManager.create{
   eventHandler = eventHandler,
   leftButton = Button.create{
     screenBuffer=screenBottomBuffer,

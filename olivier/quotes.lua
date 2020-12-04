@@ -99,7 +99,6 @@ end
 
 function getFirstQuotes()
   createNewQuotePage()
-  pageViewManager.switchToNextPage()
   pageCounterContent = ScreenContent.create{
     screenBuffer=screenBottomBuffer,
     screenBufferWriteFunc=screenBottomBuffer.writeCenter,
@@ -107,6 +106,7 @@ function getFirstQuotes()
     textColor=colors.gray,
     bgColor=colors.lightBlue
   }
+  pageViewManager.switchToNextPage()
   screenBottomBuffer.render()
 end
 

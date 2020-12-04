@@ -35,14 +35,14 @@ local function create(args)
   --allows the key strokes to scroll the screen
   local makeActive = function()
     if self.keyHandlerId == nil then
-      self.keyHandlerId = eventHandler.addHandle("key", handleKey)
+      self.keyHandlerId = self.eventHandler.addHandle("key", handleKey)
     end
   end
 
   --disallows the key strokes to scroll the screen
   local makeInactive = function()
     if self.keyHandlerId ~= nil then
-      eventHandler.remove(self.keyHandlerId)
+      self.eventHandler.remove(self.keyHandlerId)
       self.keyHandlerId = nil
     end
   end

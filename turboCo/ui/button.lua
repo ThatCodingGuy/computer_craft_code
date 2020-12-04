@@ -102,11 +102,11 @@ local function create(args)
   end
 
   local setLeftCLickCallback = function(callbackFunc)
-    table.insert(self.leftClickCallback, callbackFunc)
+    self.leftClickCallback = callbackFunc
   end
 
   local setRightClickCallback = function(callbackFunc)
-    table.insert(self.rightClickCallback, callbackFunc)
+    self.rightClickCallback = callbackFunc
   end
 
   local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}

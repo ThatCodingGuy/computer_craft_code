@@ -1,17 +1,18 @@
 --A Page View is a list of pages where one is displayed at a time
 -- All screen buffers should be of the same dimensions and positions
 
-local function create(eventHandler)
+local function create(args)
   local self = {
     pages = {},
     currPage = 0,
-    eventHandler = eventHandler,
-    scrollHandler = nil
+    eventHandler = args.eventHandler,
+    leftButton = args.leftButton,
+    leftButtonOrigCallback = nil,
+    rightButton = args.rightButton,
+    rightButtonOrigCallback = nil,
+    postPageChangeCallback = args.postPageChangeCallback
+    scrollHandler = args.scrollHandler
   }
-
-  local setScrollHandler = function(scrollHandler)
-    self.scrollHandler = scrollHandler
-  end
 
   local getPage = function()
     return self.pages[self.currPage]
@@ -40,6 +41,9 @@ local function create(eventHandler)
     if self.scrollHandler ~= nil then
       self.scrollHandler.changeScreenBuffer(page.getScreenBuffer())
     end
+    if self.postPageChangeCallback ~= nil then
+      self.postPageChangeCallback()
+    end
     return page
   end
 
@@ -64,8 +68,31 @@ local function create(eventHandler)
     switchToPage(#self.pages)
   end
 
+  local leftButtonClickCallback = function()
+    if self.leftButtonOrigCallback ~= nil then
+      self.leftButtonOrigCallback()
+    end
+    switchToPreviousPage()
+  end
+
+  local rightButtonClickCallback = function()
+    if self.rightButtonOrigCallback ~= nil then
+      self.rightButtonOrigCallback()
+    end
+    switchToNextPage()
+  end
+
+  if self.leftButton ~= nil then
+    self.leftButtonOrigCallback = self.leftButton.getLeftClickCallback()
+    self.leftButton.setLeftClickCallback(leftButtonClickCallback)
+  end
+
+  if self.rightButton ~= nil then
+    self.rightButtonOrigCallback = self.rightButton.getLeftClickCallback()
+    self.rightButton.setLeftClickCallback(rightButtonClickCallback)
+  end
+
   return {
-    setScrollHandler=setScrollHandler,
     getPage=getPage,
     getPageIndex=getPageIndex,
     hasPreviousPage=hasPreviousPage,

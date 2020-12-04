@@ -17,31 +17,20 @@ local categoryToColorMap = {
   art = colors.blue
 }
 
-local pageNumber = 0
 local numResults = 4
 local numPages = nil
 
+local scrollHandler = nil
+local pageViewManager = nil
 local pageCounterContent = nil
+local screenTopBuffer = nil
 local screenBottomBuffer = nil
+local eventHandler = EventHandler.create()
 
 local screen = peripheral.find("monitor")
 screen.clear()
 
-local eventHandler = EventHandler.create()
-
-local screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=3}
-screenTopBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
-screenTopBuffer.writeCenterLn{text="Quotes of the Day", color=colors.lightBlue, bgColor=colors.gray}
-screenTopBuffer.writeFullLineLn{text="-", color=colors.lightBlue, bgColor=colors.gray}
-screenTopBuffer.render()
-
-local scrollHandler = ScrollHandler.create(screenScrollingBuffer, eventHandler)
-scrollHandler.makeActive()
-
-local pageViewManager = PageViewManager.create(eventHandler)
-pageViewManager.setScrollHandler(scrollHandler)
-
-function getQuotes()
+function getQuotes(pageNumber)
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
   local url = string.format("https://interactive-cv-api.herokuapp.com/quotes?page_number=%s&num_results=%s", pageNumber, numResults)
   worked, quoteResponse = pcall(function() return http.get(url, {["Content-Type"] = "application/json"}) end)
@@ -76,8 +65,8 @@ function writeQuote(screenBuffer, quote)
   end
 end
 
-function writeQuotes(screenBuffer)
-  quotesResponse = getQuotes()
+function getAndWriteQuotes(screenBuffer, pageNumber)
+  quotesResponse = getQuotes(pageNumber)
   if quotesResponse ~= nil then
     quotes = quotesResponse['quotes']
     for _,quote in pairs(quotes) do
@@ -87,6 +76,7 @@ function writeQuotes(screenBuffer)
 end
 
 function createPageTrackerString()
+  local pageNumber = pageViewManager.getPageIndex()
   local numCharsMissing = #tostring(numPages) - #tostring(pageNumber)
   local pageNumberStr = tostring(pageNumber)
   for i=1,numCharsMissing do
@@ -95,61 +85,73 @@ function createPageTrackerString()
   return string.format(" %s/%s ", pageNumberStr, numPages)
 end
 
-function getPreviousQuotesAndSwitchPage()
-  if pageNumber > 1 then
-    pageNumber = pageNumber - 1
-  end
-  pageViewManager.switchToPreviousPage()
+function updatePageTracker()
   pageCounterContent.updateText(createPageTrackerString())
+  screenBottomBuffer.render()
 end
 
-function getNextQuotesAndSwitchPage()
-  if pageNumber == 0 or pageNumber < numPages then
-    pageNumber = pageNumber + 1
-  end
-  if not pageViewManager.hasNextPage() then
-    local newPageScreenBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
-    local newPage = Page.create{screenBuffer=newPageScreenBuffer}
-    pageViewManager.addPage(newPage)
-    writeQuotes(newPageScreenBuffer)
-  end
-  if pageCounterContent == nil then
-    pageCounterContent = ScreenContent.create{
-      screenBuffer=screenBottomBuffer,
-      screenBufferWriteFunc=screenBottomBuffer.writeCenter,
-      text=createPageTrackerString(),
-      textColor=colors.gray,
-      bgColor=colors.lightBlue
-    }
-    screenBottomBuffer.render()
-  else
-    pageCounterContent.updateText(createPageTrackerString())
-  end
-  pageViewManager.switchToNextPage()
+function createNewQuotePage()
+  local newPageScreenBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
+  local newPage = Page.create{screenBuffer=newPageScreenBuffer}
+  pageViewManager.addPage(newPage)
+  getAndWriteQuotes(newPageScreenBuffer, pageViewManager.getPageIndex() + 1)
 end
+
+function getFirstQuotes()
+  createNewQuotePage()
+  pageViewManager.switchToNextPage()
+  pageCounterContent = ScreenContent.create{
+    screenBuffer=screenBottomBuffer,
+    screenBufferWriteFunc=screenBottomBuffer.writeCenter,
+    text=createPageTrackerString(),
+    textColor=colors.gray,
+    bgColor=colors.lightBlue
+  }
+  screenBottomBuffer.render()
+end
+
+function getNextQuotes()
+  if pageViewManager.getPageIndex() < numPages and not pageViewManager.hasNextPage() then
+    createNewQuotePage()
+  end
+end
+
+screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=3}
+screenTopBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer.writeCenterLn{text="Quotes of the Day", color=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer.writeFullLineLn{text="-", color=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer.render()
 
 screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}
 screenBottomBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
 
-local prevButton = Button.create{screenBuffer=screenBottomBuffer,
-  eventHandler=eventHandler, 
-  text=" <-Prev ", 
-  textColor=colors.gray, 
-  bgColor=colors.lightBlue, 
-  leftClickCallback=getPreviousQuotesAndSwitchPage}
-  
-local nextButton = Button.create{screenBuffer=screenBottomBuffer,
-  screenBufferWriteFunc=screenBottomBuffer.writeRight,
-  eventHandler=eventHandler, 
-  text=" Next-> ", 
-  textColor=colors.gray, 
-  bgColor=colors.lightBlue, 
-  leftClickCallback=getNextQuotesAndSwitchPage
+scrollHandler = ScrollHandler.create(eventHandler)
+scrollHandler.makeActive()
+
+local pageViewManager = PageViewManager.create{
+  eventHandler = eventHandler,
+  leftButton = Button.create{
+    screenBuffer=screenBottomBuffer,
+    eventHandler=eventHandler, 
+    text=" <-Prev ", 
+    textColor=colors.gray, 
+    bgColor=colors.lightBlue
+  },
+  rightButton = Button.create{screenBuffer=screenBottomBuffer,
+    screenBufferWriteFunc=screenBottomBuffer.writeRight,
+    eventHandler=eventHandler, 
+    text=" Next-> ", 
+    textColor=colors.gray, 
+    bgColor=colors.lightBlue, 
+    leftClickCallback=getNextQuotes
+  },
+  scrollHandler = scrollHandler
+  postPageChangeCallback = updatePageTracker()
 }
 screenBottomBuffer.render()
 
 --Get the initial quote
-getNextQuotesAndSwitchPage()
+getFirstQuotes()
 
 local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
 

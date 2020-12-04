@@ -1,28 +1,30 @@
 -- This file is intended to provide extensions to the terminal (term) API of computercraft
 -- 
 
-local function create(screenBuffer, eventHandler)
+local function create(args)
   local self = {
-    screenBuffer = screenBuffer,
-    eventHandler = eventHandler,
+    screenBuffer = args.screenBuffer,
+    eventHandler = args.eventHandler,
     keyHandlerId = nil
   }
 
   local handleKey = function(eventData)
     local key = eventData[2]
     local screenBuffer = self.screenBuffer
-    if key == keys.up then
-      screenBuffer.scrollUp()
-    elseif key == keys.down then
-      screenBuffer.scrollDown()
-    elseif key == keys.left then
-      screenBuffer.scrollLeft()
-    elseif key == keys.right then
-      screenBuffer.scrollRight()
-    elseif key == keys.pageUp then
-      screenBuffer.pageUp()
-    elseif key == keys.pageDown then
-      screenBuffer.pageDown()
+    if screenBuffer ~= nil then
+      if key == keys.up then
+        screenBuffer.scrollUp()
+      elseif key == keys.down then
+        screenBuffer.scrollDown()
+      elseif key == keys.left then
+        screenBuffer.scrollLeft()
+      elseif key == keys.right then
+        screenBuffer.scrollRight()
+      elseif key == keys.pageUp then
+        screenBuffer.pageUp()
+      elseif key == keys.pageDown then
+        screenBuffer.pageDown()
+      end
     end
   end
 

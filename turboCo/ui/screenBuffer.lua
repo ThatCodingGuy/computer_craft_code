@@ -5,12 +5,13 @@
 local screenBuffer = {}
 
 local function create(args)
-  local screen,xStartingScreenPos,yStartingScreenPos,width,height = args.screen, args.xStartingScreenPos, args.yStartingScreenPos, args.width, args.height
+  local screen,xStartingScreenPos,yStartingScreenPos,width,height,bgColor = args.screen, args.xStartingScreenPos, args.yStartingScreenPos, args.width, args.height, args.bgColor
   local self = {
     screen = screen,
     screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
     width = width,
     height = height,
+    bgColor = bgColor,
     screenState = {
       buffer={},
       renderPos={ x=1, y=1 },
@@ -187,7 +188,7 @@ local function create(args)
     for y=self.screenStartingPos.y, maxPosY do
       for x=self.screenStartingPos.x, maxPosX do
         self.screen.setCursorPos(x, y)
-        self.screen.write(" ")
+        screenWrite(" ", nil, self.bgColor)
       end
     end
   end

@@ -19,7 +19,7 @@ local function create(args)
     bufferCursorPos= { x=0, y=0 },
     monitorTouchKeyHandlerId = nil,
     mouseClickKeyHandlerId = nil,
-    clickTimerId = nil,
+    clickTimerId = nil
   }
 
   local wasClicked = function(x, y)
@@ -93,6 +93,22 @@ local function create(args)
     end
   end
 
+  local getLeftClickCallback = function()
+    return self.leftClickCallback
+  end
+
+  local getRightClickCallback = function()
+    return self.rightClickCallback
+  end
+
+  local setLeftCLickCallback = function(callbackFunc)
+    table.insert(self.leftClickCallback, callbackFunc)
+  end
+
+  local setRightClickCallback = function(callbackFunc)
+    table.insert(self.rightClickCallback, callbackFunc)
+  end
+
   local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}
   self.currentScreenPos = writeData.screenCursorPosBefore
   self.bufferCursorPos = writeData.bufferCursorPosBefore
@@ -101,6 +117,10 @@ local function create(args)
   makeActive()
 
   return {
+    getLeftClickCallback=getLeftClickCallback,
+    setLeftCLickCallback=setLeftCLickCallback,
+    getRightClickCallback=getRightClickCallback,
+    setRightClickCallback=setRightClickCallback,
     makeActive=makeActive,
     makeInactive=makeInactive
   }

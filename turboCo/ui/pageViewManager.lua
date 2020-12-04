@@ -83,12 +83,12 @@ local function create(args)
   end
 
   if self.leftButton ~= nil then
-    self.leftButtonOrigCallback = self.leftButton.getLeftClickCallback()
+    self.leftButtonOrigCallback = self.leftButton.getLeftClickCallback
     self.leftButton.setLeftClickCallback(leftButtonClickCallback)
   end
 
   if self.rightButton ~= nil then
-    self.rightButtonOrigCallback = self.rightButton.getLeftClickCallback()
+    self.rightButtonOrigCallback = self.rightButton.getLeftClickCallback
     self.rightButton.setLeftClickCallback(rightButtonClickCallback)
   end
 

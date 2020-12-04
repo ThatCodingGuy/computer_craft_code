@@ -125,7 +125,7 @@ screenTopBuffer.render()
 screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}
 screenBottomBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
 
-scrollHandler = ScrollHandler.create(eventHandler)
+scrollHandler = ScrollHandler.create{eventHandler=eventHandler}
 scrollHandler.makeActive()
 
 local pageViewManager = PageViewManager.create{

@@ -10,7 +10,7 @@ local function create(args)
     leftButtonOrigCallback = nil,
     rightButton = args.rightButton,
     rightButtonOrigCallback = nil,
-    postPageChangeCallback = args.postPageChangeCallback
+    postPageChangeCallback = args.postPageChangeCallback,
     scrollHandler = args.scrollHandler
   }
 

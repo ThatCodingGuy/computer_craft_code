@@ -118,7 +118,7 @@ local function create(args)
 
   return {
     getLeftClickCallback=getLeftClickCallback,
-    setLeftCLickCallback=setLeftCLickCallback,
+    setLeftClickCallback=setLeftClickCallback,
     getRightClickCallback=getRightClickCallback,
     setRightClickCallback=setRightClickCallback,
     makeActive=makeActive,

@@ -101,7 +101,7 @@ local function create(args)
     return self.rightClickCallback
   end
 
-  local setLeftCLickCallback = function(callbackFunc)
+  local setLeftClickCallback = function(callbackFunc)
     self.leftClickCallback = callbackFunc
   end
 

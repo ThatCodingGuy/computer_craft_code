@@ -145,8 +145,8 @@ local pageViewManager = PageViewManager.create{
     bgColor=colors.lightBlue, 
     leftClickCallback=getNextQuotes
   },
-  scrollHandler = scrollHandler
-  postPageChangeCallback = updatePageTracker()
+  scrollHandler = scrollHandler,
+  postPageChangeCallback = updatePageTracker
 }
 screenBottomBuffer.render()
 

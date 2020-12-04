@@ -152,6 +152,11 @@ local function create(args)
       row[bufferCursorPos.x] = { color=color, bgColor=bgColor, char=char}
       bufferCursorPos.x = bufferCursorPos.x + 1
     end
+    --if no bufferCursorPos override is passed, then we want the cursor to be tracked
+    if args.bufferCursorPos == nil then
+      self.screenState.cursorPos.x = bufferCursorPos.x
+      self.screenState.cursorPos.y = bufferCursorPos.y
+    end
     return screenCursor
   end
 

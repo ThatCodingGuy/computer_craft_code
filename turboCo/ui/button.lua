@@ -31,7 +31,7 @@ local function create(args)
     --We want to flip the colors
     self.screenBuffer.write{text=self.text, color=self.bgColor, bgColor=self.textColor, bufferCursorPos=self.bufferCursorPos}
     self.screenBuffer.render()
-    self.clickTimerId = os.startTimer(0.1)
+    self.clickTimerId = os.startTimer(0.15)
     self.leftClickCallback()
   end
 

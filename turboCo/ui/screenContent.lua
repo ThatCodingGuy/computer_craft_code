@@ -24,9 +24,7 @@ local function create(args)
   self.currentBufferPos = writeData.bufferCursorPosBefore
 
   return {
-    updateText=updateText,
-    makeActive=makeActive,
-    makeInactive=makeInactive
+    updateText=updateText
   }
 
 end

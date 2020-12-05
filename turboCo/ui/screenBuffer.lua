@@ -5,7 +5,10 @@
 local screenBuffer = {}
 
 local function create(args)
-  local screen,xStartingScreenPos,yStartingScreenPos,width,height,bgColor = args.screen, args.xStartingScreenPos, args.yStartingScreenPos, args.width, args.height, args.bgColor
+  local screen, xStartingScreenPos, yStartingScreenPos, width, height, bgColor = 
+        args.screen, args.xStartingScreenPos, args.yStartingScreenPos, 
+        args.width, args.height, args.bgColor
+        
   local self = {
     screen = screen,
     screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
@@ -491,11 +494,25 @@ local function createFullScreenFromTopAndBottom(args)
   return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=topOffset + 1, width=width, height=height-topOffset-bottomOffset}
 end
 
+local function createFromOffsets(args)
+  local screen, leftOffset, rightOffset, topOffset, bottomOffset = args.screen, 
+    args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0, args.bottomOffset or 0
+  local width,height = screen.getSize()
+  return create{
+      screen=screen, 
+      xStartingScreenPos=1 + leftOffset,
+      yStartingScreenPos=1 + topOffset, 
+      width=width-leftOffset-rightOffset, 
+      height=height-topOffset-bottomOffset
+  }
+end
+
 screenBuffer.create = create
 screenBuffer.createFullScreen = createFullScreen
 screenBuffer.createFullScreenAtTopWithHeight = createFullScreenAtTopWithHeight
 screenBuffer.createFullScreenFromTop = createFullScreenFromTop
 screenBuffer.createFullScreenAtBottomWithHeight = createFullScreenAtBottomWithHeight
 screenBuffer.createFullScreenFromTopAndBottom = createFullScreenFromTopAndBottom
+screenBuffer.createFromOffsets = createFromOffsets
 
 return screenBuffer

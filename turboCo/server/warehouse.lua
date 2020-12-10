@@ -1,6 +1,5 @@
 os.loadAPI("/gitlib/turboCo/movement.lua")
 os.loadAPI("/gitlib/turboCo/modem.lua")
-
 modem.openModems()
 
 -- There are many roles in the warehouse.
@@ -107,6 +106,10 @@ local function dispatch_chest(position, item_name)
     -- TODO: Send the robot
 end
 
+
+local router = {}
+router["get_fuel_chest"] = fuel_request
+router["refuel_done"] = fuel_done
 
 function deposit(item_name, quantity)
     if not data[item_name] then

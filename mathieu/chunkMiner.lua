@@ -46,6 +46,7 @@ local function forceUp(blocks)
 end
 
 local function bore()
+    down = 0
     while true do
         moved = turtle.down()
         if moved then

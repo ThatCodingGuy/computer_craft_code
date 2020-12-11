@@ -7,7 +7,7 @@
 -- The turtle has enough fuel to run the entire line
 
 local function dropAll()
-    for i = 1, i <= 16, 1 do
+    for i = 1, 16, 1 do
         turtle.select(i)
         turtle.drop()
     end
@@ -15,7 +15,7 @@ end
 
 local function inventorySlotsRemaining()
     count = 0
-    for i = 1, i <= 16, 1 do
+    for i = 1, 16, 1 do
         if turtle.getItemCount(i) == 0 then
             count = count + 1
         end
@@ -46,8 +46,7 @@ local function forceUp(blocks)
 end
 
 local function bore()
-    down = 0
-    while done do
+    while true do
         isAir, blockData = turtle.inspectDown()
         if isAir then
             moved = turtle.down()
@@ -60,6 +59,11 @@ local function bore()
             if inventorySlotsRemaining() == 0 then
                 forceUp(down)
                 return false
+            end
+
+            if blockData.name == "minecraft:bedrock" then
+                forceUp(down)
+                return true
             end
         end
     end

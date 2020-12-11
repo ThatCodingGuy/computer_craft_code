@@ -47,9 +47,9 @@ end
 function transferSaplingsToSingleSlot()
   for i=1,NUM_SLOTS do
     local itemDetail = turtle.getItemDetail(i)
-    if itemDetail ~= nil and SAPLING_NAME == itemDetail.name then
+    if itemDetail ~= nil and SAPLING_NAME == itemDetail.name and i ~= SAPLING_SLOT then
       turtle.select(i)
-      turtle.transfer(SAPLING_SLOT)
+      turtle.transferTo(SAPLING_SLOT)
     end
   end
 end
@@ -191,10 +191,13 @@ function dropOffWood()
   local woodCount = countWood()
   local woodDropAmount = math.floor(woodCount * ((100 - COAL_PERCENTAGE) / 100))
   for i=1,NUM_SLOTS do
-    local itemDetail = turtle.getItemDetail(i)
-    if itemDetail ~= nil and WOOD_NAME == itemDetail.name then
-      if itemDetail.count > woodDropAmount then
-
+    if woodDropAmount > 0 then
+      local itemDetail = turtle.getItemDetail(i)
+      if itemDetail ~= nil and WOOD_NAME == itemDetail.name then
+        turtle.select(i)
+        --Assuming that woodDropAmount larger than a stack will just drop the stack
+        turtle.drop(woodDropAmount)
+        woodDropAmount = woodDropAmount - itemDetail.count
       end
     end
   end

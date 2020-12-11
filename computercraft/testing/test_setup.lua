@@ -1,14 +1,20 @@
-turtle = dofile("./gitlib/computercraft/turtle.lua")
+local keys = dofile("./gitlib/computercraft/keys.lua")
+local os = dofile("./gitlib/computercraft/os.lua")
+local turtle = dofile("./gitlib/computercraft/turtle.lua")
 
 --- Generates mocks for the ComputerCraft API for use within tests.
 --
 -- Run this within the before_each declaration in your tests. Running this will return a table where
 -- each entry corresponds to one of the ComputerCraft APIs.
 local function generate_cc_mocks(mock)
+    mock.revert(os)
     mock.revert(turtle)
+    _G.keys = mock(keys, true)
+    _G.os = mock(os, true)
     _G.turtle = mock(turtle, true)
     return {
-        turtle = _G.turtle
+        os = _G.os,
+        turtle = _G.turtle,
     }
 end
 

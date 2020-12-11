@@ -1,29 +1,33 @@
+local WOOD_SLOT = 1
 local FUEL_SLOT = 16
 local SAPLING_SLOT = 15
-local WOOD_SLOT = 1
+local GENERATED_FUEL_SLOT = 14
 
+local WOOD_NAME = "minecraft:log"
 local SAPLING_NAME = "minecraft:sapling"
 local FUEL_NAME = "minecraft:coal"
 
 local NUM_TREES = 6
 local DISTANCE_TO_TREE = 3
 local DISTANCE_TO_ROW = 4
+local DISTANCE_TO_SMELTER = 10
 local NUM_SLOTS = 16
+
+local MAX_FUEL_CARRIED = 30
+local MAX_SAPLINGS_CARRIED = 30
+local COAL_PERCENTAGE = 80
 
 local SLEEP_TIME = 180 -- 3 mins
 
 function refuelIfNeeded()
-  if turtle.getFuelLevel() < 200 then
-    for i=1,NUM_SLOTS do
-      local itemDetail = turtle.getItemDetail(i)
-      if itemDetail ~= nil and FUEL_NAME == itemDetail.name then
-        turtle.select(i)
-        turtle.refuel(3)
-        turtle.select(WOOD_SLOT)
-        return
-      end
+  if turtle.getFuelLevel() < 500 then
+    turtle.select(FUEL_SLOT)
+    if turtle.getItemCount() < 5 then
+      print("Ran out of fuel. plz fix.")
+    else
+      turtle.refuel(5)
     end
-    print("Ran out of fuel. plz fix.") 
+    turtle.select(WOOD_SLOT)
   end
 end
 
@@ -40,11 +44,31 @@ function plantSapling()
   print("Ran out of saplings. plz fix.") 
 end
 
-function getMoreIfNeeded(itemName)
+function transferSaplingsToSingleSlot()
+  for i=1,NUM_SLOTS do
+    local itemDetail = turtle.getItemDetail(i)
+    if itemDetail ~= nil and SAPLING_NAME == itemDetail.name then
+      turtle.select(i)
+      turtle.transfer(SAPLING_SLOT)
+    end
+  end
+end
+
+function dumpExcessSaplings()
+  local sapCount = turtle.getItemCount(SAPLING_SLOT)
+  local saplingsToDump = sapCount - MAX_SAPLINGS_CARRIED
+  if saplingsToDump > 0 then
+    turtle.select(SAPLING_SLOT)
+    turtle.drop(saplingsToDump)
+  end
+end
+
+function getMoreIfNeeded(itemName, suckSlot)
   for i=1,NUM_SLOTS do
     local itemDetail = turtle.getItemDetail(i)
     if itemDetail ~= nil and itemName == itemDetail.name then
       if turtle.getItemSpace(i) > 5 then
+        turtle.select(suckSlot)
         turtle.suck(5)
       end
     end
@@ -152,14 +176,93 @@ function cutAndReplantTrees()
   goToNextTreeRow()
 end
 
+function countWood()
+  local woodCount = 0
+  for i=1,NUM_SLOTS do
+    local itemDetail = turtle.getItemDetail(i)
+    if itemDetail ~= nil and WOOD_NAME == itemDetail.name then
+      woodCount = woodCount + itemDetail.count
+    end
+  end
+  return woodCount
+end
+
+function dropOffWood()
+  local woodCount = countWood()
+  local woodDropAmount = math.floor(woodCount * ((100 - COAL_PERCENTAGE) / 100))
+  for i=1,NUM_SLOTS do
+    local itemDetail = turtle.getItemDetail(i)
+    if itemDetail ~= nil and WOOD_NAME == itemDetail.name then
+      if itemDetail.count > woodDropAmount then
+
+      end
+    end
+  end
+  return woodCount 
+end
+
+function getFuelFromChestIfNeeded()
+  turtle.select(FUEL_SLOT)
+  local fuelToGet = MAX_FUEL_CARRIED - turtle.getItemCount()
+  if fuelToGet > 0 then
+    turtle.suck(fuelToGet)
+  end
+end
+
+function goToFurnaceAndManageFuel()
+  forceUp()
+  turtle.turnLeft()
+  forceForward()
+  forceForward()
+  forceForward()
+  turtle.turnRight()
+  forceUp()
+  for i=1,DISTANCE_TO_SMELTER do
+    forceForward()
+  end
+  turtle.select(GENERATED_FUEL_SLOT)
+  turtle.suckDown()
+  turtle.select(WOOD_SLOT)
+  turtle.dropDown()
+  turtle.turnRight()
+  forceForward()
+  forceDown()
+  forceDown()
+  forceBack()
+  turtle.select(GENERATED_FUEL_SLOT)
+  turtle.dropUp()
+  forceForward()
+  turtle.drop()
+  getFuelFromChestIfNeeded()
+end
+
+function comeBackFromFurnace()
+  forceUp()
+  turtle.turnRight()
+  for i=1,DISTANCE_TO_SMELTER do
+    forceForward()
+  end
+  turtle.turnLeft()
+  forceForward()
+  forceForward()
+  turtle.turnLeft()
+  forceDown()
+end
+
 while true do
   refuelIfNeeded()
   cutAndReplantTrees()
   turtle.turnLeft()
-  getMoreIfNeeded(SAPLING_NAME)
+  dumpExcessSaplings()
+  transferSaplingsToSingleSlot()
+  getMoreIfNeeded(SAPLING_NAME, SAPLING_SLOT)
   turtle.turnLeft()
-  getMoreIfNeeded(FUEL_NAME)
-  turtle.turnLeft()
-  turtle.turnLeft()
+  if countWood() > 20 then
+    dropOffWood()
+    turtle.turnRight()
+    turtle.turnRight()
+    goToFurnaceAndManageFuel()
+    comeBackFromFurnace()
+  end
   sleep(SLEEP_TIME)
 end

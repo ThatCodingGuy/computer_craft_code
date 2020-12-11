@@ -12,6 +12,13 @@ local function generate_cc_mocks(mock)
     }
 end
 
+local function impersonate_os_api_loader()
+    _G.os.loadAPI = function(file_path)
+        return dofile("." .. file_path)
+    end
+end
+
 return {
-    generate_cc_mocks = generate_cc_mocks
+    generate_cc_mocks = generate_cc_mocks,
+    impersonate_os_api_loader = impersonate_os_api_loader,
 }

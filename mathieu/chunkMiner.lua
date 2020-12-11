@@ -47,24 +47,23 @@ end
 
 local function bore()
     while true do
-        isAir, blockData = turtle.inspectDown()
-        if isAir then
-            moved = turtle.down()
+        moved = turtle.down()
+        if moved then
             if moved then
                 down = down + 1
             end
         else
             turtle.digDown()
-
             if inventorySlotsRemaining() == 0 then
                 forceUp(down)
                 return false
             end
+        end
 
-            if blockData.name == "minecraft:bedrock" then
-                forceUp(down)
-                return true
-            end
+        isAir, blockData = turtle.inspectDown()
+        if blockData.name == "minecraft:bedrock" then
+            forceUp(down)
+            return true
         end
     end
 

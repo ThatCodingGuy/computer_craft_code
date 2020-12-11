@@ -76,6 +76,17 @@ function forceDown()
   end
 end
 
+function forceBack()
+  local success = turtle.back()
+  while not success do
+      turtle.turnRight()
+      turtle.turnRight()
+      forceForward()
+      turtle.turnRight()
+      turtle.turnRight()
+  end
+end
+
 function detectTree()
   local found, item = turtle.inspect()
   if not found then
@@ -96,7 +107,7 @@ function cutTreeAndPlant()
   for i=1,upCounter do
     forceDown()
   end
-  turtle.back()
+  forceBack()
   turtle.select(SAPLING_SLOT)
   turtle.place()
 end

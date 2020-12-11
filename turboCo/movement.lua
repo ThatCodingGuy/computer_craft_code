@@ -654,3 +654,8 @@ function scan_area(width, depth, height, block_callback)
 
     explore_area(area, coord(start_x, start_y, start_z), facing, block_callback)
 end
+
+return {
+    coord = coord,
+    gps_locate = gps_locate,
+}

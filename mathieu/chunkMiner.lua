@@ -71,11 +71,13 @@ local function bore()
     return true
 end
 
+chunks = 4
+
 i = 0
 while true do
     done = bore()
     if done then
-        if i == 15 then
+        if i == (chunks * 16 - 1) then
             break;
         end
         forceForward(1)

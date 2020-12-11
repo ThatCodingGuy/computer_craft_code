@@ -1,5 +1,5 @@
 
-local exitHandle = {}
+local exitHandler = {}
 
 local function createFromScreens(screens, eventHandler)
   local self = {
@@ -30,6 +30,7 @@ local function createFromScreens(screens, eventHandler)
   local makeInactive = function()
     if self.keyHandlerId ~= nil then
       eventHandler.remove(self.keyHandlerId)
+      self.keyHandlerId = nil
     end
   end
 
@@ -45,7 +46,7 @@ local function createFromScreen(screen, eventHandler)
   return createFromScreens( { screen }, eventHandler)
 end
 
-exitHandle.createFromScreen = createFromScreen
-exitHandle.createFromScreens = createFromScreens
+exitHandler.createFromScreen = createFromScreen
+exitHandler.createFromScreens = createFromScreens
 
-return exitHandle
+return exitHandler

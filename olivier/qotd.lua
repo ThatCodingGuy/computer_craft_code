@@ -10,7 +10,7 @@ local categoryToColorMap = {
 }
 
 local screen = peripheral.find("monitor")
-local screenBuffer = ScreenBuffer.createFullScreen(screen)
+local screenBuffer = ScreenBuffer.createFullScreen{screen=screen}
 
 function getQuoteOfTheDay()
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -36,15 +36,16 @@ function displayQuote(quote)
   if quote then
     local color = categoryToColorMap[quote['category']]
     screenBuffer.clear()
-    screenBuffer.writeCenterLn("TurboCo Motivational Billboard")
+    screenBuffer.writeCenterLn{text="TurboCo Motivational Billboard"}
     screenBuffer.ln()
-    screenBuffer.writeCenterLn(quote['title'], color)
-    screenBuffer.writeCenterLn("Date: " .. quote['date'])
+    screenBuffer.writeCenterLn{text=quote['title'], color=color}
+    screenBuffer.writeCenterLn{text="Date: " .. quote['date']}
     screenBuffer.ln()
-    screenBuffer.writeWrapLn(quote['content'], color)
+    screenBuffer.writeWrapLn{text=quote['content'], color=color}
     screenBuffer.ln()
-    screenBuffer.writeLeftLn("Author: " .. quote['author'])
+    screenBuffer.writeLeftLn{text="Author: " .. quote['author']}
     screenBuffer.ln()
+    screenBuffer.render()
   end
 end
 

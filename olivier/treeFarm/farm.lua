@@ -208,7 +208,7 @@ function getFuelFromChestIfNeeded()
   turtle.select(FUEL_SLOT)
   local fuelToGet = MAX_FUEL_CARRIED - turtle.getItemCount()
   if fuelToGet > 0 then
-    turtle.suck(fuelToGet)
+    turtle.suckDown(fuelToGet)
   end
 end
 
@@ -223,24 +223,24 @@ function goToFurnaceAndManageFuel()
   for i=1,DISTANCE_TO_SMELTER do
     forceForward()
   end
-  turtle.select(GENERATED_FUEL_SLOT)
-  turtle.suckDown()
   turtle.select(WOOD_SLOT)
   turtle.dropDown()
+  turtle.turnLeft()
+  forceForward()
+  forceDown()
+  --fuel is added on the left
   turtle.turnRight()
-  forceForward()
-  forceDown()
-  forceDown()
-  forceBack()
-  turtle.select(GENERATED_FUEL_SLOT)
-  turtle.dropUp()
-  forceForward()
+  turtle.turnRight()
+  turtle.select(FUEL_SLOT)
   turtle.drop()
+  forceUp()
+  forceForward()
+  forceForward()
+  forceDown()
   getFuelFromChestIfNeeded()
 end
 
 function comeBackFromFurnace()
-  forceUp()
   turtle.turnRight()
   for i=1,DISTANCE_TO_SMELTER do
     forceForward()

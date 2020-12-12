@@ -7,6 +7,7 @@ local WOOD_NAME = "minecraft:log"
 local SAPLING_NAME = "minecraft:sapling"
 local FUEL_NAME = "minecraft:coal"
 
+local NUM_TREE_ROWS = 5
 local NUM_TREES = 6
 local DISTANCE_TO_TREE = 3
 local DISTANCE_TO_ROW = 4
@@ -114,7 +115,8 @@ end
 function detectTree()
   local found, item = turtle.inspect()
   if not found then
-    print("tree farm in bad state. no sapling or tree trunk in location.")
+    print("tree farm in bad state. no sapling or tree trunk in location. placing sapling anyways.")
+    plantSapling()
     return false
   end
   return item.name ~= SAPLING_NAME
@@ -136,44 +138,71 @@ function cutTreeAndPlant()
   turtle.place()
 end
 
-function moveToNextTree()
-  turtle.turnRight()
+function moveToNextTree(turnTowardNextTreeFunc, turnToNextTreeFunc)
+  turnTowardNextTreeFunc()
   for i=1,DISTANCE_TO_TREE do
     forceForward()
   end
-  turtle.turnLeft()
+  turnToNextTreeFunc()
 end
 
-function cutTreeRow()
+function cutTreeRow(turnTowardNextTreeFunc, turnToNextTreeFunc)
   for i=1,NUM_TREES do
     if detectTree() then
       cutTreeAndPlant()
     end
     if i < NUM_TREES then
-      moveToNextTree()
+      moveToNextTree(turnTowardNextTreeFunc, turnToNextTreeFunc)
     end
   end
 end
 
-function goToNextTreeRow()
-  turtle.turnRight()
+function goToNextTreeRow(turnTowardNextTreeFunc, turnToNextTreeFunc)
+  turnTowardNextTreeFunc()
   forceForward()
-  turtle.turnLeft()
-  forceUp()
-  for i=1,DISTANCE_TO_ROW + 2 do
+  turnToNextTreeFunc()
+  for i=1,DISTANCE_TO_ROW do
     forceForward()
   end
-  turtle.turnLeft()
+  turnToNextTreeFunc()
   forceForward()
-  turtle.turnLeft()
-  forceDown()
+  turnTowardNextTreeFunc()
 end
 
 function cutAndReplantTrees()
-  cutTreeRow()
-  goToNextTreeRow()
-  cutTreeRow()
-  goToNextTreeRow()
+  for i=1,NUM_TREE_ROWS do
+    local turnTowardNextTreeFunc = i % 2 == 0 and turtle.turnRight or turtle.turnLeft
+    local turnToNextTreeFunc = i % 2 == 0 and turtle.turnLeft or turtle.turnRight
+    cutTreeRow(turnTowardNextTreeFunc, turnToNextTreeFunc)
+    if i < NUM_TREE_ROWS then
+      goToNextTreeRow(turnTowardNextTreeFunc, turnToNextTreeFunc)
+    end
+  end
+  
+  if NUM_TREE_ROWS % 2 == 1 then
+    --need to go back from last tree on certain setups
+    turtle.turnRight()
+    local distanceBack = (NUM_TREES * DISTANCE_TO_TREE) + 1
+    for i=1,distanceBack do
+      forceForward()
+    end
+    turtle.turnRight()
+  else
+    --just need to turn around on these setups
+    turtle.turnRight()
+    forceForward()
+    turtle.turnRight()
+  end
+
+  forceUp()
+  local distanceBack = (NUM_TREE_ROWS * DISTANCE_TO_ROW)
+  for i=1,distanceBack do
+    forceForward()
+  end
+  turtle.turnRight()
+  forceForward()
+  turtle.turnRight()
+  forceDown()
 end
 
 function countWood()
@@ -215,26 +244,20 @@ end
 function goToFurnaceAndManageFuel()
   forceUp()
   turtle.turnLeft()
-  forceForward()
-  forceForward()
-  forceForward()
-  turtle.turnRight()
-  forceUp()
-  for i=1,DISTANCE_TO_SMELTER do
+  for i=1,4 do
     forceForward()
   end
-  turtle.select(WOOD_SLOT)
-  turtle.dropDown()
-  turtle.turnLeft()
-  forceForward()
-  forceDown()
-  --fuel is added on the left
   turtle.turnRight()
+  for i=1,4 do
+    forceForward()
+  end
   turtle.turnRight()
   turtle.select(FUEL_SLOT)
   turtle.drop()
   forceUp()
   forceForward()
+  turtle.select(WOOD_SLOT)
+  turtle.dropDown()
   forceForward()
   forceDown()
   getFuelFromChestIfNeeded()
@@ -242,30 +265,31 @@ end
 
 function comeBackFromFurnace()
   turtle.turnRight()
-  for i=1,DISTANCE_TO_SMELTER do
+  for i=1,4 do
     forceForward()
   end
   turtle.turnLeft()
   forceForward()
   forceForward()
-  turtle.turnLeft()
+  turtle.turnRight()
   forceDown()
 end
 
 while true do
   refuelIfNeeded()
   cutAndReplantTrees()
-  turtle.turnLeft()
+  turtle.turnRight()
   dumpExcessSaplings()
   transferSaplingsToSingleSlot()
   getMoreIfNeeded(SAPLING_NAME, SAPLING_SLOT)
-  turtle.turnLeft()
+  turtle.turnRight()
   if countWood() > 20 then
     dropOffWood()
-    turtle.turnRight()
-    turtle.turnRight()
     goToFurnaceAndManageFuel()
     comeBackFromFurnace()
+  else
+    turtle.turnRight()
+    turtle.turnRight()
   end
   sleep(SLEEP_TIME)
 end

@@ -3,10 +3,8 @@ local SAPLING_SLOT = 1
 local RANDOM_SHIT_SLOT = 2
 
 local SAPLING_NAME = "minecraft:sapling"
-local ACCEPTABLE_FUELS = { "minecraft:coal" }
 
 local MAX_SAPLING_AMOUNT = 10
-local DISTANCE_TO_CHEST = 11
 local NUM_SLOTS = 16
 
 function refuelIfNeeded()
@@ -47,33 +45,36 @@ function dropOffAndComeBack()
   turtle.select(RANDOM_SHIT_SLOT)
   forceDown()
   forceDown()
-  for i=1,DISTANCE_TO_CHEST do
+  for i=1,12 do
     forceForward()
   end
-  forceUp()
-  forceUp()
-  forceUp()
-  forceUp()
   turtle.turnRight()
-  forceForward()
+  for i=1,7 do
+    forceForward()
+  end
+  turtle.turnRight()
+  for i=1,4 do
+    forceUp()
+  end
 
   turtle.select(SAPLING_SLOT)
   turtle.drop()
   turtle.select(RANDOM_SHIT_SLOT)
 
+  for i=1,4 do
+    forceDown()
+  end
   turtle.turnRight()
-  turtle.turnRight()
-  forceForward()
-  forceDown()
-  forceDown()
-  forceDown()
-  forceDown()
-  turtle.turnLeft()
-  for i=1,DISTANCE_TO_CHEST do
+  for i=1,7 do
     forceForward()
   end
-  forceUp()
-  forceUp()
+  turtle.turnLeft()
+  for i=1,12 do
+    forceForward()
+  end
+  for i=1,4 do
+    forceUp()
+  end
   turtle.turnLeft()
   turtle.turnLeft()
 end

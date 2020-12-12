@@ -71,7 +71,7 @@ local function bore()
     return true
 end
 
-chunks = 4
+chunks = 5
 
 i = 0
 while true do

@@ -11,22 +11,21 @@ local NUM_TREE_ROWS = 5
 local NUM_TREES = 6
 local DISTANCE_TO_TREE = 3
 local DISTANCE_TO_ROW = 4
-local DISTANCE_TO_SMELTER = 10
 local NUM_SLOTS = 16
 
 local MAX_FUEL_CARRIED = 30
-local MAX_SAPLINGS_CARRIED = 30
-local COAL_PERCENTAGE = 80
+local MAX_SAPLINGS_CARRIED = 40
+local COAL_PERCENTAGE = 90
 
 local SLEEP_TIME = 180 -- 3 mins
 
 function refuelIfNeeded()
-  if turtle.getFuelLevel() < 500 then
+  if turtle.getFuelLevel() < 1000 then
     turtle.select(FUEL_SLOT)
     if turtle.getItemCount() < 5 then
       print("Ran out of fuel. plz fix.")
     else
-      turtle.refuel(5)
+      turtle.refuel(10)
     end
     turtle.select(WOOD_SLOT)
   end
@@ -182,7 +181,7 @@ function cutAndReplantTrees()
   if NUM_TREE_ROWS % 2 == 1 then
     --need to go back from last tree on certain setups
     turtle.turnRight()
-    local distanceBack = (NUM_TREES * DISTANCE_TO_TREE) + 1
+    local distanceBack = ((NUM_TREES - 1) * DISTANCE_TO_TREE) + 1
     for i=1,distanceBack do
       forceForward()
     end
@@ -195,7 +194,7 @@ function cutAndReplantTrees()
   end
 
   forceUp()
-  local distanceBack = (NUM_TREE_ROWS * DISTANCE_TO_ROW)
+  local distanceBack = ((NUM_TREE_ROWS - 1) * DISTANCE_TO_ROW)
   for i=1,distanceBack do
     forceForward()
   end

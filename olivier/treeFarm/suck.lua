@@ -49,7 +49,7 @@ function dropOffAndComeBack()
     forceForward()
   end
   turtle.turnRight()
-  for i=1,7 do
+  for i=1,8 do
     forceForward()
   end
   turtle.turnRight()
@@ -65,16 +65,15 @@ function dropOffAndComeBack()
     forceDown()
   end
   turtle.turnRight()
-  for i=1,7 do
+  for i=1,8 do
     forceForward()
   end
   turtle.turnLeft()
   for i=1,12 do
     forceForward()
   end
-  for i=1,4 do
-    forceUp()
-  end
+  forceUp()
+  forceUp()
   turtle.turnLeft()
   turtle.turnLeft()
 end

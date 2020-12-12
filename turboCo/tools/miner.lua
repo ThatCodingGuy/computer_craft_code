@@ -2,6 +2,10 @@ local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
 
 local class = lua_helpers.class
 
+--- An interpreter of key events. It translates the events into turtle commands, specializing in
+-- mining.
+-- @param event_handler The event handler implementation which this class will use to register
+-- itself as a key handler.
 Miner = class({}, function(event_handler)
     local function end_mining()
         event_handler.setListening(false)
@@ -27,6 +31,7 @@ Miner = class({}, function(event_handler)
         end
     end
 
+    --- Starts listening to key events and translates them into turtle commands as they arrive.
     local function start()
         event_handler.addHandle("key", call_mapped_key_handler)
         event_handler.pullEvents()

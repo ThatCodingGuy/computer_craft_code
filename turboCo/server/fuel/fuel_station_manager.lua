@@ -9,11 +9,12 @@ modem.openModems()
 local protocol = "fuel_station"
 rednet.host(protocol, "fuel_station_host")
 
+local fuel_station_coordinate_file_name = args[2]
 local observable_station_coords = ObservableValue.new()
 local stations = FuelStationGroup.new(
         80 * 64 --[[Assumes that a stack of coal/charcoal is being used to refuel.]],
         observable_station_coords)
-local fuel_coord_parser = FuelCoordParser.new("./gitlib/turboCo/server/fuel/data/fuel_stations.lua")
+local fuel_coord_parser = FuelCoordParser.new(fuel_station_coordinate_file_name)
 local parser_task = RecurringTask.new(60, function()
     observable_station_coords.set_value(fuel_coord_parser.parse())
 end)

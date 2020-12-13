@@ -74,7 +74,6 @@ function getMoreIfNeeded(itemName, suckSlot)
     end
   end
 end
-  
 
 function forceUp()
   local success = turtle.up()
@@ -215,7 +214,7 @@ function countWood()
   return woodCount
 end
 
-function dropOffWood()
+function dropOffWoodToChest()
   local woodCount = countWood()
   local woodDropAmount = math.floor(woodCount * ((100 - COAL_PERCENTAGE) / 100))
   for i=1,NUM_SLOTS do
@@ -230,6 +229,16 @@ function dropOffWood()
     end
   end
   return woodCount 
+end
+
+function dropOffWoodToFurnace()
+  for i=1,NUM_SLOTS do
+    local itemDetail = turtle.getItemDetail(i)
+    if itemDetail ~= nil and WOOD_NAME == itemDetail.name then
+      turtle.select(i)
+      turtle.dropDown()
+    end
+  end
 end
 
 function getFuelFromChestIfNeeded()
@@ -255,8 +264,7 @@ function goToFurnaceAndManageFuel()
   turtle.drop()
   forceUp()
   forceForward()
-  turtle.select(WOOD_SLOT)
-  turtle.dropDown()
+  dropOffWoodToFurnace()
   forceForward()
   forceDown()
   getFuelFromChestIfNeeded()
@@ -283,7 +291,7 @@ while true do
   getMoreIfNeeded(SAPLING_NAME, SAPLING_SLOT)
   turtle.turnRight()
   if countWood() > 20 then
-    dropOffWood()
+    dropOffWoodToChest()
     goToFurnaceAndManageFuel()
     comeBackFromFurnace()
   else

@@ -1,35 +1,31 @@
-os.loadAPI("/gitlib/turboCo/movement.lua")
-os.loadAPI("/gitlib/turboCo/modem.lua")
+local modem = dofile("./gitlib/turboCo/modem.lua")
+local ObservableValue = dofile("./gitlib/turboCo/observable_value.lua")
+local RecurringTask = dofile("./gitlib/turboCo/recurring_task.lua")
+local FuelCoordParser = dofile("./gitlib/turboCo/server/fuel/fuel_coord_parser.lua")
+local FuelStationGroup = dofile("./gitlib/turboCo/server/fuel/fuel_station_group.lua")
 
 modem.openModems()
 
 local protocol = "fuel_station"
 rednet.host(protocol, "fuel_station_host")
 
-local stations = {}
-stations[movement.coord(-91, 73, 400)] = 0
-stations[movement.coord(-92, 73, 400)] = 0
-stations[movement.coord(-93, 73, 400)] = 0
+local observable_station_coords = ObservableValue.new()
+local stations = FuelStationGroup.new(
+        80 * 64 --[[Assumes that a stack of coal/charcoal is being used to refuel.]],
+        observable_station_coords)
+local fuel_coord_parser = FuelCoordParser.new("./gitlib/turboCo/server/fuel/data/fuel_stations.lua")
+local parser_task = RecurringTask.new(60, function()
+    observable_station_coords.set_value(fuel_coord_parser.parse())
+end)
 
 local function fuel_request(sender_id, request)
-    local distance = 999999999999;
-    local nearest = nil;
-    for k, v in pairs(stations) do
-        if v == 0 then
-            local station_distance = movement.distance(k, request["position"])
-            if station_distance < distance then
-                print("Station distance: "..station_distance.." "..k)
-                nearest = k
-                distance = station_distance
-            end
-        end
-    end
+    local nearest = stations.find_nearest(request["position"])
 
-    if nearest then 
+    if nearest then
         local response = {}
         response["status"] = "success"
         response["position"] = nearest
-        stations[nearest] = sender_id
+        stations.reserve(nearest, sender_id)
         return response
     end
 
@@ -39,19 +35,13 @@ local function fuel_request(sender_id, request)
 end
 
 local function fuel_done(sender_id, request)
-
-    for k, v in pairs(stations) do
-        if v == sender_id then
-            stations[k] = 0
-        end
-    end
-
+    stations.release(sender_id)
     local response = {}
     response["status"] = "success"
     return response
 end
 
-local function receive() 
+local function receive()
     while true do
         senderId, message = rednet.receive(protocol, 10)
         if senderId then
@@ -64,7 +54,9 @@ local router = {}
 router["refuel"] = fuel_request
 router["refuel_done"] = fuel_done
 
+parser_task.start()
 while true do
+    parser_task.update()
     local senderId, message = receive()
     local request = textutils.unserializeJSON(message)
     local request_type = request["type"]

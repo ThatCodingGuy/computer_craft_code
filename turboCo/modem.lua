@@ -1,5 +1,3 @@
-
-
 local directions = {}
 table.insert(directions, "front")
 table.insert(directions, "back")
@@ -23,3 +21,8 @@ function closeModems()
         end
     end
 end
+
+return {
+    openModems = openModems,
+    closeModems = closeModems,
+}

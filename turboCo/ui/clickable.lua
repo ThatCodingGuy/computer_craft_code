@@ -83,25 +83,6 @@ local function create(args)
     end
   end
 
-  local timerCallback = function(eventData)
-    --we want to flip back the colors 
-    if eventData[2] == self.clickTimerId then
-      self.screenBuffer.write{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.bufferCursorPos}
-      self.clickTimerId = nil
-      if isActive() then
-        self.screenBuffer.render()
-      end
-    end
-  end
-
-  local getLeftClickCallback = function()
-    return self.leftClickCallback
-  end
-
-  local getRightClickCallback = function()
-    return self.rightClickCallback
-  end
-
   local addLeftClickCallback = function(callbackFunc)
     if callbackFunc ~= nil then
       table.insert(self.leftClickCallbacks, callbackFunc)
@@ -118,7 +99,7 @@ local function create(args)
     self.text = args.text or self.text
     self.bgColor = args.bgColor or self.bgColor
     self.textColor = args.textColor or self.textColor
-    
+
     self.screenBuffer.write{text=self.text, color=self.bgColor, bgColor=self.textColor, bufferCursorPos=self.bufferCursorPos}
     self.screenBuffer.render()
   end

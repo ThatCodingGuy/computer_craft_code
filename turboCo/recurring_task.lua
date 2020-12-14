@@ -8,6 +8,7 @@ local class = lua_helpers.class
 RecurringTask = class({}, function(interval, perform_task)
     local self = {
         task = coroutine.create(function()
+            perform_task()
             local start_time = os.clock()
             while true do
                 local end_time = os.clock()

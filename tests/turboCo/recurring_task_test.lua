@@ -17,28 +17,28 @@ describe("Recurring task", function()
     end)
 
     it("Should yield when timer not expired", function()
-        local task_performed = false
+        local task_performed_count = 0
         local task = RecurringTask.new(100, function()
-            task_performed = true
+            task_performed_count = task_performed_count + 1
         end)
 
         task.start()
         advance_clock(99)
         task.update()
 
-        assert.are.equal(false, task_performed)
+        assert.are.equal(1, task_performed_count)
     end)
 
     it("Should execute task when timer expires", function()
-        local task_performed = false
+        local task_performed_count = 0
         local task = RecurringTask.new(100, function()
-            task_performed = true
+            task_performed_count = task_performed_count + 1
         end)
 
         task.start()
         advance_clock(100)
         task.update()
 
-        assert.are.equal(true, task_performed)
+        assert.are.equal(2, task_performed_count)
     end)
 end)

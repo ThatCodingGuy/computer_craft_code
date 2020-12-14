@@ -25,7 +25,6 @@ local function create(args)
     --We want to flip the colors
     self.clickable.updateText{text=self.text, color=self.bgColor, bgColor=self.textColor, bufferCursorPos=self.bufferCursorPos}
     self.clickTimerId = os.startTimer(0.15)
-    self.clickable.leftClickCallback()
   end
 
   local timerCallback = function(eventData)

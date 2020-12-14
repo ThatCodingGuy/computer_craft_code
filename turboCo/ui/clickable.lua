@@ -48,9 +48,9 @@ local function create(args)
   local mouseClickHandler = function(eventData)
     local button, x, y = eventData[2], eventData[3], eventData[4]
     if wasClicked(x, y) then
-      if button == 1 and self.leftClickCallback ~= nil then
+      if button == 1 then
         executeLeftCLickCallbacks()
-      elseif button == 2 and self.rightClickCallback ~= nil then
+      elseif button == 2 then
         executeRightClickCallbacks()
       end
     end

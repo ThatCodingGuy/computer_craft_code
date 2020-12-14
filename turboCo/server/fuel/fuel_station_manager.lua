@@ -5,7 +5,7 @@ local RecurringTask = dofile("./gitlib/turboCo/recurring_task.lua")
 local FuelCoordParser = dofile("./gitlib/turboCo/server/fuel/fuel_coord_parser.lua")
 local FuelStationGroup = dofile("./gitlib/turboCo/server/fuel/fuel_station_group.lua")
 
-Logger.log_level_filter = Logger.LogLevel.INFO
+Logger.log_level_filter = Logger.LoggingLevel.INFO
 local logger = Logger.new()
 local fuel_station_coordinate_file_name = arg[2]
 

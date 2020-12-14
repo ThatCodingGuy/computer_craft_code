@@ -1,3 +1,4 @@
+local Logger = dofile("./gitlib/turboCo/logger.lua")
 local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
 local movement = dofile("./gitlib/turboCo/movement.lua")
 
@@ -5,6 +6,7 @@ local class = lua_helpers.class
 
 FuelStationGroup = class({}, function(refuel_amount, observable_coords)
     local self = {
+        logger = Logger.new(),
         max_distance = refuel_amount / 8,
         available_stations = {},
         reserved_stations = {},
@@ -12,6 +14,8 @@ FuelStationGroup = class({}, function(refuel_amount, observable_coords)
 
     local function update_and_resolve_stations(new_coords)
         local all_new_coords = {}
+        local additions = ""
+        local deletions = ""
 
         -- Add any new stations introduced.
         for _, coords in ipairs(new_coords) do
@@ -19,6 +23,7 @@ FuelStationGroup = class({}, function(refuel_amount, observable_coords)
             if self.available_stations[coords] == nil
                     and self.reserved_stations[coords] == nil then
                 self.available_stations[coords] = true
+                additions = additions .. "\n\t[" .. coords .. "]"
             end
         end
 
@@ -26,13 +31,19 @@ FuelStationGroup = class({}, function(refuel_amount, observable_coords)
         for coords, _ in pairs(self.available_stations) do
             if all_new_coords[coords] == nil then
                 self.available_stations[coords] = nil
+                deletions = deletions .. "\n\t[" .. coords .. "]"
             end
         end
         for coords, _ in pairs(self.reserved_stations) do
             if all_new_coords[coords] == nil then
                 self.reserved_stations[coords] = nil
+                deletions = deletions .. "\n\t[" .. coords .. "]"
             end
         end
+
+        self.logger.info(
+                "New station coordinates loaded.\nAdditions: "
+                        .. additions .. "\nDeletions: " .. deletions)
     end
 
     observable_coords.add_observer(update_and_resolve_stations)

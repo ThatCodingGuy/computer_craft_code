@@ -1,15 +1,24 @@
 local modem = dofile("./gitlib/turboCo/modem.lua")
 local ObservableValue = dofile("./gitlib/turboCo/observable_value.lua")
+local Logger  = dofile("./gitlib/turboCo/logger.lua")
 local RecurringTask = dofile("./gitlib/turboCo/recurring_task.lua")
 local FuelCoordParser = dofile("./gitlib/turboCo/server/fuel/fuel_coord_parser.lua")
 local FuelStationGroup = dofile("./gitlib/turboCo/server/fuel/fuel_station_group.lua")
+
+Logger.log_level_filter = Logger.LogLevel.INFO
+local logger = Logger.new()
+local fuel_station_coordinate_file_name = arg[2]
+
+if fuel_station_coordinate_file_name == nil then
+    logger.error("Expected a file name containing the station coordinates passed as argument.")
+    return
+end
 
 modem.openModems()
 
 local protocol = "fuel_station"
 rednet.host(protocol, "fuel_station_host")
 
-local fuel_station_coordinate_file_name = args[2]
 local observable_station_coords = ObservableValue.new()
 local stations = FuelStationGroup.new(
         80 * 64 --[[Assumes that a stack of coal/charcoal is being used to refuel.]],

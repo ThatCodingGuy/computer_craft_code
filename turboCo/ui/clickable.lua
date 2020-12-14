@@ -101,7 +101,9 @@ local function create(args)
     self.textColor = args.textColor or self.textColor
 
     self.screenBuffer.write{text=self.text, color=self.bgColor, bgColor=self.textColor, bufferCursorPos=self.bufferCursorPos}
-    self.screenBuffer.render()
+    if isActive() then
+      self.screenBuffer.render()
+    end
   end
 
   local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}

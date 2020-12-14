@@ -9,6 +9,8 @@ local PageViewManager = dofile("./gitlib/turboCo/ui/pageViewManager.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 
+local json = dofile("./gitlib/turboCo/json.lua")
+
 local categoryToColorMap = {
   inspire = colors.green,
   management = colors.yellow,
@@ -43,7 +45,7 @@ function getQuotes(pageNumber)
     print(responseStr)
     return
   end
-  worked, responseObject = pcall(textutils.unserializeJSON, responseStr)
+  worked, responseObject = pcall(json.decode, responseStr)
   if not worked then
     print(responseObject)
     return

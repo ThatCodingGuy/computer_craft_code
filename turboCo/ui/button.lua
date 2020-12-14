@@ -17,7 +17,7 @@ local function create(args)
   }
 
   local self = {
-    clickable = clickable
+    clickable = clickable,
     clickTimerId = nil
   }
 

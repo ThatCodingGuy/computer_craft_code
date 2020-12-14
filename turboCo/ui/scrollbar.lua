@@ -38,7 +38,7 @@ local function create(args)
   local barContent = ScreenContent.create{
     screenBuffer = scrollBarScreenBuffer,
     text = getBarText(),
-    bgColor = 
+    bgColor = colors.lightBlue
   }
 
   local scrollDownButton = Button.create{

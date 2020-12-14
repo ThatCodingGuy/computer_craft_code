@@ -97,10 +97,10 @@ local function create(args)
 
   local updateText = function(args)
     self.text = args.text or self.text
-    self.bgColor = args.bgColor or self.bgColor
     self.textColor = args.textColor or self.textColor
+    self.bgColor = args.bgColor or self.bgColor
 
-    self.screenBuffer.write{text=self.text, color=self.bgColor, bgColor=self.textColor, bufferCursorPos=self.bufferCursorPos}
+    self.screenBuffer.write{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.bufferCursorPos}
     if isActive() then
       self.screenBuffer.render()
     end

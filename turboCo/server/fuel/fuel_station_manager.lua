@@ -66,8 +66,8 @@ router["refuel_done"] = fuel_done
 
 parser_task.start()
 while true do
-    parser_task.update()
     local senderId, message = receive()
+    parser_task.update()
     local request = textutils.unserializeJSON(message)
     local request_type = request["type"]
     local response = router[request_type](senderId, request)

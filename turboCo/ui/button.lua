@@ -18,6 +18,9 @@ local function create(args)
 
   local self = {
     clickable = clickable,
+    text = args.text,
+    textColor = args.textColor,
+    bgColor = args.bgColor,
     clickTimerId = nil
   }
 

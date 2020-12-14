@@ -23,14 +23,14 @@ local function create(args)
 
   local leftClick = function()
     --We want to flip the colors
-    self.clickable.updateText{text=self.text, color=self.bgColor, bgColor=self.textColor, bufferCursorPos=self.bufferCursorPos}
+    self.clickable.updateText{text=self.text, textColor=self.bgColor, bgColor=self.textColor}
     self.clickTimerId = os.startTimer(0.15)
   end
 
   local timerCallback = function(eventData)
     --we want to flip back the colors 
     if eventData[2] == self.clickTimerId then
-      self.clickable.updateText{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.bufferCursorPos}
+      self.clickable.updateText{text=self.text, textColor=self.textColor, bgColor=self.bgColor}
       self.clickTimerId = nil
     end
   end

@@ -118,6 +118,7 @@ local function create(args)
     self.text = args.text or self.text
     self.bgColor = args.bgColor or self.bgColor
     self.textColor = args.textColor or self.textColor
+    
     self.screenBuffer.write{text=self.text, color=self.bgColor, bgColor=self.textColor, bufferCursorPos=self.bufferCursorPos}
     self.screenBuffer.render()
   end

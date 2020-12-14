@@ -7,7 +7,7 @@ local FuelStationGroup = dofile("./gitlib/turboCo/server/fuel/fuel_station_group
 
 Logger.log_level_filter = Logger.LoggingLevel.INFO
 local logger = Logger.new()
-local fuel_station_coordinate_file_name = arg[2]
+local fuel_station_coordinate_file_name = arg[1]
 
 if fuel_station_coordinate_file_name == nil then
     logger.error("Expected a file name containing the station coordinates passed as argument.")

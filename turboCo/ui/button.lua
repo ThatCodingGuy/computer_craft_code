@@ -38,7 +38,7 @@ local function create(args)
 
   args.eventHandler.addHandle("timer", timerCallback)
   self.clickable.addLeftClickCallback(leftClick)
-  makeActive()
+  self.clickable.makeActive()
 
   return {
     addLeftClickCallback=self.clickable.addLeftClickCallback,

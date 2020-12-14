@@ -18,27 +18,29 @@ local function create(args)
 
   local self = {
     clickable = clickable,
+    text = args.text,
+    textColor = args.textColor,
+    bgColor = args.bgColor,
     clickTimerId = nil
   }
 
   local leftClick = function()
     --We want to flip the colors
-    self.clickable.updateText{text=self.text, color=self.bgColor, bgColor=self.textColor, bufferCursorPos=self.bufferCursorPos}
+    self.clickable.updateText{text=self.text, textColor=self.bgColor, bgColor=self.textColor}
     self.clickTimerId = os.startTimer(0.15)
-    self.clickable.leftClickCallback()
   end
 
   local timerCallback = function(eventData)
     --we want to flip back the colors 
     if eventData[2] == self.clickTimerId then
-      self.clickable.updateText{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.bufferCursorPos}
+      self.clickable.updateText{text=self.text, textColor=self.textColor, bgColor=self.bgColor}
       self.clickTimerId = nil
     end
   end
 
   args.eventHandler.addHandle("timer", timerCallback)
   self.clickable.addLeftClickCallback(leftClick)
-  makeActive()
+  self.clickable.makeActive()
 
   return {
     addLeftClickCallback=self.clickable.addLeftClickCallback,

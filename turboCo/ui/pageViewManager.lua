@@ -38,6 +38,7 @@ local function create(args)
     self.currPage = index
     local page = self.pages[self.currPage]
     page.makeActive()
+
     if self.scrollHandler ~= nil then
       self.scrollHandler.changeScreenBuffer(page.getScreenBuffer())
     end
@@ -68,28 +69,12 @@ local function create(args)
     switchToPage(#self.pages)
   end
 
-  local leftButtonClickCallback = function()
-    if self.leftButtonOrigCallback ~= nil then
-      self.leftButtonOrigCallback()
-    end
-    switchToPreviousPage()
-  end
-
-  local rightButtonClickCallback = function()
-    if self.rightButtonOrigCallback ~= nil then
-      self.rightButtonOrigCallback()
-    end
-    switchToNextPage()
-  end
-
   if self.leftButton ~= nil then
-    self.leftButtonOrigCallback = self.leftButton.getLeftClickCallback()
-    self.leftButton.setLeftClickCallback(leftButtonClickCallback)
+    self.leftButton.addLeftClickCallback(switchToPreviousPage)
   end
 
   if self.rightButton ~= nil then
-    self.rightButtonOrigCallback = self.rightButton.getLeftClickCallback()
-    self.rightButton.setLeftClickCallback(rightButtonClickCallback)
+    self.rightButton.addLeftClickCallback(switchToNextPage)
   end
 
   return {

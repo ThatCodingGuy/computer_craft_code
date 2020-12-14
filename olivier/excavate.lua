@@ -1,10 +1,10 @@
+local TURTLE_MAX_FUEL = 20000
+
 local tArgs = { ... }
 if #tArgs ~= 1 then
 	print( "Usage: excavate <diameter>" )
 	return
 end
-
-local 
 
 -- Mine in a quarry pattern until we hit something we can't dig
 local size = tonumber( tArgs[1] )
@@ -22,30 +22,36 @@ local xDir,zDir = 0,1
 
 local goTo -- Filled in further down
 local refuel -- Filled in further down
+
+local function getBiggestFuelSlot()
+  local biggestFuelCount = 0
+  local biggestFuelSlot = 0 -- 0 means no fuel found yet
+  for n=1,16 do
+    turtle.select(n)
+    if turtle.refuel(0) then
+      local fuelCount = turtle.getItemCount()
+      if fuelCount > biggestFuelCount then
+        biggestFuelCount = fuelCount
+        biggestFuelSlot = n
+      end
+    end
+  end
+  return biggestFuelSlot
+end
  
-local function unload( _bKeepOneFuelStack )
-	print( "Unloading items..." )
+local function unload( keepBiggestStack )
+  print( "Unloading items..." )
+  local biggestFuelSlot = getBiggestFuelSlot()
 	for n=1,16 do
 		local nCount = turtle.getItemCount(n)
-		if nCount > 0 then
-			turtle.select(n)			
-			local bDrop = true
-			if _bKeepOneFuelStack and turtle.refuel(0) then
-				bDrop = false
-				_bKeepOneFuelStack = false
-			end			
-			if bDrop then
-				turtle.drop()
-				unloaded = unloaded + nCount
-			end
+		if nCount > 0 and n ~= biggestFuelSlot then
+      turtle.select(n)
+      turtle.drop()
+      unloaded = unloaded + nCount
 		end
 	end
 	collected = 0
 	turtle.select(1)
-end
-
-local checkForFuel()
-
 end
 
 local function returnSupplies()
@@ -53,11 +59,11 @@ local function returnSupplies()
 	print( "Returning to surface..." )
 	goTo( 0,0,0,0,-1 )
 	
-	local fuelNeeded = 2*(x+y+z) + 1
-	if not refuel( fuelNeeded ) then
+	if not refuel( TURTLE_MAX_FUEL ) then
 		unload( true )
-		print( "Waiting for fuel" )
-		while not refuel( fuelNeeded ) do
+    while not refuel( TURTLE_MAX_FUEL ) do
+      local fuelLevel = turtle.getFuelLevel()
+      print(string.format("Waiting for fuel. Fuel level at %s. Needs %s.", fuelLevel, TURTLE_MAX_FUEL))
 			os.pullEvent( "turtle_inventory" )
 		end
 	else
@@ -99,7 +105,7 @@ function refuel( ammount )
 		return true
 	end
 	
-	local needed = ammount or (xPos + zPos + depth + 2)
+  local needed = ammount or (xPos + zPos + depth + 2)
 	if turtle.getFuelLevel() < needed then
 		local fueled = false
 		for n=1,16 do

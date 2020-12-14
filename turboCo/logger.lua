@@ -9,6 +9,11 @@ local LoggingLevel = enum {
 local print_to_output = print
 local log_level_filter = LoggingLevel.WARNING
 
+-- Make sure there's a single global instance of the Logger module.
+if _G.Logger ~= nil then
+    return _G.Logger
+end
+
 --- A simple logger that allows writing messages to stdout.
 -- @param print_to_stdout An optional function that prints the contents to whatever output should be
 -- used.
@@ -40,10 +45,12 @@ Logger = class({
     end
 
     return {
+        debug = debug,
         info = info,
         warn = warn,
         error = error,
     }
 end)
 
-return Logger
+_G.Logger = Logger
+return _G.Logger

@@ -30,8 +30,12 @@ function stop(tapeDrive, tArgs)
   tapeDrive.stop()
 end
 
+function getPosition(tapeDrive, tArgs)
+  print(tapeDrive.getPosition())
+end
+
 function getLabel(tapeDrive, tArgs)
-  tapeDrive.getLabel()
+  print(tapeDrive.getLabel())
 end
 
 function setLabel(tapeDrive, tArgs)
@@ -39,7 +43,9 @@ function setLabel(tapeDrive, tArgs)
     print("Usage: tape setLabel <label_name>")
     return
   end
-  tapeDrive.setLabel(tArgs[2])
+  local newLabel = tArgs[2]
+  tapeDrive.setLabel(newLabel)
+  print(string.format("new label set to '%s'", newLabel))
 end
 
 local commands = {
@@ -47,6 +53,7 @@ local commands = {
   play=play,
   rewind=rewind,
   stop=stop,
+  getPosition=getPosition,
   setLabel=setLabel,
   getLabel=getLabel
 }

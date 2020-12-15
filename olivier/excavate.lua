@@ -23,6 +23,18 @@ local xDir,zDir = 0,1
 local goTo -- Filled in further down
 local refuel -- Filled in further down
 
+local function dumpCobblestoneStacks()
+	for i=1,16 do
+		local itemDetail = turtle.getItemDetail(i)
+		if itemDetail ~= nil and itemDetail.name == "minecraft:cobblestone" and turtle.getItemSpace(i) == 0 then
+			local selectedSlot = turtle.getSelectedSlot()
+			turtle.select(i)
+			turtle.drop()
+			turtle.select(selectedSlot)
+		end
+	end
+end
+
 local function getBiggestFuelSlot()
   local biggestFuelCount = 0
   local biggestFuelSlot = 0 -- 0 means no fuel found yet
@@ -54,14 +66,18 @@ local function unload( keepBiggestStack )
 	turtle.select(1)
 end
 
-local function returnSupplies()
+local function returnSupplies(lowOnFuel)
 	local x,y,z,xd,zd = xPos,depth,zPos,xDir,zDir
 	print( "Returning to surface..." )
 	goTo( 0,0,0,0,-1 )
-	
-	if not refuel( TURTLE_MAX_FUEL ) then
+
+	local refuelToLevel = nil
+	if lowOnFuel then
+		refuelToLevel = TURTLE_MAX_FUEL
+	end
+	if not refuel( refuelToLevel ) then
 		unload( true )
-    while not refuel( TURTLE_MAX_FUEL ) do
+    while not refuel( refuelToLevel ) do
       local fuelLevel = turtle.getFuelLevel()
       print(string.format("Waiting for fuel. Fuel level at %s. Needs %s.", fuelLevel, TURTLE_MAX_FUEL))
 			os.pullEvent( "turtle_inventory" )
@@ -132,21 +148,29 @@ end
 local function tryForwards()
 	if not refuel() then
 		print( "Not enough Fuel" )
-		returnSupplies()
+		returnSupplies(true)
 	end
-	
 	while not turtle.forward() do
 		if turtle.detect() then
 			if turtle.dig() then
+				--first try to dump extra cobble
 				if not collect() then
-					returnSupplies()
+					dumpCobblestoneStacks()
+				end
+				if not collect() then
+					returnSupplies(false)
 				end
 			else
 				return false
 			end
 		elseif turtle.attack() then
+			--first try to dump extra cobble
 			if not collect() then
-				returnSupplies()
+				dumpCobblestoneStacks()
+			end
+
+			if not collect() then
+				returnSupplies(false)
 			end
 		else
 			sleep( 0.5 )
@@ -161,21 +185,31 @@ end
 local function tryDown()
 	if not refuel() then
 		print( "Not enough Fuel" )
-		returnSupplies()
+		returnSupplies(true)
 	end
 	
 	while not turtle.down() do
 		if turtle.detectDown() then
 			if turtle.digDown() then
+				--first try to dump extra cobble
 				if not collect() then
-					returnSupplies()
+					dumpCobblestoneStacks()
+				end
+
+				if not collect() then
+					returnSupplies(false)
 				end
 			else
 				return false
 			end
 		elseif turtle.attackDown() then
+			--first try to dump extra cobble
 			if not collect() then
-				returnSupplies()
+				dumpCobblestoneStacks()
+			end
+
+			if not collect() then
+				returnSupplies(false)
 			end
 		else
 			sleep( 0.5 )

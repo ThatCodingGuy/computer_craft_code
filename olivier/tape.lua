@@ -4,17 +4,23 @@ function write(tapeDrive, tArgs)
     print("Usage: tape write <path_to_file>")
     return
   end
-  local f = fs.open(tArgs[2], "rb")
-  local byte
-  repeat
-    byte = f.read()
-    if byte then drive.write(byte) end
-  until not byte
-  f.close()
+  local filePath = tArgs[2]
+  local f = fs.open(filePath, "rb")
+  if f then
+    local byte
+    repeat
+      byte = f.read()
+      if byte then drive.write(byte) end
+    until not byte
+    f.close()
+  else
+    print(string.format("no file found on path %s", filePath))
+  end
 end
 
 function play(tapeDrive, tArgs)
   tapeDrive.play()
+  print("playing cassette")
 end
 
 function rewind(tapeDrive, tArgs)
@@ -24,10 +30,12 @@ function rewind(tapeDrive, tArgs)
     return
   end
   tapeDrive.seek(position * -1)
+  print("tape rewinded to beginning")
 end
 
 function stop(tapeDrive, tArgs)
   tapeDrive.stop()
+  print("tape stopped")
 end
 
 function getPosition(tapeDrive, tArgs)
@@ -48,6 +56,28 @@ function setLabel(tapeDrive, tArgs)
   print(string.format("new label set to '%s'", newLabel))
 end
 
+function setVolume(tapeDrive, tArgs)
+  if tArgs ~= 2 then
+    print("Usage: tape setVolume <volume>")
+    print("<volume> is a number from 0.0 to 1.0")
+    return
+  end
+  local newVolume = tArgs[2]
+  tapeDrive.setVolume(newVolume)
+  print(string.format("new volume set to '%s'", newVolume))
+end
+
+function setSpeed(tapeDrive, tArgs)
+  if tArgs ~= 2 then
+    print("Usage: tape setSpeed <speed>")
+    print("speed is a value from 0.25 to 2.0, denoting the difference from regular tape speed, which is 1.0.")
+    return
+  end
+  local newSpeed = tArgs[2]
+  tapeDrive.setSpeed(newSpeed)
+  print(string.format("new speed set to '%s'", newSpeed))
+end
+
 local commands = {
   write=write,
   play=play,
@@ -55,14 +85,16 @@ local commands = {
   stop=stop,
   getPosition=getPosition,
   setLabel=setLabel,
-  getLabel=getLabel
+  getLabel=getLabel,
+  setVolume=setVolume,
+  setSpeed=setSpeed
 }
 
 local tArgs = { ... }
 
 if #tArgs < 1 then
   print("Usage: tape <command>")
-  print("Possible commands are ['write', rewind', 'play', 'stop', 'getLabel', 'setLabel']")
+  print("Possible commands are ['write', rewind', 'play', 'stop', 'getLabel', 'setLabel', 'setVolume', 'setSpeed']")
   return
 end
 
@@ -74,5 +106,5 @@ local func = commands[tArgs[1]]
 if func then
   func(drive, tArgs)
 else
-  print("Possible commands are ['write', rewind', 'play', 'stop', 'getLabel', 'setLabel']")
+  print("Possible commands are ['write', rewind', 'play', 'stop', 'getLabel', 'setLabel', 'setVolume', 'setSpeed']")
 end

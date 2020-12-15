@@ -1,6 +1,6 @@
 
 function write(tapeDrive, tArgs)
-  if tArgs ~= 2 then
+  if #tArgs ~= 2 then
     print("Usage: tape write <path_to_file>")
     return
   end
@@ -47,7 +47,7 @@ function getLabel(tapeDrive, tArgs)
 end
 
 function setLabel(tapeDrive, tArgs)
-  if tArgs ~= 2 then
+  if #tArgs ~= 2 then
     print("Usage: tape setLabel <label_name>")
     return
   end
@@ -57,7 +57,7 @@ function setLabel(tapeDrive, tArgs)
 end
 
 function setVolume(tapeDrive, tArgs)
-  if tArgs ~= 2 then
+  if #tArgs ~= 2 then
     print("Usage: tape setVolume <volume>")
     print("<volume> is a number from 0.0 to 1.0")
     return
@@ -68,7 +68,7 @@ function setVolume(tapeDrive, tArgs)
 end
 
 function setSpeed(tapeDrive, tArgs)
-  if tArgs ~= 2 then
+  if #tArgs ~= 2 then
     print("Usage: tape setSpeed <speed>")
     print("speed is a value from 0.25 to 2.0, denoting the difference from regular tape speed, which is 1.0.")
     return

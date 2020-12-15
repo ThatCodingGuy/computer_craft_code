@@ -45,7 +45,7 @@ describe("Recurring task", function()
 
     it("should wait correct amount of time when blocking on task", function()
         local sleep_calls = {}
-        _G.sleep = function(time_to_sleep)
+        os.sleep = function(time_to_sleep)
             table.insert(sleep_calls, time_to_sleep)
         end
         local task = RecurringTask.new(100, function()

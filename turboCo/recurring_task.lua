@@ -47,8 +47,7 @@ RecurringTask = class({}, function(interval, perform_task)
         local remaining_time = self.next_execution_details.remaining_time
         if time_since_last_clock_read < remaining_time then
             local sleep_time = remaining_time - time_since_last_clock_read
-            sleep(sleep_time)
-            print(current_time + sleep_time)
+            os.sleep(sleep_time)
             self.next_execution_details = {
                 remaining_time = 0,
                 last_clock_read = current_time + sleep_time

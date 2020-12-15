@@ -31,10 +31,6 @@ local function feed_cows()
     end
 end
 
-local self = {
-    feed_cows_task = RecurringTask.new(COW_BREED_COOLDOWN, feed_cows)
-}
-
 local function wait_for_food()
     if get_food_count() > 0 then
         return
@@ -42,17 +38,17 @@ local function wait_for_food()
 
     logger.info("Ran out of food. Waiting for more...")
     while get_food_count() <= 0 do
-        sleep(FOOD_CHECK_PERIOD)
+        os.sleep(FOOD_CHECK_PERIOD)
     end
 end
 
 local function run()
     Logger.log_level_filter = Logger.LoggingLevel.INFO
-    wait_for_food()
-    self.feed_cows_task.start()
+    local feed_cows_task = RecurringTask.new(COW_BREED_COOLDOWN, feed_cows)
     while true do
         wait_for_food()
-        self.feed_cows_task.wait_until_update()
+        feed_cows_task.wait_until_update()
+        feed_cows_task.update()
     end
 end
 

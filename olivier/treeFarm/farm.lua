@@ -20,12 +20,12 @@ local COAL_PERCENTAGE = 90
 local SLEEP_TIME = 180 -- 3 mins
 
 function refuelIfNeeded()
-  if turtle.getFuelLevel() < 1000 then
+  if turtle.getFuelLevel() < 2000 then
     turtle.select(FUEL_SLOT)
     if turtle.getItemCount() < 5 then
       print("Ran out of fuel. plz fix.")
     else
-      turtle.refuel(10)
+      turtle.refuel()
     end
     turtle.select(WOOD_SLOT)
   end

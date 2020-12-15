@@ -4,7 +4,7 @@ local RANDOM_SHIT_SLOT = 2
 
 local SAPLING_NAME = "minecraft:sapling"
 
-local MAX_SAPLING_AMOUNT = 10
+local MAX_SAPLING_AMOUNT = 19
 local NUM_SLOTS = 16
 
 function refuelIfNeeded()

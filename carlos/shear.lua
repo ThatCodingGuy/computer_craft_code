@@ -1,11 +1,15 @@
 -- Spins in a circle an shears all sheep around the turtle. Note, placing
 -- dropping shears on the ground will shear any sheep in that square. Spinning
 -- and placing don't require fuel.
- 
+
 local inventory = require("inventory")
 
 local SECONDS_BETWEEN_EXPORTS = 20
 
+local is_above_chest = args[1]
+if is_above_chest == nil then
+    is_above_chest = false
+end
 local g_wool_count = 0
 local g_last_export_time = nil
 local g_should_export_stats = false
@@ -19,21 +23,21 @@ local function export_stats()
         return
     end
     if g_last_export_time == nil or
-       (os.clock() - g_last_export_time) > SECONDS_BETWEEN_EXPORTS then
+            (os.clock() - g_last_export_time) > SECONDS_BETWEEN_EXPORTS then
         print("exporting stats")
-        rednet.broadcast({total_wool=g_wool_count}, "shear_stats")
+        rednet.broadcast({ total_wool = g_wool_count }, "shear_stats")
         g_last_export_time = os.clock()
     end
 end
 
 if peripheral.getType("left") == "modem" then
-  g_should_export_stats = true
-  rednet.open("left")
+    g_should_export_stats = true
+    rednet.open("left")
 end
 
 while 1 do
-    for i=1,4 do
-        if not inventory.selectItemWithName("minecraft:shears")  then
+    for i = 1, 4 do
+        if not inventory.selectItemWithName("minecraft:shears") then
             error("I have no shears")
         end
         turtle.place()
@@ -43,6 +47,9 @@ while 1 do
     local new_wool_count = 0
     for _, item_type in ipairs(wool_item_types) do
         new_wool_count = new_wool_count + inventory.countItemWithName(item_type)
+        if is_above_chest and inventory.selectItemWithName(item_type) then
+            turtle.dropDown()
+        end
     end
     if new_wool_count ~= g_wool_count then
         g_wool_count = new_wool_count

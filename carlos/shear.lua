@@ -12,16 +12,9 @@ if arg[1] == nil or arg[1] == "false" then
 else
     is_above_chest = true
 end
-if is_above_chest == nil then
-    is_above_chest = false
-end
 local g_wool_count = 0
 local g_last_export_time = nil
 local g_should_export_stats = false
-local wool_item_types = {
-    "minecraft:black_wool",
-    "minecraft:purple_wool"
-}
 
 local function export_stats()
     if not g_should_export_stats then
@@ -50,11 +43,9 @@ while 1 do
         turtle.turnLeft()
     end
     local new_wool_count = 0
-    for _, item_type in ipairs(wool_item_types) do
-        new_wool_count = new_wool_count + inventory.countItemWithName(item_type)
-        if is_above_chest and inventory.selectItemWithName(item_type) then
-            turtle.dropDown()
-        end
+    new_wool_count = new_wool_count + inventory.countItemWithName("minecraft:wool")
+    if is_above_chest and inventory.selectItemWithName("minecraft:wool") then
+        turtle.dropDown()
     end
     if new_wool_count ~= g_wool_count then
         g_wool_count = new_wool_count

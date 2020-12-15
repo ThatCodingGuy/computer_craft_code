@@ -65,7 +65,7 @@ if drive == nil then
 end
 local func = commands[tArgs[1]]
 if func then
-  func()
+  func(drive, tArgs)
 else
   print("Possible commands are ['write', rewind', 'play', 'stop', 'getLabel', 'setLabel']")
 end

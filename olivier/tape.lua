@@ -10,7 +10,7 @@ function write(tapeDrive, tArgs)
     local byte
     repeat
       byte = f.read()
-      if byte then drive.write(byte) end
+      if byte then tapeDrive.write(byte) end
     until not byte
     f.close()
   else

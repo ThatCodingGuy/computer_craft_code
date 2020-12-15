@@ -6,7 +6,7 @@ local inventory = require("inventory")
 
 local SECONDS_BETWEEN_EXPORTS = 20
 
-local is_above_chest = args[1]
+local is_above_chest = arg[1]
 if is_above_chest == nil then
     is_above_chest = false
 end

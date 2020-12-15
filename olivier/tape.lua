@@ -62,7 +62,7 @@ function setVolume(tapeDrive, tArgs)
     print("<volume> is a number from 0.0 to 1.0")
     return
   end
-  local newVolume = tArgs[2]
+  local newVolume = tonumber(tArgs[2])
   tapeDrive.setVolume(newVolume)
   print(string.format("new volume set to '%s'", newVolume))
 end
@@ -73,7 +73,7 @@ function setSpeed(tapeDrive, tArgs)
     print("speed is a value from 0.25 to 2.0, denoting the difference from regular tape speed, which is 1.0.")
     return
   end
-  local newSpeed = tArgs[2]
+  local newSpeed = tonumber(tArgs[2])
   tapeDrive.setSpeed(newSpeed)
   print(string.format("new speed set to '%s'", newSpeed))
 end

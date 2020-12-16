@@ -10,6 +10,7 @@ local function create(args)
     screenBuffer=args.screenBuffer,
     screenBufferWriteFunc=args.screenBufferWriteFunc,
     eventHandler=args.eventHandler,
+    id=args.id,
     text=args.text,
     textColor=args.textColor,
     bgColor=args.bgColor,
@@ -18,7 +19,7 @@ local function create(args)
     currentScreenPos= { x=0, y=0 },
     bufferCursorPos= { x=0, y=0 },
     monitorTouchKeyHandlerId = nil,
-    mouseClickKeyHandlerId = nil,
+    mouseClickKeyHandlerId = nil
   }
 
   local wasClicked = function(x, y)
@@ -28,13 +29,13 @@ local function create(args)
 
   local executeLeftCLickCallbacks = function()
     for _,callback in pairs(self.leftClickCallbacks) do
-      callback()
+      callback(self.id)
     end
   end
 
   local executeRightClickCallbacks = function()
     for _,callback in pairs(self.rightClickCallbacks) do
-      callback()
+      callback(self.id)
     end
   end
 

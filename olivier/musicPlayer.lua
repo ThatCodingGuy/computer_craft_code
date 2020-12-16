@@ -18,7 +18,8 @@ local idMap = {
   [1]="/gitlib/olivier/music/doom.dfpwm",
   [2]="/gitlib/olivier/music/letItSnow.dfpwm",
   [3]="/gitlib/olivier/music/mario.dfpwm",
-  [4]="/gitlib/olivier/music/megalovania.dfpwm"
+  [4]="/gitlib/olivier/music/megalovania.dfpwm",
+  [5]="/gitlib/olivier/music/dangerZone.dfpwm"
 }
 
 function write(tapeDrive, filePath)
@@ -85,6 +86,14 @@ radioGroup.addRadioInput(RadioInput.create{
 radioGroup.addRadioInput(RadioInput.create{
   id=4,
   title="Megalovania",
+  screenBuffer=screenBuffer,
+  screenBufferWriteFunc=screenBuffer.writeLn,
+  eventHandler=eventHandler
+})
+
+radioGroup.addRadioInput(RadioInput.create{
+  id=5,
+  title="Danger Zone",
   screenBuffer=screenBuffer,
   screenBufferWriteFunc=screenBuffer.writeLn,
   eventHandler=eventHandler

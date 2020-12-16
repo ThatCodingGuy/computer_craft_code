@@ -30,6 +30,9 @@ local screenBottomBuffer = nil
 local eventHandler = EventHandler.create()
 
 local screen = peripheral.find("monitor")
+if screen == nil then
+  screen = term.current()
+end
 screen.clear()
 
 function getQuotes(pageNumber)

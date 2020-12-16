@@ -5,8 +5,6 @@ local RadioInput = dofile("./gitlib/turboCo/ui/radioInput.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 
-os.loadAPI('./gitlib/olivier/tape.lua')
-
 local screen = peripheral.find("monitor")
 if screen == nil then
   screen = term.current()
@@ -23,18 +21,41 @@ local idMap = {
   [4]="/gitlib/olivier/music/megalovania.dfpwm"
 }
 
+function write(tapeDrive, filePath)
+  local f = fs.open(filePath, "rb")
+  if f then
+    local byte
+    repeat
+      byte = f.read()
+      if byte then tapeDrive.write(byte) end
+    until not byte
+    f.close()
+  else
+    print(string.format("no file found on path %s", filePath))
+  end
+end
+
+function rewind(tapeDrive)
+  local position = tapeDrive.getPosition()
+  if position <= 0 then
+    return
+  end
+  tapeDrive.seek(position * -1)
+end
+
 function play()
   local fileName = idMap[radioGroup.getSelected().getId()]
   if fileName then
-    tape.rewind(tapeDrive)
-    tape.write(tapeDrive, {"write", fileName})
+    tapeDrive.stop()
+    rewind(tapeDrive)
+    write(tapeDrive, fileName)
     tape.rewind(tapeDrive)
   end
-  tape.play(tapeDrive)
+  tapeDrive.play()
 end
 
 function stop()
-  tape.stop(tapeDrive)
+  tapeDrive.stop()
 end
 
 radioGroup.addRadioInput(RadioInput.create{

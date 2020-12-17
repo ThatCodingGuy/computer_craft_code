@@ -29,9 +29,22 @@ local screenTopBuffer = nil
 local screenBottomBuffer = nil
 local eventHandler = EventHandler.create()
 
-local screen = peripheral.find("monitor")
+local tArgs = { ... }
+local screen = nil
+if #tArgs > 0 then
+  local screenSide = tArgs[1]
+  if screenSide == "term" then
+    screen = term.current()
+  else
+    screen = peripheral.wrap(screenSide)
+  end
+end
+
 if screen == nil then
-  screen = term.current()
+  screen = peripheral.find("monitor")
+  if screen == nil then
+    screen = term.current()
+  end
 end
 screen.clear()
 
@@ -160,10 +173,12 @@ getFirstQuotes()
 
 local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
 
-print("Press UP to scroll up, and DOWN to scroll down")
-print("Press LEFT to scroll left, and RIGHT to scroll right")
-print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
-print("Press END to exit cleanly")
+if screen ~= term.current() then
+  print("Press UP to scroll up, and DOWN to scroll down")
+  print("Press LEFT to scroll left, and RIGHT to scroll right")
+  print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
+  print("Press END to exit cleanly")
+end
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

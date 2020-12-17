@@ -15,15 +15,6 @@ local eventHandler = EventHandler.create()
 local screenBuffer = ScreenBuffer.createFullScreen{screen=screen}
 local radioGroup = RadioGroup.create()
 
-local idMap = {
-  [1]="/gitlib/olivier/music/doom.dfpwm",
-  [2]="/gitlib/olivier/music/letItSnow.dfpwm",
-  [3]="/gitlib/olivier/music/mario.dfpwm",
-  [4]="/gitlib/olivier/music/megalovania.dfpwm",
-  [5]="/gitlib/olivier/music/dangerZone.dfpwm",
-  [6]="/gitlib/olivier/music/gangstasParadise.dfpwm"
-}
-
 function getAllMusicAndCreateButtons(radioGroup)
   local searchTerm = musicFolderPath .. "*.dfpwm"
   local files = fs.find(searchTerm)
@@ -60,7 +51,7 @@ function rewind(tapeDrive)
 end
 
 function play()
-  local fileName = idMap[radioGroup.getSelected().getId()]
+  local fileName = radioGroup.getSelected().getId()
   if fileName then
     tapeDrive.stop()
     rewind(tapeDrive)

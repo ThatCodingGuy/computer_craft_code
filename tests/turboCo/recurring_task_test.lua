@@ -11,7 +11,7 @@ describe("Recurring task", function()
             handle_event_type = event_type
             internal_task = callback
         end,
-        pullEvent = function()
+        pullEvents = function()
         end
     }
     local t
@@ -29,7 +29,7 @@ describe("Recurring task", function()
 
     it("should perform task and schedule next one on run", function()
         stub(event_handler, "addHandle")
-        stub(event_handler, "pullEvent")
+        stub(event_handler, "pullEvents")
         local recurring_task = RecurringTask.new(50, t.do_thing, event_handler)
 
         recurring_task.run()
@@ -37,10 +37,10 @@ describe("Recurring task", function()
         assert.stub(t.do_thing).was.called(1)
         assert.stub(event_handler.addHandle).was.called()
         assert.spy(os.startTimer).was.called_with(50)
-        assert.stub(event_handler.pullEvent).was.called()
+        assert.stub(event_handler.pullEvents).was.called()
 
         event_handler.addHandle:revert()
-        event_handler.pullEvent:revert()
+        event_handler.pullEvents:revert()
     end)
 
     it("should do nothing on irrelevant timer ID", function()

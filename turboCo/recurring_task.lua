@@ -25,7 +25,7 @@ RecurringTask = class({}, function(interval, perform_task, event_handler)
         perform_task()
         event_handler.addHandle("timer", run_task)
         self.timer_id = os.startTimer(interval)
-        event_handler.pullEvent()
+        event_handler.pullEvents()
     end
 
     return {

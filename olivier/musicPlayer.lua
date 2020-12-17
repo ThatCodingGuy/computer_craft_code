@@ -5,7 +5,7 @@ local RadioInput = dofile("./gitlib/turboCo/ui/radioInput.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 
-local musicFolderPath = "./gitlib/olivier/music/"
+local musicFolderPath = "/gitlib/olivier/music/"
 local screen = peripheral.find("monitor")
 if screen == nil then
   screen = term.current()
@@ -24,8 +24,19 @@ local idMap = {
   [6]="/gitlib/olivier/music/gangstasParadise.dfpwm"
 }
 
-function getMusicFiles()
-
+function getAllMusicAndCreateButtons(radioGroup)
+  local searchTerm = musicFolderPath .. "*.dfpwm"
+  local files = fs.find(searchTerm)
+  for _,f in pairs(files) do
+    local name = fs.getName(f)
+      radioGroup.addRadioInput(RadioInput.create{
+        id=f,
+        title=name,
+        screenBuffer=screenBuffer,
+        screenBufferWriteFunc=screenBuffer.writeLn,
+        eventHandler=eventHandler
+      })
+  end
 end
 
 function write(tapeDrive, filePath)
@@ -63,53 +74,7 @@ function stop()
   tapeDrive.stop()
 end
 
-radioGroup.addRadioInput(RadioInput.create{
-  id=1,
-  title="Doom",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=2,
-  title="Let It Snow",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=3,
-  title="Mario",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=4,
-  title="Megalovania",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=5,
-  title="Danger Zone",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=6,
-  title="Gangsta's Paradise",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
+getAllMusicAndCreateButtons(radioGroup)
 
 screenBuffer.ln()
 local playButton = Button.create{

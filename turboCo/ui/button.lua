@@ -46,6 +46,11 @@ local function create(args)
     end
   end
 
+  local addLeftClickCallback = function(callback)
+    self.clickable.addLeftMouseUpCallback(leftClickCallback)
+    self.clickable.addMonitorTouchCallback(leftClickCallback)
+  end
+
   --Button extra functionality to clickable
   self.clickable.addLeftMouseDownCallback(mouseDown)
   self.clickable.addLeftMouseUpCallback(mouseUp)
@@ -56,7 +61,7 @@ local function create(args)
 
   --Adding actual requested callbacks
   if args.leftClickCallback ~= nil then
-    self.clickable.addLeftMouseUpCallback(args.leftClickCallback)
+    addLeftClickCallback(args.leftClickCallback)
   end
 
   if args.rightClickCallback ~= nil then
@@ -66,7 +71,7 @@ local function create(args)
   self.clickable.makeActive()
 
   return {
-    addLeftClickCallback=self.clickable.addLeftMouseUpCallback,
+    addLeftClickCallback=addLeftClickCallback,
     addRightClickCallback=self.clickable.addRightMouseUpCallback,
     makeActive=self.clickable.makeActive,
     makeInactive=self.clickable.makeInactive

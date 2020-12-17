@@ -66,6 +66,7 @@ local function create(args)
   local monitorTouchHandler = function(eventData)
     local x, y = eventData[3], eventData[4]
     if wasClicked(x, y) then
+      print("ok")
       executeMonitorTouchCallbacks()
     end
   end
@@ -107,7 +108,7 @@ local function create(args)
     --Can assume both input method IDs to be in same state
     if not isActive() then
       self.monitorTouchHandlerId = self.eventHandler.addHandle("monitor_touch", monitorTouchHandler)
-      self.mouseClickHanderId = self.eventHandler.addHandle("mouse_click", mouseClickHandler)
+      self.mouseClickHanderId = self.eventHandler.addHandle("mouse_click", mouseDownHandler)
       self.mouseUpHandlerId = self.eventHandler.addHandle("mouse_up", mouseUpHandler)
     end
   end

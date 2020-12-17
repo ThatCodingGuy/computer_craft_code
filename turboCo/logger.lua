@@ -15,40 +15,33 @@ if _G.Logger ~= nil then
 end
 
 --- A simple logger that allows writing messages to stdout.
--- @param print_to_stdout An optional function that prints the contents to whatever output should be
--- used.
+-- @param print_to_output An optional function that prints the contents to whatever output should be
+-- used. It should accept varargs as parameters.
 Logger = class({
     LoggingLevel = LoggingLevel,
     print_to_output = print_to_output,
     log_level_filter = log_level_filter,
 
 }, function()
-    local function debug(message)
-        if Logger.log_level_filter <= Logger.LoggingLevel.DEBUG then
-            Logger.print_to_output("D: " .. message)
-        end
-    end
-    local function info(message)
-        if Logger.log_level_filter <= Logger.LoggingLevel.INFO then
-            Logger.print_to_output("I: " .. message)
-        end
-    end
-    local function warn(message)
-        if Logger.log_level_filter <= Logger.LoggingLevel.WARNING then
-            Logger.print_to_output("W: " .. message)
-        end
-    end
-    local function error(message)
-        if Logger.log_level_filter <= Logger.LoggingLevel.ERROR then
-            Logger.print_to_output("E: " .. message)
+    local function log(level, ...)
+        if Logger.log_level_filter <= level then
+            Logger.print_to_output(Logger.LoggingLevel[level], ": ", ...)
         end
     end
 
     return {
-        debug = debug,
-        info = info,
-        warn = warn,
-        error = error,
+        debug = function(...)
+            log(Logger.LoggingLevel.DEBUG, ...)
+        end,
+        info = function(...)
+            log(Logger.LoggingLevel.INFO, ...)
+        end,
+        warn = function(...)
+            log(Logger.LoggingLevel.WARNING, ...)
+        end,
+        error = function(...)
+            log(Logger.LoggingLevel.ERROR, ...)
+        end,
     }
 end)
 

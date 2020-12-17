@@ -29,13 +29,13 @@ function getAllMusicAndCreateButtons(radioGroup)
   local files = fs.find(searchTerm)
   for _,f in pairs(files) do
     local name = fs.getName(f)
-      radioGroup.addRadioInput(RadioInput.create{
-        id=f,
-        title=name,
-        screenBuffer=screenBuffer,
-        screenBufferWriteFunc=screenBuffer.writeLn,
-        eventHandler=eventHandler
-      })
+    radioGroup.addRadioInput(RadioInput.create{
+      id=f,
+      title=name,
+      screenBuffer=screenBuffer,
+      screenBufferWriteFunc=screenBuffer.writeLn,
+      eventHandler=eventHandler
+    })
   end
 end
 

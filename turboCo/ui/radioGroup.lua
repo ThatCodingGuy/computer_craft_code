@@ -23,7 +23,6 @@ local function create(args)
 
   local addRadioInput = function(radioInput)
     table.insert(self.radioInputs, radioInput)
-    print(radioInput.addLeftClickCallback)
     radioInput.addLeftClickCallback(handleRadioInputClicked)
   end
 

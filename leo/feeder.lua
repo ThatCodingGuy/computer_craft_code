@@ -1,3 +1,4 @@
+local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
 local inventory = dofile("./gitlib/carlos/inventory.lua")
 local Logger = dofile("./gitlib/turboCo/logger.lua")
 local RecurringTask = dofile("./gitlib/turboCo/recurring_task.lua")
@@ -11,6 +12,17 @@ local logger = Logger.new()
 
 local function get_food_count()
     return inventory.countItemWithName(FOOD_LABEL)
+end
+
+local function wait_for_food()
+    if get_food_count() > 0 then
+        return
+    end
+
+    logger.info("Ran out of food. Waiting for more...")
+    while get_food_count() <= 0 do
+        os.sleep(FOOD_CHECK_PERIOD)
+    end
 end
 
 local function feed_cows()
@@ -29,27 +41,12 @@ local function feed_cows()
             failed_placements = 0
         end
     end
-end
-
-local function wait_for_food()
-    if get_food_count() > 0 then
-        return
-    end
-
-    logger.info("Ran out of food. Waiting for more...")
-    while get_food_count() <= 0 do
-        os.sleep(FOOD_CHECK_PERIOD)
-    end
+    wait_for_food()
 end
 
 local function run()
     Logger.log_level_filter = Logger.LoggingLevel.INFO
-    local feed_cows_task = RecurringTask.new(COW_BREED_COOLDOWN, feed_cows)
-    while true do
-        wait_for_food()
-        feed_cows_task.wait_until_update()
-        feed_cows_task.update()
-    end
+    RecurringTask.new(COW_BREED_COOLDOWN, feed_cows, EventHandler.create()).run()
 end
 
 run()

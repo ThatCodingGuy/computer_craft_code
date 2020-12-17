@@ -1,6 +1,7 @@
+local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
 local modem = dofile("./gitlib/turboCo/modem.lua")
+local Logger = dofile("./gitlib/turboCo/logger.lua")
 local ObservableValue = dofile("./gitlib/turboCo/observable_value.lua")
-local Logger  = dofile("./gitlib/turboCo/logger.lua")
 local RecurringTask = dofile("./gitlib/turboCo/recurring_task.lua")
 local FuelCoordParser = dofile("./gitlib/turboCo/server/fuel/fuel_coord_parser.lua")
 local FuelStationGroup = dofile("./gitlib/turboCo/server/fuel/fuel_station_group.lua")
@@ -26,7 +27,7 @@ local stations = FuelStationGroup.new(
 local fuel_coord_parser = FuelCoordParser.new(fuel_station_coordinate_file_name)
 local parser_task = RecurringTask.new(60, function()
     observable_station_coords.set_value(fuel_coord_parser.parse())
-end)
+end, EventHandler.create())
 
 local function fuel_request(sender_id, request)
     local nearest = stations.find_nearest(request["position"])
@@ -60,17 +61,19 @@ local function receive()
     end
 end
 
+function run()
+    while true do
+        local senderId, message = receive()
+        local request = textutils.unserializeJSON(message)
+        local request_type = request["type"]
+        local response = router[request_type](senderId, request)
+        local message = textutils.serializeJSON(response)
+        rednet.send(senderId, message, protocol)
+    end
+end
+
 local router = {}
 router["refuel"] = fuel_request
 router["refuel_done"] = fuel_done
 
-parser_task.start()
-while true do
-    local senderId, message = receive()
-    parser_task.update()
-    local request = textutils.unserializeJSON(message)
-    local request_type = request["type"]
-    local response = router[request_type](senderId, request)
-    local message = textutils.serializeJSON(response)
-    rednet.send(senderId, message, protocol)
-end
+parallel.waitForAll(parser_task.run, run)

@@ -3,80 +3,65 @@ local RecurringTask = dofile("./gitlib/turboCo/recurring_task.lua")
 
 describe("Recurring task", function()
     local os
-    local clock_time = 0
-
-    local function advance_clock(interval)
-        clock_time = clock_time + interval
-    end
+    local timer_id
+    local internal_task
+    local handle_event_type
+    local event_handler = {
+        addHandle = function(event_type, callback)
+            handle_event_type = event_type
+            internal_task = callback
+        end,
+        pullEvent = function()
+        end
+    }
+    local t
 
     before_each(function()
-        clock_time = 0
         os = test_setup.generate_cc_mocks(mock).os
-        os.clock = function()
-            return clock_time
+        os.startTimer = function(_)
+            return timer_id
         end
+        spy.on(os, "startTimer")
+        t = { do_thing = function()
+        end }
+        stub(t, "do_thing")
     end)
 
-    it("should yield when timer not expired", function()
-        local task_performed_count = 0
-        local task = RecurringTask.new(100, function()
-            task_performed_count = task_performed_count + 1
-        end)
+    it("should perform task and schedule next one on run", function()
+        stub(event_handler, "addHandle")
+        stub(event_handler, "pullEvent")
+        local recurring_task = RecurringTask.new(50, t.do_thing, event_handler)
 
-        task.start()
-        advance_clock(99)
-        task.update()
+        recurring_task.run()
 
-        assert.are.equal(1, task_performed_count)
+        assert.stub(t.do_thing).was.called(1)
+        assert.stub(event_handler.addHandle).was.called()
+        assert.spy(os.startTimer).was.called_with(50)
+        assert.stub(event_handler.pullEvent).was.called()
+
+        event_handler.addHandle:revert()
+        event_handler.pullEvent:revert()
     end)
 
-    it("should execute task when timer expires", function()
-        local task_performed_count = 0
-        local task = RecurringTask.new(100, function()
-            task_performed_count = task_performed_count + 1
-        end)
+    it("should do nothing on irrelevant timer ID", function()
+        local recurring_task = RecurringTask.new(50, t.do_thing, event_handler)
+        timer_id = 123
 
-        task.start()
-        advance_clock(100)
-        task.update()
+        recurring_task.run()
+        internal_task { "timer", 456 }
 
-        assert.are.equal(2, task_performed_count)
+        assert.stub(t.do_thing).was.called(1)
     end)
 
-    it("should wait correct amount of time when blocking on task", function()
-        local sleep_calls = {}
-        os.sleep = function(time_to_sleep)
-            table.insert(sleep_calls, time_to_sleep)
-        end
-        local task = RecurringTask.new(100, function()
-        end)
+    it("should run task and reschedule when receiving timer event", function()
+        local recurring_task = RecurringTask.new(50, t.do_thing, event_handler)
+        timer_id = 123
 
-        task.wait_until_update()
-        assert.are.equal(0, #sleep_calls)
-        task.wait_until_update()
-        assert.are.equal(0, #sleep_calls)
-        task.update()
+        recurring_task.run()
+        internal_task { "timer", 123 }
 
-        task.wait_until_update()
-        assert.are.equal(1, #sleep_calls)
-        assert.are.equal(100, sleep_calls[1])
-        advance_clock(100)
-
-        task.wait_until_update()
-        assert.are.equal(1, #sleep_calls)
-
-        advance_clock(100)
-        task.wait_until_update()
-        assert.are.equal(1, #sleep_calls)
-        task.update()
-
-        advance_clock(50)
-        task.wait_until_update()
-        assert.are.equal(2, #sleep_calls)
-        assert.are.equal(50, sleep_calls[2])
-        advance_clock(50)
-
-        task.wait_until_update()
-        assert.are.equal(2, #sleep_calls)
+        assert.stub(t.do_thing).was.called(2)
+        assert.spy(os.startTimer).was.called_with(50)
+        assert.spy(os.startTimer).was.called(2)
     end)
 end)

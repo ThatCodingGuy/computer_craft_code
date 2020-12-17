@@ -48,7 +48,7 @@ function play()
     tapeDrive.stop()
     rewind(tapeDrive)
     write(tapeDrive, fileName)
-    tape.rewind(tapeDrive)
+    rewind(tapeDrive)
   end
   tapeDrive.play()
 end

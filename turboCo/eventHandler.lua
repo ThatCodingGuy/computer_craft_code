@@ -11,21 +11,12 @@ local function create()
     listening=true
   }
 
-  local addAnyHandle = function(eventType, callback, clearOnHandle)
-    local handleId = self.currId
-    table.insert(self.callbackDataList, {callback=callback, eventType=eventType, id=self.currId, clearOnHandle=clearOnHandle})
-    self.currId = self.currId + 1
-    return handleId
-  end
-
-  --This event handler clears itself from the callback list after processed once
-  local addOneTimeHandle = function(eventType, callback)
-    return addAnyHandle(eventType, callback, true)
-  end
-
     --add an event handler for a certain type
   local addHandle = function(eventType, callback)
-    return addAnyHandle(eventType, callback, false)
+    local handleId = self.currId
+    table.insert(self.callbackDataList, {callback=callback, eventType=eventType, id=self.currId })
+    self.currId = self.currId + 1
+    return handleId
   end
 
   local removeHandle = function(id)
@@ -47,19 +38,16 @@ local function create()
   local pullEvents = function()
     while self.listening do
       local eventData = {os.pullEvent()}
+      print(textutils.serializeJSON(eventData))
       for index,value in pairs(self.callbackDataList) do
         if value.eventType == eventData[1] then
           value.callback(eventData)
-          if value.clearOnHandle then
-            table.remove(self.callbackDataList, index)
-          end
         end
       end
     end
   end
 
   return {
-    addOneTimeHandle=addOneTimeHandle,
     addHandle=addHandle,
     removeHandle=removeHandle,
     pullEvents=pullEvents,

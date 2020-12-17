@@ -34,7 +34,7 @@ local function create(args)
     text=createRadioText(),
     textColor=args.textColor,
     bgColor=args.bgColor,
-    leftClickCallback=args.leftClickCallback
+    leftMouseDownCallback=args.leftClickCallback
   }
   self.clickable = clickable
   
@@ -55,10 +55,15 @@ local function create(args)
     return self.id
   end
 
+  local addLeftClickCallback = function(callback)
+    self.clickable.addLeftMouseDownCallback(callback)
+    self.clickable.addMonitorTouchCallback(callback)
+  end
+
   self.clickable.makeActive()
 
   return {
-    addLeftClickCallback=self.clickable.addLeftClickCallback,
+    addLeftClickCallback=addLeftClickCallback,
     makeActive=self.clickable.makeActive,
     makeInactive=self.clickable.makeInactive,
     setSelected=setSelected,

@@ -12,8 +12,6 @@ local function create(args)
     text=args.text,
     textColor=args.textColor,
     bgColor=args.bgColor,
-    leftClickCallback=args.leftClickCallback,
-    rightClickCallback=args.rightClickCallback,
   }
 
   local self = {
@@ -21,30 +19,55 @@ local function create(args)
     text = args.text,
     textColor = args.textColor,
     bgColor = args.bgColor,
-    clickTimerId = nil
+    monitorClickTimerId = nil
   }
 
-  local leftClick = function()
+  local mouseDown = function()
     --We want to flip the colors
     self.clickable.updateText{text=self.text, textColor=self.bgColor, bgColor=self.textColor}
-    self.clickTimerId = os.startTimer(0.15)
+  end
+
+  local mouseUp = function()
+    --We want to flip back the colors to normal
+    self.clickable.updateText{text=self.text, textColor=self.textColor, bgColor=self.bgColor}
+  end
+
+  local monitorTouch = function()
+    --We want to flip the colors
+    self.clickable.updateText{text=self.text, textColor=self.bgColor, bgColor=self.textColor}
+    self.monitorClickTimerId = os.startTimer(0.05) --flip back the colors after a short time
   end
 
   local timerCallback = function(eventData)
     --we want to flip back the colors 
-    if eventData[2] == self.clickTimerId then
+    if eventData[2] == self.monitorClickTimerId then
       self.clickable.updateText{text=self.text, textColor=self.textColor, bgColor=self.bgColor}
-      self.clickTimerId = nil
+      self.monitorClickTimerId = nil
     end
   end
 
+  --Button extra functionality to clickable
+  self.clickable.addLeftMouseDownCallback(mouseDown)
+  self.clickable.addLeftMouseUpCallback(mouseUp)
+  self.clickable.addRightMouseDownCallback(mouseDown)
+  self.clickable.addLeftMouseUpCallback(mouseUp)
+  self.clickable.addMonitorTouchCallback(monitorTouch)
   args.eventHandler.addHandle("timer", timerCallback)
-  self.clickable.addLeftClickCallback(leftClick)
+
+  --Adding actual requested callbacks
+  if args.leftClickCallback ~= nil then
+    self.clickable.addLeftMouseUpCallback(args.leftClickCallback)
+  end
+
+  if args.rightClickCallback ~= nil then
+    self.clickable.addRightMouseUpCallback(args.rightClickCallback)
+  end
+
   self.clickable.makeActive()
 
   return {
-    addLeftClickCallback=self.clickable.addLeftClickCallback,
-    addRightClickCallback=self.clickable.addRightClickCallback,
+    addLeftClickCallback=self.clickable.addLeftMouseUpCallback,
+    addRightClickCallback=self.clickable.addRightMouseUpCallback,
     makeActive=self.clickable.makeActive,
     makeInactive=self.clickable.makeInactive
   }

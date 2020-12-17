@@ -14,12 +14,18 @@ local function create(args)
     text=args.text,
     textColor=args.textColor,
     bgColor=args.bgColor,
-    leftClickCallbacks={},
-    rightClickCallbacks={},
+    monitorTouchCallbacks={},
+    leftMouseDownCallbacks={},
+    leftMouseUpCallbacks={},
+    rightMouseDownCallbacks={},
+    rightMouseUpCallbacks={},
     currentScreenPos= { x=0, y=0 },
     bufferCursorPos= { x=0, y=0 },
-    monitorTouchKeyHandlerId = nil,
-    mouseClickKeyHandlerId = nil
+    monitorTouchHandlerId = nil,
+    mouseClickHanderId = nil,
+    mouseUpHandlerId = nil,
+    isLeftMouseHeldDown = false,
+    isRightMouseHeldDown = false,
   }
 
   local wasClicked = function(x, y)
@@ -27,14 +33,32 @@ local function create(args)
     return x >= self.currentScreenPos.x and x <= maxPosX and y == self.currentScreenPos.y
   end
 
-  local executeLeftCLickCallbacks = function()
-    for _,callback in pairs(self.leftClickCallbacks) do
+  local executeMonitorTouchCallbacks = function()
+    for _,callback in pairs(self.monitorTouchCallbacks) do
       callback(self.id)
     end
   end
 
-  local executeRightClickCallbacks = function()
-    for _,callback in pairs(self.rightClickCallbacks) do
+  local executeLeftMouseDownCallbacks = function()
+    for _,callback in pairs(self.leftMouseDownCallbacks) do
+      callback(self.id)
+    end
+  end
+
+  local executeLeftMouseUpCallbacks = function()
+    for _,callback in pairs(self.leftMouseUpCallbacks) do
+      callback(self.id)
+    end
+  end
+
+  local executeRightMouseDownCallbacks = function()
+    for _,callback in pairs(self.rightMouseDownCallbacks) do
+      callback(self.id)
+    end
+  end
+
+  local executeRightMouseUpCallbacks = function()
+    for _,callback in pairs(self.rightMouseUpCallbacks) do
       callback(self.id)
     end
   end
@@ -42,18 +66,31 @@ local function create(args)
   local monitorTouchHandler = function(eventData)
     local x, y = eventData[3], eventData[4]
     if wasClicked(x, y) then
-      executeLeftCLickCallbacks()
+      executeMonitorTouchCallbacks()
     end
   end
 
-  local mouseClickHandler = function(eventData)
+  local mouseDownHandler = function(eventData)
     local button, x, y = eventData[2], eventData[3], eventData[4]
     if wasClicked(x, y) then
       if button == 1 then
-        executeLeftCLickCallbacks()
+        self.isLeftMouseHeldDown = true
+        executeLeftMouseDownCallbacks()
       elseif button == 2 then
-        executeRightClickCallbacks()
+        self.isRightMouseHeldDown = true
+        executeRightMouseDownCallbacks()
       end
+    end
+  end
+
+  local mouseUpHandler = function(eventData)
+    local button, x, y = eventData[2], eventData[3], eventData[4]
+    if button == 1 and self.isLeftMouseHeldDown then
+      self.isLeftMouseHeldDown = false
+      executeLeftMouseUpCallbacks()
+    elseif button == 2 and self.isRightMouseHeldDown then
+      self.isRightMouseHeldDown = false
+      executeRightMouseUpCallbacks()
     end
   end
   
@@ -63,36 +100,57 @@ local function create(args)
   end
 
   local isActive = function()
-    return self.monitorTouchKeyHandlerId ~= nil
+    return self.monitorTouchHandlerId ~= nil
   end
 
   local makeActive = function()
     --Can assume both input method IDs to be in same state
     if not isActive() then
-      self.monitorTouchKeyHandlerId = self.eventHandler.addHandle("monitor_touch", monitorTouchHandler)
-      self.mouseClickKeyHandlerId = self.eventHandler.addHandle("mouse_click", mouseClickHandler)
+      self.monitorTouchHandlerId = self.eventHandler.addHandle("monitor_touch", monitorTouchHandler)
+      self.mouseClickHanderId = self.eventHandler.addHandle("mouse_click", mouseClickHandler)
+      self.mouseUpHandlerId = self.eventHandler.addHandle("mouse_up", mouseUpHandler)
     end
   end
 
   local makeInactive = function()
     --Can assume both input method IDs to be in same state
     if isActive() then
-      self.eventHandler.removeHandle(self.monitorTouchKeyHandlerId)
-      self.eventHandler.removeHandle(self.mouseClickKeyHandlerId)
-      self.monitorTouchKeyHandlerId = nil
-      self.mouseClickKeyHandlerId = nil
+      self.eventHandler.removeHandle(self.monitorTouchHandlerId)
+      self.eventHandler.removeHandle(self.mouseClickHanderId)
+      self.eventHandler.removeHandle(self.mouseUpHandlerId)
+      self.monitorTouchHandlerId = nil
+      self.mouseClickHanderId = nil
+      self.mouseUpHandlerId = nil
     end
   end
 
-  local addLeftClickCallback = function(callbackFunc)
+  local addMonitorTouchCallback = function(callbackFunc)
     if callbackFunc ~= nil then
-      table.insert(self.leftClickCallbacks, callbackFunc)
+      table.insert(self.monitorTouchCallbacks, callbackFunc)
     end
   end
 
-  local addRightClickCallback = function(callbackFunc)
+  local addLeftMouseDownCallback = function(callbackFunc)
     if callbackFunc ~= nil then
-      table.insert(self.rightClickCallbacks, callbackFunc)
+      table.insert(self.leftMouseDownCallbacks, callbackFunc)
+    end
+  end
+
+  local addLeftMouseUpCallback = function(callbackFunc)
+    if callbackFunc ~= nil then
+      table.insert(self.leftMouseUpCallbacks, callbackFunc)
+    end
+  end
+
+  local addRightMouseDownCallback = function(callbackFunc)
+    if callbackFunc ~= nil then
+      table.insert(self.rightMouseDownCallbacks, callbackFunc)
+    end
+  end
+
+  local addRightMouseUpCallback = function(callbackFunc)
+    if callbackFunc ~= nil then
+      table.insert(self.rightMouseUpCallbacks, callbackFunc)
     end
   end
 
@@ -111,20 +169,35 @@ local function create(args)
   self.currentScreenPos = writeData.screenCursorPosBefore
   self.bufferCursorPos = writeData.bufferCursorPosBefore
 
-  if args.leftClickCallback ~= nil then
-    addLeftClickCallback(args.leftClickCallback)
+  if args.monitorTouchCallback ~= nil then
+    addMonitorTouchCallback(args.monitorTouchCallback)
   end
 
-  if args.rightClickCallback ~= nil then
-    addRightClickCallback(args.rightClickCallback)
+  if args.leftMouseDownCallback ~= nil then
+    addLeftMouseDownCallback(args.leftMouseDownCallback)
+  end
+
+  if args.leftMouseUpCallback ~= nil then
+    addLeftMouseUpCallback(args.leftMouseUpCallback)
+  end
+
+  if args.rightMouseDownCallback ~= nil then
+    addRightMouseDownCallback(args.rightMouseDownCallback)
+  end
+
+  if args.rightMouseUpCallback ~= nil then
+    addRightMouseUpCallback(args.rightMouseUpCallback)
   end
 
   self.screenBuffer.registerCallback(screenBufferCallback)
   makeActive()
 
   return {
-    addLeftClickCallback=addLeftClickCallback,
-    addRightClickCallback=getRightClickCallback,
+    addMonitorTouchCallback=addMonitorTouchCallback,
+    addLeftMouseDownCallback=addLeftMouseDownCallback,
+    addLeftMouseUpCallback=addLeftMouseUpCallback,
+    addRightMouseDownCallback=addRightMouseDownCallback,
+    addRightMouseUpCallback=addRightMouseUpCallback,
     makeActive=makeActive,
     makeInactive=makeInactive,
     updateText=updateText

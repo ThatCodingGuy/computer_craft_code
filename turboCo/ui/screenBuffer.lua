@@ -5,15 +5,16 @@
 local screenBuffer = {}
 
 local function create(args)
-  local screen, xStartingScreenPos, yStartingScreenPos, width, height, bgColor = 
+  local screen, xStartingScreenPos, yStartingScreenPos, width, height, textColor, bgColor = 
         args.screen, args.xStartingScreenPos, args.yStartingScreenPos, 
-        args.width, args.height, args.bgColor
+        args.width, args.height, args.textColor, args.bgColor
         
   local self = {
     screen = screen,
     screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
     width = width,
     height = height,
+    textColor = textColor,
     bgColor = bgColor,
     screenState = {
       buffer={},
@@ -163,64 +164,93 @@ local function create(args)
     return screenCursor
   end
 
-    --sets monitor to new colors and returns the old colors
-  local setMonitorColorIfNeeded = function(color, bgColor)
-    if self.screen.isColor() then
-      local currentColor = self.screen.getTextColor()
-      if color ~= nil then
-        self.screen.setTextColor(color)
-      end
-      local currentBgColor = self.screen.getBackgroundColor()
-      if bgColor ~= nil then
-        self.screen.setBackgroundColor(bgColor)
-      end
-      return currentColor, currentBgColor
+  local blitMap = {
+    [1]="0",
+    [2]="1",
+    [4]="2",
+    [8]="3",
+    [16]="4",
+    [32]="5",
+    [64]="6",
+    [128]="7",
+    [256]="8",
+    [512]="9",
+    [1024]="a",
+    [2048]="b",
+    [4096]="c",
+    [8192]="d",
+    [16384]="e",
+    [32768]="f",
+  }
+
+  local getBlitTextChars = function(bufferCharData)
+    local blitTextChar = " "
+    if bufferCharData ~= nil and bufferCharData.char ~= nil then
+      blitTextChar = bufferCharData.char
     end
-    return nil, nil
+    local blitColorChar = " "
+    if bufferCharData ~= nil and bufferCharData.color ~= nil then
+      blitColorChar = blitMap[bufferCharData.color]
+    elseif self.textColor ~= nil then
+      blitColorChar = blitMap[self.textColor]
+    end
+    local blitBgColorChar = blitMap[colors.black]
+    if bufferCharData ~= nil and bufferCharData.bgColor ~= nil then
+      blitBgColorChar = blitMap[bufferCharData.bgColor]
+    elseif self.bgColor ~= nil then
+      bgColorChar = blitMap[self.bgColor]
+    end
+    return blitTextChar, blitColorChar, blitBgColorChar
   end
 
-  local screenWrite = function(text, color, bgColor)
-    local oldColor, oldBgColor = setMonitorColorIfNeeded(color, bgColor)
-    self.screen.write(text)
-    setMonitorColorIfNeeded(oldColor, oldBgColor)
+  local renderEmptyRow = function(screenCursorPosX, screenCursorPosY)
+    local blitText = ""
+    local blitColor = ""
+    local blitBgColor = ""
+    for i=1,self.width do
+      local blitTextChar, blitColorChar, blitBgColorChar = getBlitTextChars(nil)
+      blitText = blitText .. blitTextChar
+      blitColor = blitColor .. blitColorChar
+      blitBgColor = blitBgColor .. blitBgColorChar
+    end
+    self.screen.setCursorPos(screenCursorPosX, screenCursorPosY)
+    self.screen.blit(blitText, blitColor, blitBgColor)
   end
 
-  local writeCharFromBuffer = function(row, col)
-    local bufferCharData = self.screenState.buffer[row][col]
-    screenWrite(bufferCharData.char, bufferCharData.color, bufferCharData.bgColor)
+  local renderBufferRow = function(bufferRow, screenCursorPosX, screenCursorPosY)
+    if bufferRow == nil then
+      renderEmptyRow(screenCursorPosX, screenCursorPosY)
+      return
+    end
+    local blitText = ""
+    local blitColor = ""
+    local blitBgColor = ""
+    local maxCol = self.screenState.renderPos.x + self.width - 1
+    for i=self.screenState.renderPos.x,maxCol do
+      local bufferCharData = bufferRow[i]
+      local blitTextChar, blitColorChar, blitBgColorChar = getBlitTextChars(bufferCharData)
+      blitText = blitText .. blitTextChar
+      blitColor = blitColor .. blitColorChar
+      blitBgColor = blitBgColor .. blitBgColorChar
+    end
+    self.screen.setCursorPos(screenCursorPosX, screenCursorPosY)
+    self.screen.blit(blitText, blitColor, blitBgColor)
   end
 
   local clearScreen = function()
     local maxPosX = self.screenStartingPos.x + self.width - 1
     local maxPosY = self.screenStartingPos.y + self.height - 1
     for y=self.screenStartingPos.y, maxPosY do
-      for x=self.screenStartingPos.x, maxPosX do
-        self.screen.setCursorPos(x, y)
-        screenWrite(" ", nil, self.bgColor)
-      end
+      renderEmptyRow(self.screenStartingPos.x, y)
     end
   end
 
   local render = function()
     local maxCol = self.screenState.renderPos.x + self.width - 1
     local maxRow = self.screenState.renderPos.y + self.height - 1
-    local bufferLength = getBufferLength()
-    if maxRow > bufferLength then
-      maxRow = bufferLength
-    end
-    clearScreen()
     local cursorY = self.screenStartingPos.y
     for i=self.screenState.renderPos.y,maxRow do
-      if self.screenState.buffer[i] ~= nil then
-        local cursorX = self.screenStartingPos.x
-        for j=self.screenState.renderPos.x,maxCol do
-          if self.screenState.buffer[i][j] ~= nil then
-            self.screen.setCursorPos(cursorX, cursorY)
-            writeCharFromBuffer(i, j)
-          end
-          cursorX = cursorX + 1
-        end
-      end
+      renderBufferRow(self.screenState.buffer[i], self.screenStartingPos.x, cursorY)
       cursorY = cursorY + 1
     end
   end

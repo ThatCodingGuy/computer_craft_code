@@ -5,6 +5,7 @@ local RadioInput = dofile("./gitlib/turboCo/ui/radioInput.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 
+local musicFolderPath = "./gitlib/olivier/music/"
 local screen = peripheral.find("monitor")
 if screen == nil then
   screen = term.current()
@@ -19,8 +20,13 @@ local idMap = {
   [2]="/gitlib/olivier/music/letItSnow.dfpwm",
   [3]="/gitlib/olivier/music/mario.dfpwm",
   [4]="/gitlib/olivier/music/megalovania.dfpwm",
-  [5]="/gitlib/olivier/music/dangerZone.dfpwm"
+  [5]="/gitlib/olivier/music/dangerZone.dfpwm",
+  [6]="/gitlib/olivier/music/gangstasParadise.dfpwm"
 }
+
+function getMusicFiles()
+
+end
 
 function write(tapeDrive, filePath)
   local f = fs.open(filePath, "rb")
@@ -92,6 +98,14 @@ radioGroup.addRadioInput(RadioInput.create{
 radioGroup.addRadioInput(RadioInput.create{
   id=5,
   title="Danger Zone",
+  screenBuffer=screenBuffer,
+  screenBufferWriteFunc=screenBuffer.writeLn,
+  eventHandler=eventHandler
+})
+
+radioGroup.addRadioInput(RadioInput.create{
+  id=6,
+  title="Gangsta's Paradise",
   screenBuffer=screenBuffer,
   screenBufferWriteFunc=screenBuffer.writeLn,
   eventHandler=eventHandler

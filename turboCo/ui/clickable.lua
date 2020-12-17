@@ -66,7 +66,6 @@ local function create(args)
   local monitorTouchHandler = function(eventData)
     local x, y = eventData[3], eventData[4]
     if wasClicked(x, y) then
-      print("ok")
       executeMonitorTouchCallbacks()
     end
   end

@@ -47,8 +47,8 @@ local function create(args)
   end
 
   local addLeftClickCallback = function(callback)
-    self.clickable.addLeftMouseUpCallback(leftClickCallback)
-    self.clickable.addMonitorTouchCallback(leftClickCallback)
+    self.clickable.addLeftMouseUpCallback(callback)
+    self.clickable.addMonitorTouchCallback(callback)
   end
 
   --Button extra functionality to clickable

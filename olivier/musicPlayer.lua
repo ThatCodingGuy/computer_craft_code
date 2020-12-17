@@ -45,7 +45,6 @@ function rewind(tapeDrive)
 end
 
 function play()
-  print("play")
   local fileName = idMap[radioGroup.getSelected().getId()]
   if fileName then
     tapeDrive.stop()

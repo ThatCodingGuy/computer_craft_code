@@ -31,8 +31,6 @@ function write(tapeDrive, filePath)
       if byte then tapeDrive.write(byte) end
     until not byte
     f.close()
-  else
-    print(string.format("no file found on path %s", filePath))
   end
 end
 

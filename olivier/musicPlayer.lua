@@ -62,7 +62,7 @@ function writeTapeUnit(eventData)
     --Update screen with progress
     local progressText = string.format("%d/%d", maxByte, fileSize)
     progressDisplay.updateText{text=progressText}
-    os.queueEvent(TAPE_WRITE_EVENT_TYPE, tapeDrive, sourceFile, maxByte, fileSize)
+    os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, maxByte + 1, fileSize)
   end
   screenBuffer.render()
   sourceFile.close()
@@ -92,7 +92,7 @@ function play()
   if fileName then
     tapeDrive.stop()
     rewind(tapeDrive)
-    queueWrite(tapeDrive, fileName)
+    queueWrite(fileName)
   else
     error("file doesn't exist. plz fix.")
   end
@@ -136,7 +136,6 @@ screenBuffer.render()
 
 ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
-eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, displayTapeWriteProgress)
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

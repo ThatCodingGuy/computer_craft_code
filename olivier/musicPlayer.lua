@@ -24,7 +24,7 @@ Button.create{
   screenBuffer=screenTitleBuffer,
   screenBufferWriteFunc=screenTitleBuffer.writeRight,
   eventHandler=eventHandler,
-  text=" x",
+  text=" x ",
   textColor=colors.white,
   bgColor=colors.red,
   leftClickCallback=exitHandler.exit

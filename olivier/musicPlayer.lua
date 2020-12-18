@@ -35,8 +35,8 @@ function getAllMusicAndCreateButtons(radioGroup)
   end
 end
 
-function playFinish(tapeDrive)
-  rewind(tapeDrive)
+function playFinish()
+  rewind()
   tapeDrive.play()
 end
 
@@ -75,11 +75,11 @@ function queueWrite(filePath)
     local fileSize = f.seek("end")
     f.seek("set", current) --go back to beggining after we just went to end
     f.close()
-    os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, 0, fileSize)
+    os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, current, fileSize)
   end
 end
 
-function rewind(tapeDrive)
+function rewind()
   local position = tapeDrive.getPosition()
   if position <= 0 then
     return

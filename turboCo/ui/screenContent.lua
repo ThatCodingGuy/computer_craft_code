@@ -30,12 +30,12 @@ local function create(args)
 
     local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
     self.currentScreenPos = writeData.screenCursorPosBefore
-    self.bufferCursorPos = writeData.bufferCursorPosBefore
+    self.currentBufferPos = writeData.bufferCursorPosBefore
   end
 
   local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}
   self.currentScreenPos = writeData.screenCursorPosBefore
-  self.bufferCursorPos = writeData.bufferCursorPosBefore
+  self.currentBufferPos = writeData.bufferCursorPosBefore
 
   return {
     updateText=updateText

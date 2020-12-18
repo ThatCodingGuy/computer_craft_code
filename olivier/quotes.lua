@@ -104,7 +104,7 @@ function createPageTrackerString()
 end
 
 function updatePageTracker()
-  pageCounterContent.updateText(createPageTrackerString())
+  pageCounterContent.updateText{text=createPageTrackerString()}
   screenBottomBuffer.render()
 end
 

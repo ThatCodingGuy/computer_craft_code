@@ -60,7 +60,7 @@ function writeTapeUnit(eventData)
     playFinish()
   else
     --Update screen with progress
-    local progressText = string.format("%d/%d", maxByte, fileSize)
+    local progressText = string.format("%s/%s", maxByte, fileSize)
     progressDisplay.updateText{text=progressText}
     os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, maxByte + 1, fileSize)
   end

@@ -15,8 +15,8 @@ local function create(args)
     bgColor=args.bgColor
   }
 
-  local updateText = function(newText)
-    self.text = newText
+  local updateText = function(args)
+    self.text = args.text
     self.screenBuffer.write{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
   end
 

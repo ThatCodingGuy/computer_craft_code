@@ -31,6 +31,17 @@ local function create(args)
     }
   end
 
+  local cloneArgs = function(args)
+    if args ~= nil then
+      if args.bufferCursorPos ~= nil then
+        args.bufferCursorPos = {
+          x = args.bufferCursorPos.x,
+          y = args.bufferCursorPos.y
+        }
+      end
+    end
+  end
+
   local getBufferLength = function()
     local lastIndex = 0
     for index,_ in pairs(self.screenState.buffer) do
@@ -124,21 +135,13 @@ local function create(args)
   local writeTextToBuffer = function(args)
     local text, color, bgColor, bufferCursorPos = args.text, args.color, args.bgColor, args.bufferCursorPos
     if bufferCursorPos == nil then
-      --need to clone
       bufferCursorPos = {
         x=self.screenState.cursorPos.x,
         y=self.screenState.cursorPos.y
       }
-    else
-      --need to clone
-      bufferCursorPos = {
-        x=bufferCursorPos.x or self,
-        y=bufferCursorPos.y
-      }
     end
     local screenCursor = {
       screenCursorPosBefore = getScreenCursorPos(),
-      --need to clone
       bufferCursorPosBefore = {
         x=self.screenState.cursorPos.x,
         y=self.screenState.cursorPos.y
@@ -270,11 +273,12 @@ local function create(args)
 
   --Sets cursor to the beggining of the next line
   local ln = function()
-    setCursorToNextLine(args)
+    setCursorToNextLine()
     sendCallbackData(createCallbackData())
   end
 
   local write = function(args)
+    cloneArgs(args)
     local writeData = writeTextToBuffer(args)
     sendCallbackData(createCallbackData())
     return writeData
@@ -282,6 +286,7 @@ local function create(args)
 
   --Sets cursor to the beggining of the next line after writing
   local writeLn = function(args)
+    cloneArgs(args)
     local writeData = writeTextToBuffer(args)
     setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
@@ -290,6 +295,7 @@ local function create(args)
 
   --writes line from left to right of a single char
   local writeFullLineLn = function(args)
+    cloneArgs(args)
     local char = safeSubstring(args.text, 1, 1)
     args.text = ""
     for i=self.screenState.cursorPos.x,self.width do
@@ -302,6 +308,7 @@ local function create(args)
 
   --writes line from left to right of a single char, then set cursor to where it was
   local writeFullLineThenResetCursor = function(args)
+    cloneArgs(args)
     local origX,origY = self.screenState.cursorPos.x,self.screenState.cursorPos.y
     local writeData = writeFullLineLn(args)
     self.screenState.cursorPos.x = origX
@@ -311,6 +318,7 @@ local function create(args)
   end
 
   local writeWrapImpl = function(args)
+    cloneArgs(args)
     local text, color, bgColor = args.text, args.color, args.bgColor
     local remainingText = text
     local writeData = nil
@@ -333,6 +341,7 @@ local function create(args)
 
   --Write so that the text wraps to the next line
   local writeWrap = function(args)
+    cloneArgs(args)
     local writeData = writeWrapImpl(args)
     sendCallbackData(createCallbackData())
     return writeData
@@ -340,6 +349,7 @@ local function create(args)
 
   --Sets cursor to the beggining of the next line after writing
   local writeWrapLn = function(args)
+    cloneArgs(args)
     local writeData = writeWrapImpl(args)
     setCursorToNextLine()
     sendCallbackData(createCallbackData())
@@ -348,6 +358,7 @@ local function create(args)
 
   --Writes centered text for a monitor of any size
   local writeCenter = function(args)
+    cloneArgs(args)
     local textSize = string.len(args.text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then
@@ -364,6 +375,7 @@ local function create(args)
 
     --Writes centered text for a monitor of any size, then enter a new line
   local writeCenterLn = function(args)
+    cloneArgs(args)
     local writeData = writeCenter(args)
     setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
@@ -372,6 +384,7 @@ local function create(args)
 
   --Writes text to the left for a monitor of any size
   local writeLeft = function(args)
+    cloneArgs(args)
     if args.bufferCursorPos ~= nil then
       args.bufferCursorPos.x = 1
     else
@@ -383,6 +396,7 @@ local function create(args)
 
   --Writes text to the left for a monitor of any size, then enter a new line
   local writeLeftLn = function(args)
+    cloneArgs(args)
     local writeData = writeLeft(args)
     setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
@@ -391,6 +405,7 @@ local function create(args)
 
   --Writes text to the right for a monitor of any size
   local writeRight = function(args)
+    cloneArgs(args)
     local text = args.text
     local textLen = string.len(text)
     if textLen <= self.width then
@@ -407,6 +422,7 @@ local function create(args)
 
   --Writes text to the right for a monitor of any size, then enter a new line
   local writeRightLn = function(args)
+    cloneArgs(args)
     local writeData = writeRight(args)
     setCursorToNextLine(args)
     return writeData

@@ -41,10 +41,7 @@ function playFinish(tapeDrive)
 end
 
 function writeTapeUnit(eventData)
-  local tapeDrive = eventData[1]
-  local sourceFile = eventData[2]
-  local currByteCounter = eventData[3]
-  local fileSize = eventData[4]
+  local tapeDrive, sourceFile, currByteCounter, fileSize = eventData[2], eventData[3], eventData[4], eventData[5]
   local maxByte = currByteCounter + 1024 --Adds 1KB of read
   if maxByte > fileSize then
     maxByte = fileSize
@@ -68,11 +65,6 @@ function writeTapeUnit(eventData)
     screenBuffer.render()
     os.queueEvent(TAPE_WRITE_EVENT_TYPE, tapeDrive, sourceFile, maxByte, fileSize)
   end
-end
-
-function displayTapeWriteProgress(eventData)
-  local progressUpdate = ""
-  
 end
 
 function queueWrite(tapeDrive, filePath)

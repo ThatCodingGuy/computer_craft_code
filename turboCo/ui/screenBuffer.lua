@@ -143,8 +143,8 @@ local function create(args)
     local screenCursor = {
       screenCursorPosBefore = getScreenCursorPos(),
       bufferCursorPosBefore = {
-        x=self.screenState.cursorPos.x,
-        y=self.screenState.cursorPos.y
+        x=bufferCursorPos.x,
+        y=bufferCursorPos.y
       }
     }
     local buffer = self.screenState.buffer

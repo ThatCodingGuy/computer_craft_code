@@ -9,7 +9,6 @@ local function create(args)
   local self = {
     screenBuffer=args.screenBuffer,
     screenBufferWriteFunc=args.screenBufferWriteFunc,
-    currentBufferPos= { x=0, y=0 },
     text=args.text,
     textColor=args.textColor,
     bgColor=args.bgColor

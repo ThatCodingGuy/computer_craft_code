@@ -16,6 +16,12 @@ local function create(args)
   }
 
   local updateText = function(args)
+    local oldTextLen = #self.text
+    local clearingText = ""
+    for i=1,oldTextLen do
+      clearingText = clearingText .. " "
+    end
+    self.screenBuffer.write{text=clearingText, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
     self.text = args.text
     self.screenBuffer.write{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
   end

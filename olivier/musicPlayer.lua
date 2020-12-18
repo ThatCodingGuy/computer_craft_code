@@ -54,17 +54,20 @@ function writeTapeUnit(eventData)
       tapeDrive.write(byte)
     end
   end
+  --Update screen with progress
+  local progressText = string.format("Writing: %s/%s bytes.", maxByte, fileSize)
+  progressDisplay.updateText{text=progressText}
+  screenBuffer.render()
+  
   --Stop if done, and actually play the tape, if not, put another event in the queue
   if maxByte == fileSize then
     progressDisplay.updateText{text=""}
+    screenBuffer.render()
     playFinish()
   else
-    --Update screen with progress
-    local progressText = string.format("%s/%s", maxByte, fileSize)
-    progressDisplay.updateText{text=progressText}
     os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, maxByte + 1, fileSize)
   end
-  screenBuffer.render()
+  
   sourceFile.close()
 end
 

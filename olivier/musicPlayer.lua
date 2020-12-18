@@ -56,9 +56,9 @@ function writeTapeUnit(eventData)
       tapeDrive.write(byte)
     end
   end
-  local percentage = (maxByte / fileSize) * 100
+  local percentage = math.floor((maxByte / fileSize) * 100)
   --Update screen with progress
-  local progressText = string.format("Writing: %s/100%%", percentage)
+  local progressText = string.format("Writing: %s%% complete", percentage)
   progressDisplay.updateText{text=progressText}
   screenBuffer.render()
 

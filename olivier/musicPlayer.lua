@@ -16,7 +16,7 @@ if screen == nil then
 end
 local tapeDrive = peripheral.find("tape_drive")
 local eventHandler = EventHandler.create()
-local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
+local exitHandler = ExitHandler.createFromScreen(screen, eventHandler)
 
 local screenTitleBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=2, bgColor=colors.yellow, textColor=colors.gray}
 screenTitleBuffer.writeCenter{text="-- Music Player --"}

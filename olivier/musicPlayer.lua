@@ -41,39 +41,41 @@ function playFinish(tapeDrive)
 end
 
 function writeTapeUnit(eventData)
-  local tapeDrive, sourceFile, currByteCounter, fileSize = eventData[2], eventData[3], eventData[4], eventData[5]
+  local filePath, currByteCounter, fileSize = eventData[2], eventData[3], eventData[4]
   local maxByte = currByteCounter + 1024 --Adds 1KB of read
   if maxByte > fileSize then
     maxByte = fileSize
   end
+  local sourceFile = fs.open(filePath, "rb")
+  sourceFile.seek("set", currByteCounter)
   for i=currByteCounter,maxByte do
     local byte = sourceFile.read()
     if byte then
       tapeDrive.write(byte)
     end
   end
-  --Stop if done, and actually play the tape, if not, put naother event in the queue
+  --Stop if done, and actually play the tape, if not, put another event in the queue
   if maxByte == fileSize then
     progressDisplay.updateText{text=""}
-    screenBuffer.render()
-    sourceFile.close()
     playFinish()
   else
     --Update screen with progress
     local progressText = string.format("%d/%d", maxByte, fileSize)
     progressDisplay.updateText{text=progressText}
-    screenBuffer.render()
     os.queueEvent(TAPE_WRITE_EVENT_TYPE, tapeDrive, sourceFile, maxByte, fileSize)
   end
+  screenBuffer.render()
+  sourceFile.close()
 end
 
-function queueWrite(tapeDrive, filePath)
+function queueWrite(filePath)
   local f = fs.open(filePath, "rb")
   if f then
     local current = f.seek()
     local fileSize = f.seek("end")
     f.seek("set", current) --go back to beggining after we just went to end
-    os.queueEvent(TAPE_WRITE_EVENT_TYPE, tapeDrive, f, 0, fileSize)
+    f.close()
+    os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, 0, fileSize)
   end
 end
 

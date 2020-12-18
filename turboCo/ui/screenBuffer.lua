@@ -258,7 +258,7 @@ local function create(args)
 
   local setCursorToNextLine = function(args)
     --If we were providing an override to bufferCursorPos, then we do not want to set the cursor
-    if args.bufferCursorPos == nil then
+    if args == nil or args.bufferCursorPos == nil then
       self.screenState.cursorPos.x = 1
       self.screenState.cursorPos.y = self.screenState.cursorPos.y + 1
     end

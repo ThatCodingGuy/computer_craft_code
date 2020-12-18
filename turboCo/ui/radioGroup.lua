@@ -8,7 +8,7 @@ local function create(args)
   }
 
   if args ~= nil and args.radioInputs ~= nil then
-    self.radioInputs = radioInputs
+    self.radioInputs = args.radioInputs
   end
 
   local handleRadioInputClicked = function(clickedId)

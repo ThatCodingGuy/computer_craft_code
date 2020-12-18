@@ -134,6 +134,7 @@ screenBuffer.ln()
 
 progressDisplay = ScreenContent.create{
   screenBuffer=screenBuffer,
+  screenBufferWriteFunc=screenBuffer.writeCenterLn,
   text="",
 }
 

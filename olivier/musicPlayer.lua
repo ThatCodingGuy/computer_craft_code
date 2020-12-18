@@ -4,8 +4,12 @@ local RadioGroup = dofile("./gitlib/turboCo/ui/radioGroup.lua")
 local RadioInput = dofile("./gitlib/turboCo/ui/radioInput.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
+local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 
-local musicFolderPath = "/gitlib/olivier/music/"
+local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
+
+local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
+
 local screen = peripheral.find("monitor")
 if screen == nil then
   screen = term.current()
@@ -14,9 +18,10 @@ local tapeDrive = peripheral.find("tape_drive")
 local eventHandler = EventHandler.create()
 local screenBuffer = ScreenBuffer.createFullScreen{screen=screen}
 local radioGroup = RadioGroup.create()
+local progressDisplay = nil
 
 function getAllMusicAndCreateButtons(radioGroup)
-  local searchTerm = musicFolderPath .. "*.dfpwm"
+  local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
   local files = fs.find(searchTerm)
   for _,f in pairs(files) do
     local name = fs.getName(f)
@@ -30,15 +35,52 @@ function getAllMusicAndCreateButtons(radioGroup)
   end
 end
 
-function write(tapeDrive, filePath)
+function playFinish(tapeDrive)
+  rewind(tapeDrive)
+  tapeDrive.play()
+end
+
+function writeTapeUnit(eventData)
+  local tapeDrive = eventData[1]
+  local sourceFile = eventData[2]
+  local currByteCounter = eventData[3]
+  local fileSize = eventData[4]
+  local maxByte = currByteCounter + 1024 --Adds 1KB of read
+  if maxByte > fileSize then
+    maxByte = fileSize
+  end
+  for i=currByteCounter,maxByte do
+    local byte = sourceFile.read()
+    if byte then
+      tapeDrive.write(byte)
+    end
+  end
+  --Stop if done, and actually play the tape, if not, put naother event in the queue
+  if maxByte == fileSize then
+    progressDisplay.updateText{text=""}
+    screenBuffer.render()
+    sourceFile.close()
+    playFinish()
+  else
+    --Update screen with progress
+    local progressText = string.format("%d/%d", maxByte, fileSize)
+    progressDisplay.updateText{text=progressText}
+    screenBuffer.render()
+    os.queueEvent(TAPE_WRITE_EVENT_TYPE, tapeDrive, sourceFile, maxByte, fileSize)
+  end
+end
+
+function displayTapeWriteProgress(eventData)
+  local progressUpdate = ""
+  
+end
+
+function queueWrite(tapeDrive, filePath)
   local f = fs.open(filePath, "rb")
   if f then
-    local byte
-    repeat
-      byte = f.read()
-      if byte then tapeDrive.write(byte) end
-    until not byte
-    f.close()
+    local fileSize = f.seek("end")
+    f.seek(0) --go back to beggining after we just went to end
+    os.queueEvent(TAPE_WRITE_EVENT_TYPE, tapeDrive, f, 0, fileSize)
   end
 end
 
@@ -55,10 +97,10 @@ function play()
   if fileName then
     tapeDrive.stop()
     rewind(tapeDrive)
-    write(tapeDrive, fileName)
-    rewind(tapeDrive)
+    queueWrite(tapeDrive, fileName)
+  else
+    error("file doesn't exist. plz fix.")
   end
-  tapeDrive.play()
 end
 
 function stop()
@@ -84,14 +126,22 @@ local stopButton = Button.create{
   screenBufferWriteFunc=screenBuffer.writeLn,
   eventHandler=eventHandler, 
   text=" Stop ", 
-  textColor=colors.white, 
+  textColor=colors.white,
   bgColor=colors.red,
   leftClickCallback=stop
+}
+screenBuffer.ln()
+
+progressDisplay = ScreenContent.create{
+  screenBuffer=screenBuffer,
+  text="",
 }
 
 screenBuffer.render()
 
-local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
+ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
+eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
+eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, displayTapeWriteProgress)
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

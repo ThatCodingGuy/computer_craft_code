@@ -132,7 +132,7 @@ local function create(args)
     else
       --need to clone
       bufferCursorPos = {
-        x=bufferCursorPos.x,
+        x=bufferCursorPos.x or self,
         y=bufferCursorPos.y
       }
     end
@@ -238,7 +238,6 @@ local function create(args)
   end
 
   local clearScreen = function()
-    local maxPosX = self.screenStartingPos.x + self.width - 1
     local maxPosY = self.screenStartingPos.y + self.height - 1
     for y=self.screenStartingPos.y, maxPosY do
       renderEmptyRow(self.screenStartingPos.x, y)
@@ -246,7 +245,6 @@ local function create(args)
   end
 
   local render = function()
-    local maxCol = self.screenState.renderPos.x + self.width - 1
     local maxRow = self.screenState.renderPos.y + self.height - 1
     local cursorY = self.screenStartingPos.y
     for i=self.screenState.renderPos.y,maxRow do
@@ -255,9 +253,12 @@ local function create(args)
     end
   end
 
-  local setCursorToNextLine = function()
-    self.screenState.cursorPos.x = 1
-    self.screenState.cursorPos.y = self.screenState.cursorPos.y + 1
+  local setCursorToNextLine = function(args)
+    --If we were providing an override to bufferCursorPos, then we do not want to set the cursor
+    if args.bufferCursorPos == nil then
+      self.screenState.cursorPos.x = 1
+      self.screenState.cursorPos.y = self.screenState.cursorPos.y + 1
+    end
   end
 
   -- Clears the screen for the screenBuffer then resets the cursor pointer
@@ -269,7 +270,7 @@ local function create(args)
 
   --Sets cursor to the beggining of the next line
   local ln = function()
-    setCursorToNextLine()
+    setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
   end
 
@@ -282,7 +283,7 @@ local function create(args)
   --Sets cursor to the beggining of the next line after writing
   local writeLn = function(args)
     local writeData = writeTextToBuffer(args)
-    setCursorToNextLine()
+    setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
     return writeData
   end
@@ -350,7 +351,12 @@ local function create(args)
     local textSize = string.len(args.text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then
-      self.screenState.cursorPos.x = math.floor(emptySpace / 2) + 1
+      local cursorPosX = math.floor(emptySpace / 2) + 1
+      if args.bufferCursorPos ~= nil then
+        args.bufferCursorPos.x = cursorPosX
+      else
+        self.screenState.cursorPos.x = cursorPosX
+      end
     end
     sendCallbackData(createCallbackData())
     return writeTextToBuffer(args)
@@ -359,14 +365,18 @@ local function create(args)
     --Writes centered text for a monitor of any size, then enter a new line
   local writeCenterLn = function(args)
     local writeData = writeCenter(args)
-    setCursorToNextLine()
+    setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
     return writeData
   end
 
   --Writes text to the left for a monitor of any size
   local writeLeft = function(args)
-    self.screenState.cursorPos.x = 1
+    if args.bufferCursorPos ~= nil then
+      args.bufferCursorPos.x = 1
+    else
+      self.screenState.cursorPos.x = 1
+    end
     sendCallbackData(createCallbackData())
     return writeTextToBuffer(args)
   end
@@ -374,7 +384,7 @@ local function create(args)
   --Writes text to the left for a monitor of any size, then enter a new line
   local writeLeftLn = function(args)
     local writeData = writeLeft(args)
-    setCursorToNextLine()
+    setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
     return writeData
   end
@@ -384,7 +394,12 @@ local function create(args)
     local text = args.text
     local textLen = string.len(text)
     if textLen <= self.width then
-      self.screenState.cursorPos.x = self.width - textLen + 1
+      local cursorPosX = self.width - textLen + 1
+      if args.bufferCursorPos ~= nil then
+        args.bufferCursorPos.x = cursorPosX
+      else
+        self.screenState.cursorPos.x = cursorPosX
+      end
     end
     sendCallbackData(createCallbackData())
     return writeTextToBuffer(args)
@@ -393,7 +408,7 @@ local function create(args)
   --Writes text to the right for a monitor of any size, then enter a new line
   local writeRightLn = function(args)
     local writeData = writeRight(args)
-    setCursorToNextLine()
+    setCursorToNextLine(args)
     return writeData
   end
 

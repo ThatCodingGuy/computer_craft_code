@@ -20,7 +20,8 @@ local screenTitleBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=sc
 screenTitleBuffer.writeCenter{text="Music Player"}
 screenTitleBuffer.render()
 
-local screenBuffer = ScreenBuffer.createFullScreenFromTop{screen=screen, height=3, bgColor=colors.purple, textColor=colors.white}
+local screenBuffer = ScreenBuffer.createFullScreenFromTop{screen=screen, topOffset=3, bgColor=colors.purple, textColor=colors.white}
+screenBuffer.ln()
 local radioGroup = RadioGroup.create()
 local progressDisplay = nil
 local isWritingMusic = false

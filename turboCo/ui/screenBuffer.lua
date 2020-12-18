@@ -8,7 +8,7 @@ local function create(args)
   local screen, xStartingScreenPos, yStartingScreenPos, width, height, textColor, bgColor = 
         args.screen, args.xStartingScreenPos, args.yStartingScreenPos, 
         args.width, args.height, args.textColor, args.bgColor
-        
+  print(bgColor)
   local self = {
     screen = screen,
     screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },

@@ -8,7 +8,6 @@ local function create(args)
   local screen, xStartingScreenPos, yStartingScreenPos, width, height, textColor, bgColor = 
         args.screen, args.xStartingScreenPos, args.yStartingScreenPos, 
         args.width, args.height, args.textColor, args.bgColor
-  print(bgColor)
   local self = {
     screen = screen,
     screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
@@ -201,7 +200,7 @@ local function create(args)
     if bufferCharData ~= nil and bufferCharData.bgColor ~= nil then
       blitBgColorChar = blitMap[bufferCharData.bgColor]
     elseif self.bgColor ~= nil then
-      bgColorChar = blitMap[self.bgColor]
+      blitBgColorChar = blitMap[self.bgColor]
     end
     return blitTextChar, blitColorChar, blitBgColorChar
   end
@@ -547,7 +546,7 @@ local function createFullScreenAtTopWithHeight(args)
     width=width, 
     height=height, 
     bgColor=args.bgColor, 
-    color=args.color
+    textColor=args.textColor
   }
 end
 
@@ -560,7 +559,7 @@ local function createFullScreenFromTop(args)
     width=width, 
     height=height-topOffset, 
     bgColor=args.bgColor,
-    color=args.color
+    textColor=args.textColor
   }
 end
 
@@ -573,7 +572,7 @@ local function createFullScreenAtBottomWithHeight(args)
     width=width, 
     height=desiredHeight, 
     bgColor=args.bgColor, 
-    color=args.color
+    textColor=args.textColor
   }
 end
 
@@ -586,7 +585,7 @@ local function createFullScreenFromTopAndBottom(args)
     width=width, 
     height=height-topOffset-bottomOffset, 
     bgColor=args.bgColor, 
-    color=args.color
+    textColor=args.textColor
   }
 end
 
@@ -601,7 +600,7 @@ local function createFromOffsets(args)
       width=width-leftOffset-rightOffset,
       height=height-topOffset-bottomOffset,
       bgColor=args.bgColor,
-      color=args.color
+      textColor=args.textColor
   }
 end
 

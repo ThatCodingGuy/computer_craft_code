@@ -16,16 +16,28 @@ if screen == nil then
 end
 local tapeDrive = peripheral.find("tape_drive")
 local eventHandler = EventHandler.create()
-local screenTitleBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=3, bgColor=colors.yellow, textColor=colors.white}
-screenTitleBuffer.writeCenter{text="Music Player"}
+local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
+
+local screenTitleBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=2, bgColor=colors.yellow, textColor=colors.gray}
+screenTitleBuffer.writeCenter{text="-- Music Player --"}
+Button.create{
+  screenBuffer=screenTitleBuffer,
+  screenBufferWriteFunc=screenTitleBuffer.writeRight,
+  eventHandler=eventHandler,
+  text=" x",
+  textColor=colors.white,
+  bgColor=colors.red,
+  leftClickCallback=exitHandler.exit
+}
 screenTitleBuffer.render()
 
-local screenBuffer = ScreenBuffer.createFullScreenFromTop{screen=screen, topOffset=3, bgColor=colors.purple, textColor=colors.white}
+local screenBuffer = ScreenBuffer.createFullScreenFromTop{screen=screen, topOffset=2, bgColor=colors.purple, textColor=colors.white}
 screenBuffer.ln()
 local radioGroup = RadioGroup.create()
 local progressDisplay = nil
 local isWritingMusic = false
 local currentFileWrittenToTape = nil
+
 
 function getAllMusicAndCreateButtons(radioGroup)
   local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
@@ -152,8 +164,6 @@ progressDisplay = ScreenContent.create{
 }
 
 screenBuffer.render()
-
-ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
 
 --Loops until exit handle quits it

@@ -8,14 +8,18 @@ local function createFromScreens(screens, eventHandler)
     keyHandlerId = nil
   }
 
+  local exit = function()
+    for _,screen in pairs(self.screens) do
+      screen.clear()
+      screen.setCursorPos(1,1)
+    end
+    eventHandler.setListening(false)
+  end
+
   local handleKey = function(eventData)
     local key = eventData[2]
     if key == keys['end'] then
-      for _,screen in pairs(self.screens) do
-        screen.clear()
-        screen.setCursorPos(1,1)
-      end
-      eventHandler.setListening(false)
+      exit()
     end
   end
 
@@ -37,6 +41,7 @@ local function createFromScreens(screens, eventHandler)
   self.keyHandlerId = self.eventHandler.addHandle("key", handleKey)
 
   return {
+    exit=exit,
     makeActive=makeActive,
     makeInactive=makeInactive
   }

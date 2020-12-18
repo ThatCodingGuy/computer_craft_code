@@ -16,7 +16,11 @@ if screen == nil then
 end
 local tapeDrive = peripheral.find("tape_drive")
 local eventHandler = EventHandler.create()
-local screenBuffer = ScreenBuffer.createFullScreen{screen=screen}
+local screenTitleBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=3, bgColor=colors.yellow, textColor=colors.white}
+screenTitleBuffer.writeCenter{text="Music Player"}
+screenTitleBuffer.render()
+
+local screenBuffer = ScreenBuffer.createFullScreenFromTop{screen=screen, height=3, bgColor=colors.purple, textColor=colors.white}
 local radioGroup = RadioGroup.create()
 local progressDisplay = nil
 local isWritingMusic = false

@@ -528,31 +528,66 @@ end
 local function createFullScreen(args)
   local screen = args.screen
   local width,height = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=1, width=width, height=height}
+  return create{screen=screen, 
+    xStartingScreenPos=1, 
+    yStartingScreenPos=1, 
+    width=width, 
+    height=height, 
+    bgColor=args.bgColor, 
+    color=args.color
+  }
 end
 
 local function createFullScreenAtTopWithHeight(args)
   local screen,height = args.screen,args.height
   local width,_ = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=1, width=width, height=height}
+  return create{screen=screen, 
+    xStartingScreenPos=1, 
+    yStartingScreenPos=1, 
+    width=width, 
+    height=height, 
+    bgColor=args.bgColor, 
+    color=args.color
+  }
 end
 
 local function createFullScreenFromTop(args)
   local screen,topOffset = args.screen, args.topOffset
   local width,height = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=topOffset + 1, width=width, height=height-topOffset}
+  return create{screen=screen,
+    xStartingScreenPos=1, 
+    yStartingScreenPos=topOffset + 1,
+    width=width, 
+    height=height-topOffset, 
+    bgColor=args.bgColor,
+    color=args.color
+  }
 end
 
 local function createFullScreenAtBottomWithHeight(args)
   local screen,desiredHeight = args.screen, args.height
   local width,height = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=height-desiredHeight+1, width=width, height=desiredHeight}
+  return create{screen=screen, 
+    xStartingScreenPos=1, 
+    yStartingScreenPos=height-desiredHeight+1, 
+    width=width, 
+    height=desiredHeight, 
+    bgColor=args.bgColor, 
+    color=args.color
+  }
 end
 
 local function createFullScreenFromTopAndBottom(args)
   local screen,topOffset,bottomOffset = args.screen, args.topOffset, args.bottomOffset
   local width,height = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=topOffset + 1, width=width, height=height-topOffset-bottomOffset}
+  return create{screen=screen, 
+    xStartingScreenPos=1, 
+    yStartingScreenPos=topOffset + 1,
+    width=width, 
+    height=height-topOffset-bottomOffset, 
+    bgColor=args.bgColor, 
+    color=args.color
+  }
 end
 
 local function createFromOffsets(args)
@@ -562,9 +597,11 @@ local function createFromOffsets(args)
   return create{
       screen=screen, 
       xStartingScreenPos=1 + leftOffset,
-      yStartingScreenPos=1 + topOffset, 
-      width=width-leftOffset-rightOffset, 
-      height=height-topOffset-bottomOffset
+      yStartingScreenPos=1 + topOffset,
+      width=width-leftOffset-rightOffset,
+      height=height-topOffset-bottomOffset,
+      bgColor=args.bgColor,
+      color=args.color
   }
 end
 

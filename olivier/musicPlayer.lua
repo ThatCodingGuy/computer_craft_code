@@ -91,7 +91,7 @@ function play()
   local fileName = radioGroup.getSelected().getId()
   if fileName then
     tapeDrive.stop()
-    rewind(tapeDrive)
+    rewind()
     queueWrite(fileName)
   else
     error("file doesn't exist. plz fix.")

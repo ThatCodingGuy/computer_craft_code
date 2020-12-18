@@ -7,9 +7,7 @@ local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
-
 local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
-
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
 
 local screen = peripheral.find("monitor")
@@ -21,6 +19,8 @@ local eventHandler = EventHandler.create()
 local screenBuffer = ScreenBuffer.createFullScreen{screen=screen}
 local radioGroup = RadioGroup.create()
 local progressDisplay = nil
+local isWritingMusic = false
+local currentFileWrittenToTape = nil
 
 function getAllMusicAndCreateButtons(radioGroup)
   local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
@@ -35,11 +35,6 @@ function getAllMusicAndCreateButtons(radioGroup)
       eventHandler=eventHandler
     })
   end
-end
-
-function playFinish()
-  rewind()
-  tapeDrive.play()
 end
 
 function writeTapeUnit(eventData)
@@ -64,13 +59,15 @@ function writeTapeUnit(eventData)
 
   --Stop if done, and actually play the tape, if not, put another event in the queue
   if maxByte == fileSize then
+    currentFileWrittenToTape = filePath
     progressDisplay.updateText{text=""}
     screenBuffer.render()
-    playFinish()
+    rewind()
+    tapeDrive.play()
+    isWritingMusic = false
   else
     os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, maxByte + 1, fileSize)
   end
-  
   sourceFile.close()
 end
 
@@ -81,6 +78,7 @@ function queueWrite(filePath)
     local fileSize = f.seek("end")
     f.seek("set", current) --go back to beggining after we just went to end
     f.close()
+    isWritingMusic = true
     os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, current, fileSize)
   end
 end
@@ -94,26 +92,36 @@ function rewind()
 end
 
 function play()
-  local fileName = radioGroup.getSelected().getId()
-  if fileName then
-    tapeDrive.stop()
-    rewind()
-    queueWrite(fileName)
-  else
-    error("file doesn't exist. plz fix.")
+  if not isWritingMusic then
+    local fileName = radioGroup.getSelected().getId()
+    if fileName then
+      
+      if currentFileWrittenToTape == fileName then
+        --resume if we are already loaded
+        tapeDrive.play()
+      else
+        --if we are not loaded, write the new song
+        tapeDrive.stop()
+        rewind()
+        queueWrite(fileName)
+      end
+    else
+      error("file doesn't exist. plz fix.")
+    end
   end
 end
 
 function stop()
-  tapeDrive.stop()
+  if not isWritingMusic then
+    tapeDrive.stop()
+  end
 end
 
 getAllMusicAndCreateButtons(radioGroup)
 
-screenBuffer.ln()
 local playButton = Button.create{
   screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
+  screenBufferWriteFunc=screenBuffer.writeLeft,
   eventHandler=eventHandler, 
   text=" Play ", 
   textColor=colors.white, 
@@ -121,17 +129,15 @@ local playButton = Button.create{
   leftClickCallback=play
 }
 
-screenBuffer.ln()
 local stopButton = Button.create{
   screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
+  screenBufferWriteFunc=screenBuffer.writeRight,
   eventHandler=eventHandler, 
   text=" Stop ", 
   textColor=colors.white,
   bgColor=colors.red,
   leftClickCallback=stop
 }
-screenBuffer.ln()
 
 progressDisplay = ScreenContent.create{
   screenBuffer=screenBuffer,

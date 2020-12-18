@@ -123,6 +123,7 @@ end
 
 getAllMusicAndCreateButtons(radioGroup)
 
+screenBuffer.ln()
 local playButton = Button.create{
   screenBuffer=screenBuffer,
   screenBufferWriteFunc=screenBuffer.writeLeft,

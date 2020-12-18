@@ -78,8 +78,9 @@ end
 function queueWrite(tapeDrive, filePath)
   local f = fs.open(filePath, "rb")
   if f then
+    local current = f.seek()
     local fileSize = f.seek("end")
-    f.seek(0) --go back to beggining after we just went to end
+    f.seek("set", current) --go back to beggining after we just went to end
     os.queueEvent(TAPE_WRITE_EVENT_TYPE, tapeDrive, f, 0, fileSize)
   end
 end

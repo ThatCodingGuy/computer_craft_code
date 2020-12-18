@@ -10,6 +10,8 @@ local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
 
 local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
 
+local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
+
 local screen = peripheral.find("monitor")
 if screen == nil then
   screen = term.current()
@@ -42,7 +44,7 @@ end
 
 function writeTapeUnit(eventData)
   local filePath, currByteCounter, fileSize = eventData[2], eventData[3], eventData[4]
-  local maxByte = currByteCounter + 1024 --Adds 1KB of read
+  local maxByte = currByteCounter + BYTE_WRITE_UNIT
   if maxByte > fileSize then
     maxByte = fileSize
   end
@@ -58,7 +60,7 @@ function writeTapeUnit(eventData)
   local progressText = string.format("Writing: %s/%s bytes.", maxByte, fileSize)
   progressDisplay.updateText{text=progressText}
   screenBuffer.render()
-  
+
   --Stop if done, and actually play the tape, if not, put another event in the queue
   if maxByte == fileSize then
     progressDisplay.updateText{text=""}

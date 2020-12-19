@@ -537,13 +537,13 @@ local function createFromOverrides(args)
   end
   print(heightOverride)
   return create{
-      screen=screen, 
-      xStartingScreenPos=1 + leftOffset,
-      yStartingScreenPos=1 + topOffset,
-      width=widthOverride,
-      height=heightOverride,
-      bgColor=args.bgColor,
-      textColor=args.textColor
+    screen=screen, 
+    xStartingScreenPos=1 + leftOffset,
+    yStartingScreenPos=1 + topOffset,
+    width=widthOverride,
+    height=heightOverride,
+    bgColor=args.bgColor,
+    textColor=args.textColor
   }
 end
 

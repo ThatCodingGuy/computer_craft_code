@@ -31,12 +31,12 @@ local function handleRestone(eventData)
         local distanceToRadar = math.abs(player.distance - RADAR_APPROX_DOOR_DISTANCE)
         if distanceToRadar < closestDistance then
           closestDistance = distanceToRadar
-          closestPlayer = player.name
+          closestPlayer = player
         end
     end
     if closestPlayer then
-      greetPlayer(closestPlayer)
-      print(string.format("greeting player: \"%s\" with distance: \"%s\". distance", closestPlayer, closestDistance))
+      greetPlayer(closestPlayer.name)
+      print(string.format("greeting player: \"%s\" with distance to plate: \"%s\". distance to radar: \"%s\"", closestPlayer, closestDistance, closestPlayer.distance))
     end
   end
 end

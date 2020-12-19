@@ -25,11 +25,11 @@ function round(num, numDecimalPlaces)
 end
 
 local function getRealTapeSpeed()
-  return tostring(round(tapeSpeed, 2))
+  return round(tapeSpeed, 2)
 end
 
 local function getRealTapeVolume()
-  return tostring(round(tapeVolume, 2))
+  return round(tapeVolume, 2)
 end
 
 if tapeDrive ~= nil then

@@ -1,5 +1,5 @@
 --Creates a button on your screenBuffer
---Has mouse hover, mouse click, and mouse
+--Has monitor touch, mouse click, and mouse up handling
 
 local Clickable = dofile("./gitlib/turboCo/ui/clickable.lua")
 

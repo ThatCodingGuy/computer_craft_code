@@ -1,7 +1,9 @@
--- This file is intended to provide extensions to the terminal (term) API of computercraft
--- Basically you create a screen buffer that is meant to track a certain part of the screen (or all of it)
--- Operations such as writing and wrapping around are provided, as well as the ability to scroll through text
--- Always call render() when you actually want it displayed
+--[[
+  This file is intended to provide extensions to the terminal (term) API of computercraft
+  Basically you create a screen buffer that is meant to track a certain part of the screen (or all of it)
+  Operations such as writing and wrapping around are provided, as well as the ability to scroll through text
+  Always call render() when you actually want it displayed
+]]
 local screenBuffer = {}
 
 local function create(args)
@@ -535,7 +537,6 @@ local function createFromOverrides(args)
   if heightOverride == nil then
     heightOverride = height - topOffset - bottomOffset
   end
-  print(heightOverride)
   return create{
     screen=screen, 
     xStartingScreenPos=1 + leftOffset,

@@ -1,5 +1,11 @@
---Creates a button on your screenBuffer
---Has mouse hover, mouse click, and mouse
+--[[
+  Creates content on your screen that is tracked at a certain screen buffer location, and
+  can be updated with the updateText() function. An optional screen buffer write function
+  can be used making sure the intent of the content alignment is respected. For example:
+  giving an screenBufferWriteFunc override of "screenBuffer.writeCenter" will make sure
+  that the new text will still be centered with the updateText() command.
+]]
+
 
 local function create(args)
   if args.screenBufferWriteFunc == nil then

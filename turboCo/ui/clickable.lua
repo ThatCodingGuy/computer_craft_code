@@ -1,5 +1,8 @@
---Creates a button on your screenBuffer
---Has mouse hover, mouse click, and mouse
+--[[
+  Creates a clickable on your screen buffer
+  A clickable is anything that can be clicked in any way to produce a result
+  Probably won't be used directly, but used as part of button / radioInput for example
+]]
 
 local function create(args)
   if args.screenBufferWriteFunc == nil then

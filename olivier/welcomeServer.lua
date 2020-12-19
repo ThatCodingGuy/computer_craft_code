@@ -36,6 +36,7 @@ local function handleRestone(eventData)
     end
     if closestPlayer then
       greetPlayer(closestPlayer)
+      print(string.format("greeting player: \"%s\" with distance: \"%s\"", closestPlayer, closestDistance))
     end
   end
 end

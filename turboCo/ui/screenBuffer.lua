@@ -530,17 +530,17 @@ local function createFromOverrides(args)
     args.bottomOffset or 0, args.widthOverride, args.heightOverride
   local width,height = screen.getSize()
   if widthOverride == nil then
-    widthOverride = width
+    widthOverride = width - leftOffset - rightOffset
   end
   if heightOverride == nil then
-    heightOverride = height
+    heightOverride = height - topOffset - bottomOffset
   end
   return create{
       screen=screen, 
       xStartingScreenPos=1 + leftOffset,
       yStartingScreenPos=1 + topOffset,
-      width=widthOverride-leftOffset-rightOffset,
-      height=heightOverride-topOffset-bottomOffset,
+      width=widthOverride,
+      height=heightOverride,
       bgColor=args.bgColor,
       textColor=args.textColor
   }

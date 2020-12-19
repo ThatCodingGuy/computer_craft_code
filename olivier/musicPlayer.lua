@@ -18,9 +18,23 @@ end
 local tapeDrive = peripheral.find("tape_drive")
 local tapeSpeed = 1.0
 local tapeVolume = 0.5
+
+function round(num, numDecimalPlaces)
+  local mult = 10^(numDecimalPlaces or 0)
+  return math.floor(num * mult + 0.5) / mult
+end
+
+local function getRealTapeSpeed()
+  return tostring(round(tapeSpeed, 2))
+end
+
+local function getRealTapeVolume()
+  return tostring(round(tapeVolume, 2))
+end
+
 if tapeDrive ~= nil then
-  tapeDrive.setVolume(tapeVolume)
-  tapeDrive.setSpeed(tapeSpeed)
+  tapeDrive.setVolume(getRealTapeVolume())
+  tapeDrive.setSpeed(getRealTapeSpeed())
 end
 
 local eventHandler = EventHandler.create()
@@ -33,11 +47,11 @@ local volumeScreenContent = nil
 
 function increaseSpeed()
   tapeSpeed = tapeSpeed + 0.1
-  if tapeSpeed > 2 then
-    tapeSpeed = 2
+  if tapeSpeed > 2.0 then
+    tapeSpeed = 2.0
   end
   tapeDrive.setSpeed(tapeSpeed)
-  speedScreenContent.updateText{text=tostring(tapeSpeed)}
+  speedScreenContent.updateText{text=tostring(getRealTapeSpeed())}
 end
 
 function decreaseSpeed()
@@ -46,7 +60,7 @@ function decreaseSpeed()
     tapeSpeed = 0.25
   end
   tapeDrive.setSpeed(tapeSpeed)
-  speedScreenContent.updateText{text=tostring(tapeSpeed)}
+  speedScreenContent.updateText{text=tostring(getRealTapeSpeed())}
 end
 
 function decreaseVolume()
@@ -55,16 +69,16 @@ function decreaseVolume()
     tapeVolume = 0
   end
   tapeDrive.setVolume(tapeVolume)
-  volumeScreenContent.updateText{text=tostring(tapeVolume)}
+  volumeScreenContent.updateText{text=tostring(getRealTapeVolume())}
 end
 
 function increaseVolume()
   tapeVolume = tapeVolume + 0.1
-  if tapeVolume > 1.0 then
-    tapeVolume = 1
+  if tapeVolume > 10 then
+    tapeVolume = 10
   end
   tapeDrive.setVolume(tapeVolume)
-  volumeScreenContent.updateText{text=tostring(tapeVolume)}
+  volumeScreenContent.updateText{text=tostring(getRealTapeVolume())}
 end
 
 local screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1, bgColor=colors.yellow, textColor=colors.gray}

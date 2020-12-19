@@ -8,7 +8,7 @@ local chatBox = peripheral.find("chat_box")
 if not chatBox then
   error("connect a chatBox.")
 end
-local RADAR_APPROX_DOOR_DISTANCE = 1.95
+local RADAR_APPROX_DOOR_DISTANCE = 4.6
 
 if not chatBox.getName() then
   chatBox.setName("PartyHouse")
@@ -36,7 +36,7 @@ local function handleRestone(eventData)
     end
     if closestPlayer then
       greetPlayer(closestPlayer)
-      print(string.format("greeting player: \"%s\" with distance: \"%s\"", closestPlayer, closestDistance))
+      print(string.format("greeting player: \"%s\" with distance: \"%s\". distance", closestPlayer, closestDistance))
     end
   end
 end

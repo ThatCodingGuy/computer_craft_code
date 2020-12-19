@@ -8,7 +8,6 @@ local function create(args)
   local screen, xStartingScreenPos, yStartingScreenPos, width, height, textColor, bgColor = 
         args.screen, args.xStartingScreenPos, args.yStartingScreenPos, 
         args.width, args.height, args.textColor, args.bgColor
-        
   local self = {
     screen = screen,
     screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
@@ -29,6 +28,17 @@ local function create(args)
       x=self.screenStartingPos.x + self.screenState.cursorPos.x - 1,
       y=self.screenStartingPos.y + self.screenState.cursorPos.y - 1,
     }
+  end
+
+  local cloneArgs = function(args)
+    if args ~= nil then
+      if args.bufferCursorPos ~= nil then
+        args.bufferCursorPos = {
+          x = args.bufferCursorPos.x,
+          y = args.bufferCursorPos.y
+        }
+      end
+    end
   end
 
   local getBufferLength = function()
@@ -124,24 +134,16 @@ local function create(args)
   local writeTextToBuffer = function(args)
     local text, color, bgColor, bufferCursorPos = args.text, args.color, args.bgColor, args.bufferCursorPos
     if bufferCursorPos == nil then
-      --need to clone
       bufferCursorPos = {
         x=self.screenState.cursorPos.x,
         y=self.screenState.cursorPos.y
-      }
-    else
-      --need to clone
-      bufferCursorPos = {
-        x=bufferCursorPos.x,
-        y=bufferCursorPos.y
       }
     end
     local screenCursor = {
       screenCursorPosBefore = getScreenCursorPos(),
-      --need to clone
       bufferCursorPosBefore = {
-        x=self.screenState.cursorPos.x,
-        y=self.screenState.cursorPos.y
+        x=bufferCursorPos.x,
+        y=bufferCursorPos.y
       }
     }
     local buffer = self.screenState.buffer
@@ -198,7 +200,7 @@ local function create(args)
     if bufferCharData ~= nil and bufferCharData.bgColor ~= nil then
       blitBgColorChar = blitMap[bufferCharData.bgColor]
     elseif self.bgColor ~= nil then
-      bgColorChar = blitMap[self.bgColor]
+      blitBgColorChar = blitMap[self.bgColor]
     end
     return blitTextChar, blitColorChar, blitBgColorChar
   end
@@ -238,7 +240,6 @@ local function create(args)
   end
 
   local clearScreen = function()
-    local maxPosX = self.screenStartingPos.x + self.width - 1
     local maxPosY = self.screenStartingPos.y + self.height - 1
     for y=self.screenStartingPos.y, maxPosY do
       renderEmptyRow(self.screenStartingPos.x, y)
@@ -246,7 +247,6 @@ local function create(args)
   end
 
   local render = function()
-    local maxCol = self.screenState.renderPos.x + self.width - 1
     local maxRow = self.screenState.renderPos.y + self.height - 1
     local cursorY = self.screenStartingPos.y
     for i=self.screenState.renderPos.y,maxRow do
@@ -255,9 +255,12 @@ local function create(args)
     end
   end
 
-  local setCursorToNextLine = function()
-    self.screenState.cursorPos.x = 1
-    self.screenState.cursorPos.y = self.screenState.cursorPos.y + 1
+  local setCursorToNextLine = function(args)
+    --If we were providing an override to bufferCursorPos, then we do not want to set the cursor
+    if args == nil or args.bufferCursorPos == nil then
+      self.screenState.cursorPos.x = 1
+      self.screenState.cursorPos.y = self.screenState.cursorPos.y + 1
+    end
   end
 
   -- Clears the screen for the screenBuffer then resets the cursor pointer
@@ -274,6 +277,7 @@ local function create(args)
   end
 
   local write = function(args)
+    cloneArgs(args)
     local writeData = writeTextToBuffer(args)
     sendCallbackData(createCallbackData())
     return writeData
@@ -281,14 +285,16 @@ local function create(args)
 
   --Sets cursor to the beggining of the next line after writing
   local writeLn = function(args)
+    cloneArgs(args)
     local writeData = writeTextToBuffer(args)
-    setCursorToNextLine()
+    setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
     return writeData
   end
 
   --writes line from left to right of a single char
   local writeFullLineLn = function(args)
+    cloneArgs(args)
     local char = safeSubstring(args.text, 1, 1)
     args.text = ""
     for i=self.screenState.cursorPos.x,self.width do
@@ -301,6 +307,7 @@ local function create(args)
 
   --writes line from left to right of a single char, then set cursor to where it was
   local writeFullLineThenResetCursor = function(args)
+    cloneArgs(args)
     local origX,origY = self.screenState.cursorPos.x,self.screenState.cursorPos.y
     local writeData = writeFullLineLn(args)
     self.screenState.cursorPos.x = origX
@@ -310,6 +317,7 @@ local function create(args)
   end
 
   local writeWrapImpl = function(args)
+    cloneArgs(args)
     local text, color, bgColor = args.text, args.color, args.bgColor
     local remainingText = text
     local writeData = nil
@@ -332,6 +340,7 @@ local function create(args)
 
   --Write so that the text wraps to the next line
   local writeWrap = function(args)
+    cloneArgs(args)
     local writeData = writeWrapImpl(args)
     sendCallbackData(createCallbackData())
     return writeData
@@ -339,6 +348,7 @@ local function create(args)
 
   --Sets cursor to the beggining of the next line after writing
   local writeWrapLn = function(args)
+    cloneArgs(args)
     local writeData = writeWrapImpl(args)
     setCursorToNextLine()
     sendCallbackData(createCallbackData())
@@ -347,10 +357,16 @@ local function create(args)
 
   --Writes centered text for a monitor of any size
   local writeCenter = function(args)
+    cloneArgs(args)
     local textSize = string.len(args.text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then
-      self.screenState.cursorPos.x = math.floor(emptySpace / 2) + 1
+      local cursorPosX = math.floor(emptySpace / 2) + 1
+      if args.bufferCursorPos ~= nil then
+        args.bufferCursorPos.x = cursorPosX
+      else
+        self.screenState.cursorPos.x = cursorPosX
+      end
     end
     sendCallbackData(createCallbackData())
     return writeTextToBuffer(args)
@@ -358,33 +374,46 @@ local function create(args)
 
     --Writes centered text for a monitor of any size, then enter a new line
   local writeCenterLn = function(args)
+    cloneArgs(args)
     local writeData = writeCenter(args)
-    setCursorToNextLine()
+    setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
     return writeData
   end
 
   --Writes text to the left for a monitor of any size
   local writeLeft = function(args)
-    self.screenState.cursorPos.x = 1
+    cloneArgs(args)
+    if args.bufferCursorPos ~= nil then
+      args.bufferCursorPos.x = 1
+    else
+      self.screenState.cursorPos.x = 1
+    end
     sendCallbackData(createCallbackData())
     return writeTextToBuffer(args)
   end
 
   --Writes text to the left for a monitor of any size, then enter a new line
   local writeLeftLn = function(args)
+    cloneArgs(args)
     local writeData = writeLeft(args)
-    setCursorToNextLine()
+    setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
     return writeData
   end
 
   --Writes text to the right for a monitor of any size
   local writeRight = function(args)
+    cloneArgs(args)
     local text = args.text
     local textLen = string.len(text)
     if textLen <= self.width then
-      self.screenState.cursorPos.x = self.width - textLen + 1
+      local cursorPosX = self.width - textLen + 1
+      if args.bufferCursorPos ~= nil then
+        args.bufferCursorPos.x = cursorPosX
+      else
+        self.screenState.cursorPos.x = cursorPosX
+      end
     end
     sendCallbackData(createCallbackData())
     return writeTextToBuffer(args)
@@ -392,8 +421,9 @@ local function create(args)
 
   --Writes text to the right for a monitor of any size, then enter a new line
   local writeRightLn = function(args)
+    cloneArgs(args)
     local writeData = writeRight(args)
-    setCursorToNextLine()
+    setCursorToNextLine(args)
     return writeData
   end
 
@@ -497,31 +527,66 @@ end
 local function createFullScreen(args)
   local screen = args.screen
   local width,height = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=1, width=width, height=height}
+  return create{screen=screen, 
+    xStartingScreenPos=1, 
+    yStartingScreenPos=1, 
+    width=width, 
+    height=height, 
+    bgColor=args.bgColor, 
+    color=args.color
+  }
 end
 
 local function createFullScreenAtTopWithHeight(args)
   local screen,height = args.screen,args.height
   local width,_ = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=1, width=width, height=height}
+  return create{screen=screen, 
+    xStartingScreenPos=1, 
+    yStartingScreenPos=1, 
+    width=width, 
+    height=height, 
+    bgColor=args.bgColor, 
+    textColor=args.textColor
+  }
 end
 
 local function createFullScreenFromTop(args)
   local screen,topOffset = args.screen, args.topOffset
   local width,height = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=topOffset + 1, width=width, height=height-topOffset}
+  return create{screen=screen,
+    xStartingScreenPos=1, 
+    yStartingScreenPos=topOffset + 1,
+    width=width, 
+    height=height-topOffset, 
+    bgColor=args.bgColor,
+    textColor=args.textColor
+  }
 end
 
 local function createFullScreenAtBottomWithHeight(args)
   local screen,desiredHeight = args.screen, args.height
   local width,height = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=height-desiredHeight+1, width=width, height=desiredHeight}
+  return create{screen=screen, 
+    xStartingScreenPos=1, 
+    yStartingScreenPos=height-desiredHeight+1, 
+    width=width, 
+    height=desiredHeight, 
+    bgColor=args.bgColor, 
+    textColor=args.textColor
+  }
 end
 
 local function createFullScreenFromTopAndBottom(args)
   local screen,topOffset,bottomOffset = args.screen, args.topOffset, args.bottomOffset
   local width,height = screen.getSize()
-  return create{screen=screen, xStartingScreenPos=1, yStartingScreenPos=topOffset + 1, width=width, height=height-topOffset-bottomOffset}
+  return create{screen=screen, 
+    xStartingScreenPos=1, 
+    yStartingScreenPos=topOffset + 1,
+    width=width, 
+    height=height-topOffset-bottomOffset, 
+    bgColor=args.bgColor, 
+    textColor=args.textColor
+  }
 end
 
 local function createFromOffsets(args)
@@ -531,9 +596,11 @@ local function createFromOffsets(args)
   return create{
       screen=screen, 
       xStartingScreenPos=1 + leftOffset,
-      yStartingScreenPos=1 + topOffset, 
-      width=width-leftOffset-rightOffset, 
-      height=height-topOffset-bottomOffset
+      yStartingScreenPos=1 + topOffset,
+      width=width-leftOffset-rightOffset,
+      height=height-topOffset-bottomOffset,
+      bgColor=args.bgColor,
+      textColor=args.textColor
   }
 end
 

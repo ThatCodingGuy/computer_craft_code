@@ -4,43 +4,103 @@ local RadioGroup = dofile("./gitlib/turboCo/ui/radioGroup.lua")
 local RadioInput = dofile("./gitlib/turboCo/ui/radioInput.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
+local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 
-local musicFolderPath = "./gitlib/olivier/music/"
+local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
+local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
+local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
+
 local screen = peripheral.find("monitor")
 if screen == nil then
   screen = term.current()
 end
 local tapeDrive = peripheral.find("tape_drive")
 local eventHandler = EventHandler.create()
-local screenBuffer = ScreenBuffer.createFullScreen{screen=screen}
-local radioGroup = RadioGroup.create()
+local exitHandler = ExitHandler.createFromScreen(screen, eventHandler)
 
-local idMap = {
-  [1]="/gitlib/olivier/music/doom.dfpwm",
-  [2]="/gitlib/olivier/music/letItSnow.dfpwm",
-  [3]="/gitlib/olivier/music/mario.dfpwm",
-  [4]="/gitlib/olivier/music/megalovania.dfpwm",
-  [5]="/gitlib/olivier/music/dangerZone.dfpwm",
-  [6]="/gitlib/olivier/music/gangstasParadise.dfpwm"
+local screenTitleBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=2, bgColor=colors.yellow, textColor=colors.gray}
+screenTitleBuffer.writeCenter{text="-- Music Player --"}
+Button.create{
+  screenBuffer=screenTitleBuffer,
+  screenBufferWriteFunc=screenTitleBuffer.writeRight,
+  eventHandler=eventHandler,
+  text=" x",
+  textColor=colors.white,
+  bgColor=colors.red,
+  leftClickCallback=exitHandler.exit
 }
+screenTitleBuffer.render()
 
-function getMusicFiles()
+local screenBuffer = ScreenBuffer.createFullScreenFromTop{screen=screen, topOffset=2, bgColor=colors.purple, textColor=colors.white}
+screenBuffer.ln()
+local radioGroup = RadioGroup.create()
+local progressDisplay = nil
+local isWritingMusic = false
+local currentFileWrittenToTape = nil
 
-end
 
-function write(tapeDrive, filePath)
-  local f = fs.open(filePath, "rb")
-  if f then
-    local byte
-    repeat
-      byte = f.read()
-      if byte then tapeDrive.write(byte) end
-    until not byte
-    f.close()
+function getAllMusicAndCreateButtons(radioGroup)
+  local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
+  local files = fs.find(searchTerm)
+  for _,f in pairs(files) do
+    local name = fs.getName(f)
+    radioGroup.addRadioInput(RadioInput.create{
+      id=f,
+      title=name,
+      screenBuffer=screenBuffer,
+      screenBufferWriteFunc=screenBuffer.writeLn,
+      eventHandler=eventHandler
+    })
   end
 end
 
-function rewind(tapeDrive)
+function writeTapeUnit(eventData)
+  local filePath, currByteCounter, fileSize = eventData[2], eventData[3], eventData[4]
+  local maxByte = currByteCounter + BYTE_WRITE_UNIT
+  if maxByte > fileSize then
+    maxByte = fileSize
+  end
+  local sourceFile = fs.open(filePath, "rb")
+  sourceFile.seek("set", currByteCounter)
+  for i=currByteCounter,maxByte do
+    local byte = sourceFile.read()
+    if byte then
+      tapeDrive.write(byte)
+    end
+  end
+  local percentage = math.floor((maxByte / fileSize) * 100)
+  --Update screen with progress
+  local progressText = string.format("Writing: %s%% complete", percentage)
+  progressDisplay.updateText{text=progressText}
+  screenBuffer.render()
+
+  --Stop if done, and actually play the tape, if not, put another event in the queue
+  if maxByte == fileSize then
+    currentFileWrittenToTape = filePath
+    progressDisplay.updateText{text=""}
+    screenBuffer.render()
+    rewind()
+    tapeDrive.play()
+    isWritingMusic = false
+  else
+    os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, maxByte + 1, fileSize)
+  end
+  sourceFile.close()
+end
+
+function queueWrite(filePath)
+  local f = fs.open(filePath, "rb")
+  if f then
+    local current = f.seek()
+    local fileSize = f.seek("end")
+    f.seek("set", current) --go back to beggining after we just went to end
+    f.close()
+    isWritingMusic = true
+    os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, current, fileSize)
+  end
+end
+
+function rewind()
   local position = tapeDrive.getPosition()
   if position <= 0 then
     return
@@ -49,72 +109,37 @@ function rewind(tapeDrive)
 end
 
 function play()
-  local fileName = idMap[radioGroup.getSelected().getId()]
-  if fileName then
-    tapeDrive.stop()
-    rewind(tapeDrive)
-    write(tapeDrive, fileName)
-    rewind(tapeDrive)
+  if not isWritingMusic then
+    local fileName = radioGroup.getSelected().getId()
+    if fileName then
+      
+      if currentFileWrittenToTape == fileName then
+        --resume if we are already loaded
+        tapeDrive.play()
+      else
+        --if we are not loaded, write the new song
+        tapeDrive.stop()
+        rewind()
+        queueWrite(fileName)
+      end
+    else
+      error("file doesn't exist. plz fix.")
+    end
   end
-  tapeDrive.play()
 end
 
 function stop()
-  tapeDrive.stop()
+  if not isWritingMusic then
+    tapeDrive.stop()
+  end
 end
 
-radioGroup.addRadioInput(RadioInput.create{
-  id=1,
-  title="Doom",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=2,
-  title="Let It Snow",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=3,
-  title="Mario",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=4,
-  title="Megalovania",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=5,
-  title="Danger Zone",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
-
-radioGroup.addRadioInput(RadioInput.create{
-  id=6,
-  title="Gangsta's Paradise",
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
-  eventHandler=eventHandler
-})
+getAllMusicAndCreateButtons(radioGroup)
 
 screenBuffer.ln()
 local playButton = Button.create{
   screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
+  screenBufferWriteFunc=screenBuffer.writeLeft,
   eventHandler=eventHandler, 
   text=" Play ", 
   textColor=colors.white, 
@@ -122,20 +147,24 @@ local playButton = Button.create{
   leftClickCallback=play
 }
 
-screenBuffer.ln()
 local stopButton = Button.create{
   screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLn,
+  screenBufferWriteFunc=screenBuffer.writeRight,
   eventHandler=eventHandler, 
   text=" Stop ", 
-  textColor=colors.white, 
+  textColor=colors.white,
   bgColor=colors.red,
   leftClickCallback=stop
 }
 
-screenBuffer.render()
+progressDisplay = ScreenContent.create{
+  screenBuffer=screenBuffer,
+  screenBufferWriteFunc=screenBuffer.writeCenter,
+  text="",
+}
 
-local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
+screenBuffer.render()
+eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

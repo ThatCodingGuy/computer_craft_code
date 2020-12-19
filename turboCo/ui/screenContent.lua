@@ -30,6 +30,10 @@ local function create(args)
     local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
     self.currentScreenPos = writeData.screenCursorPosBefore
     self.currentBufferPos = writeData.bufferCursorPosBefore
+
+    if args.render then
+      self.screenBuffer.render()
+    end
   end
 
   local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}

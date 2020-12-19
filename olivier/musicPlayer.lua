@@ -44,6 +44,7 @@ local isWritingMusic = false
 local currentFileWrittenToTape = nil
 local speedScreenContent = nil
 local volumeScreenContent = nil
+local controlScreenBuffer = nil
 
 function increaseSpeed()
   tapeSpeed = tapeSpeed + 0.1
@@ -51,7 +52,7 @@ function increaseSpeed()
     tapeSpeed = 2.0
   end
   tapeDrive.setSpeed(tapeSpeed)
-  speedScreenContent.updateText{text=tostring(getRealTapeSpeed())}
+  speedScreenContent.updateText{text=tostring(getRealTapeSpeed()), render=true}
 end
 
 function decreaseSpeed()
@@ -60,7 +61,7 @@ function decreaseSpeed()
     tapeSpeed = 0.25
   end
   tapeDrive.setSpeed(tapeSpeed)
-  speedScreenContent.updateText{text=tostring(getRealTapeSpeed())}
+  speedScreenContent.updateText{text=tostring(getRealTapeSpeed()), render=true}
 end
 
 function decreaseVolume()
@@ -69,7 +70,7 @@ function decreaseVolume()
     tapeVolume = 0
   end
   tapeDrive.setVolume(tapeVolume)
-  volumeScreenContent.updateText{text=tostring(getRealTapeVolume())}
+  volumeScreenContent.updateText{text=tostring(getRealTapeVolume()), render=true}
 end
 
 function increaseVolume()
@@ -78,7 +79,7 @@ function increaseVolume()
     tapeVolume = 10
   end
   tapeDrive.setVolume(tapeVolume)
-  volumeScreenContent.updateText{text=tostring(getRealTapeVolume())}
+  volumeScreenContent.updateText{text=tostring(getRealTapeVolume()), render=true}
 end
 
 local screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1, bgColor=colors.yellow, textColor=colors.gray}
@@ -94,7 +95,7 @@ Button.create{
 }
 screenTitleBuffer.render()
 
-local controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1,topOffset=1, bgColor=colors.blue, textColor=colors.white}
+controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1,topOffset=1, bgColor=colors.blue, textColor=colors.white}
 controlScreenBuffer.write{text="  "}
 Button.create{
   screenBuffer=controlScreenBuffer,

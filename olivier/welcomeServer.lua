@@ -27,7 +27,7 @@ local function handleRestone(eventData)
   if plateActivated then
     local closestPlayer = nil
     local closestDistance = 999999
-    for _,player in radar.getPlayers() do
+    for _,player in pairs(radar.getPlayers()) do
         local distanceToRadar = math.abs(player.distance - RADAR_APPROX_DOOR_DISTANCE)
         if distanceToRadar < closestDistance then
           closestDistance = distanceToRadar

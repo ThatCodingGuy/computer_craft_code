@@ -8,7 +8,7 @@ local chatBox = peripheral.find("chat_box")
 if not chatBox then
   error("connect a chatBox.")
 end
-local RADAR_APPROX_DOOR_DISTANCE = 6.5
+local RADAR_APPROX_DOOR_DISTANCE = 1.95
 
 if not chatBox.getName() then
   chatBox.setName("PartyHouse")

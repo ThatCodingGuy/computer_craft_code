@@ -1,4 +1,3 @@
-local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local modem = dofile("./gitlib/turboCo/modem.lua")
 local Logger = dofile("./gitlib/turboCo/logger.lua")
 local ObservableValue = dofile("./gitlib/turboCo/observable_value.lua")
@@ -27,7 +26,7 @@ local stations = FuelStationGroup.new(
 local fuel_coord_parser = FuelCoordParser.new(fuel_station_coordinate_file_name)
 local parser_task = RecurringTask.new(60, function()
     observable_station_coords.set_value(fuel_coord_parser.parse())
-end, EventHandler.create())
+end)
 
 local function fuel_request(sender_id, request)
     local nearest = stations.find_nearest(request["position"])

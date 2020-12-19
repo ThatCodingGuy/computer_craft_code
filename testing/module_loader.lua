@@ -24,12 +24,12 @@ ModuleLoader = class({}, function(faked_modules)
     --
     -- Call this within the before_each function for your tests.
     --
-    local function setUp()
+    local function set_up()
         _G.dofile = internal_dofile
     end
 
     return {
-        setUp = setUp,
+        set_up = set_up,
     }
 end)
 

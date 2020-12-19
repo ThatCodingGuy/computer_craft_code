@@ -1,67 +1,35 @@
-local test_setup = dofile("./gitlib/computercraft/testing/test_setup.lua")
+local ModuleLoader = dofile("./gitlib/testing/module_loader.lua")
+
+local events = {
+    sleep = function(delay)
+    end
+}
+local module_loader = ModuleLoader.new {
+    ["./gitlib/turboCo/event/events.lua"] = events
+}
+module_loader.set_up()
+
 local RecurringTask = dofile("./gitlib/turboCo/recurring_task.lua")
 
 describe("Recurring task", function()
-    local os
-    local timer_id
-    local internal_task
-    local handle_event_type
-    local event_handler = {
-        addHandle = function(event_type, callback)
-            handle_event_type = event_type
-            internal_task = callback
-        end,
-        pullEvents = function()
-        end
-    }
-    local t
-
     before_each(function()
-        os = test_setup.generate_cc_mocks(mock).os
-        os.startTimer = function(_)
-            return timer_id
-        end
-        spy.on(os, "startTimer")
-        t = { do_thing = function()
-        end }
-        stub(t, "do_thing")
+        spy.on(events, "sleep")
     end)
 
-    it("should perform task and schedule next one on run", function()
-        stub(event_handler, "addHandle")
-        stub(event_handler, "pullEvents")
-        local recurring_task = RecurringTask.new(50, t.do_thing, event_handler)
+    it("should run correctly", function()
+        local calls = 0
+        local task
+        task = RecurringTask.new(123, function()
+            calls = calls + 1
+            if calls == 3 then
+                task.stop()
+            end
+        end)
 
-        recurring_task.run()
+        task.run()
 
-        assert.stub(t.do_thing).was.called(1)
-        assert.stub(event_handler.addHandle).was.called()
-        assert.spy(os.startTimer).was.called_with(50)
-        assert.stub(event_handler.pullEvents).was.called()
-
-        event_handler.addHandle:revert()
-        event_handler.pullEvents:revert()
-    end)
-
-    it("should do nothing on irrelevant timer ID", function()
-        local recurring_task = RecurringTask.new(50, t.do_thing, event_handler)
-        timer_id = 123
-
-        recurring_task.run()
-        internal_task { "timer", 456 }
-
-        assert.stub(t.do_thing).was.called(1)
-    end)
-
-    it("should run task and reschedule when receiving timer event", function()
-        local recurring_task = RecurringTask.new(50, t.do_thing, event_handler)
-        timer_id = 123
-
-        recurring_task.run()
-        internal_task { "timer", 123 }
-
-        assert.stub(t.do_thing).was.called(2)
-        assert.spy(os.startTimer).was.called_with(50)
-        assert.spy(os.startTimer).was.called(2)
+        assert.spy(events.sleep).was.called(3)
+        assert.spy(events.sleep).was.called_with(123)
+        assert.are.equal(3, calls)
     end)
 end)

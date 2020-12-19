@@ -1,4 +1,4 @@
-local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
+local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local modem = dofile("./gitlib/turboCo/modem.lua")
 local Logger = dofile("./gitlib/turboCo/logger.lua")
 local ObservableValue = dofile("./gitlib/turboCo/observable_value.lua")

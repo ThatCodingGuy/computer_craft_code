@@ -1,6 +1,6 @@
 --Get historical quotes of the day
 
-local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
+local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local ScrollHandler = dofile("./gitlib/turboCo/ui/scrollHandler.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")

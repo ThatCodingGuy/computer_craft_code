@@ -1,4 +1,4 @@
-local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
+local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local RadioGroup = dofile("./gitlib/turboCo/ui/radioGroup.lua")
 local RadioInput = dofile("./gitlib/turboCo/ui/radioInput.lua")

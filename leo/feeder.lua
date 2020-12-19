@@ -1,4 +1,4 @@
-local EventHandler = dofile("./gitlib/turboCo/eventHandler.lua")
+local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local inventory = dofile("./gitlib/carlos/inventory.lua")
 local Logger = dofile("./gitlib/turboCo/logger.lua")
 local RecurringTask = dofile("./gitlib/turboCo/recurring_task.lua")

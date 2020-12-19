@@ -29,7 +29,7 @@ local function create(args)
   }
 
   local wasClicked = function(x, y)
-    local maxPosX = self.currentScreenPos.x + #self.text
+    local maxPosX = self.currentScreenPos.x + #self.text - 1
     return x >= self.currentScreenPos.x and x <= maxPosX and y == self.currentScreenPos.y
   end
 

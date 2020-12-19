@@ -20,16 +20,16 @@ local function has_food()
 end
 
 local function wait_for_food()
-    if not has_food() then
-        logger.warn("Waiting for food before feeding cows.")
-        while not has_food() do
-            events.sleep(FOOD_CHECK_PERIOD)
-        end
+    while not has_food() do
+        events.wait_for_inventory_change()
     end
 end
 
 local function feed_cows()
-    wait_for_food()
+    if not has_food() then
+        logger.warn("Waiting for food before feeding cows.")
+        wait_for_food()
+    end
     logger.info("Feeding cows.")
     local failed_placements = 0
     while failed_placements < DELTAS_TO_STOP_FEEDING do
@@ -47,9 +47,7 @@ end
 
 check_for_more_food = function()
     logger.warn("Ran out of food.")
-    while not has_food() do
-        events.wait_for_inventory_change()
-    end
+    wait_for_food()
     inform_food_strategy = detect_food_outages
 end
 
@@ -75,7 +73,7 @@ local function run()
     else
         inform_food_strategy = check_for_more_food
     end
-    parallel.waitForAll(feed_cows_task.run, inform_food)
+    parallel.waitForAll(inform_food, feed_cows_task.run)
 end
 
 run()

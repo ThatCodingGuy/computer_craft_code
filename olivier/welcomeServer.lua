@@ -8,7 +8,7 @@ local chatBox = peripheral.find("chat_box")
 if not chatBox then
   error("connect a chatBox.")
 end
-local RADAR_APPROX_DOOR_DISTANCE = 8.0
+local RADAR_APPROX_DOOR_DISTANCE = 6.5
 
 if not chatBox.getName() then
   chatBox.setName("PartyHouse")
@@ -27,7 +27,7 @@ local function handleRestone(eventData)
   if plateActivated then
     local closestPlayer = nil
     local closestDistance = 999999
-    for _,player in pairs(radar.getPlayers()) do
+    for _,player in ipairs(radar.getPlayers()) do
         local distanceToRadar = math.abs(player.distance - RADAR_APPROX_DOOR_DISTANCE)
         if distanceToRadar < closestDistance then
           closestDistance = distanceToRadar

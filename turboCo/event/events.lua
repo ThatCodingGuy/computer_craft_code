@@ -1,12 +1,20 @@
 --- Contains helpers for scheduling tasks on events as they're received.
 
 --- Waits for an event of type `event_type` to occur and then calls `callback`.
+-- `callback` is expected to be able to handle whatever event parameters are passed to it.
 local function listen(callback, event_type)
     callback(os.pullEvent(event_type))
 end
 
+--- Waits for a turtle inventory change event to occur.
+local function wait_for_inventory_change()
+    listen(function()
+    end, "turtle_inventory")
+end
+
 --- Schedules `callback` to run after `delay` seconds, once the program blocks on the returned
 -- handler.
+-- @param callback The parameterless function to call when the timer is triggered.
 -- @return A handler that should be called once the current coroutine is ready to be blocked. The
 -- handler will eventually call `callback` depending on how much time is left before the call should
 -- be scheduled.
@@ -31,6 +39,7 @@ end
 
 return {
     listen = listen,
+    wait_for_inventory_change = wait_for_inventory_change,
     schedule = schedule,
     sleep = sleep,
 }

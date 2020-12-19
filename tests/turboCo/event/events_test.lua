@@ -13,6 +13,7 @@ describe("Events", function()
     end
 
     before_each(function()
+        return_value = nil
         os = test_setup.generate_cc_mocks(mock).os
         os.pullEvent = function(event_type)
             return get_return_value()
@@ -75,5 +76,14 @@ describe("Events", function()
 
             os.startTimer:revert()
         end)
+    end)
+
+    it("waits for inventory change event", function()
+        spy.on(os, "pullEvent")
+        return_value = { "turtle_inventory" }
+
+        events.wait_for_inventory_change()
+
+        assert.spy(os.pullEvent).was.called_with("turtle_inventory")
     end)
 end)

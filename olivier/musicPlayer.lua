@@ -14,11 +14,60 @@ local screen = peripheral.find("monitor")
 if screen == nil then
   screen = term.current()
 end
+
 local tapeDrive = peripheral.find("tape_drive")
+local tapeSpeed = 1.0
+local tapeVolume = 0.5
+if tapeDrive ~= nil then
+  tapeDrive.setVolume(tapeVolume)
+  tapeDrive.setSpeed(tapeSpeed)
+end
+
 local eventHandler = EventHandler.create()
 local exitHandler = ExitHandler.createFromScreen(screen, eventHandler)
+local progressDisplay = nil
+local isWritingMusic = false
+local currentFileWrittenToTape = nil
+local speedScreenContent = nil
+local volumeScreenContent = nil
 
-local screenTitleBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=2, bgColor=colors.yellow, textColor=colors.gray}
+function increaseSpeed()
+  tapeSpeed = tapeSpeed + 0.1
+  if tapeSpeed > 2 then
+    tapeSpeed = 2
+  end
+  tapeDrive.setSpeed(tapeSpeed)
+  speedScreenContent.updateText{text=tostring(tapeSpeed)}
+end
+
+function decreaseSpeed()
+  tapeSpeed = tapeSpeed - 0.1
+  if tapeSpeed < 0.25 then
+    tapeSpeed = 0.25
+  end
+  tapeDrive.setSpeed(tapeSpeed)
+  speedScreenContent.updateText{text=tostring(tapeSpeed)}
+end
+
+function decreaseVolume()
+  tapeVolume = tapeVolume - 0.1
+  if tapeVolume < 0 then
+    tapeVolume = 0
+  end
+  tapeDrive.setVolume(tapeVolume)
+  volumeScreenContent.updateText{text=tostring(tapeVolume)}
+end
+
+function increaseVolume()
+  tapeVolume = tapeVolume + 0.1
+  if tapeVolume > 1.0 then
+    tapeVolume = 1
+  end
+  tapeDrive.setVolume(tapeVolume)
+  volumeScreenContent.updateText{text=tostring(tapeVolume)}
+end
+
+local screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1, bgColor=colors.yellow, textColor=colors.gray}
 screenTitleBuffer.writeCenter{text="-- Music Player --"}
 Button.create{
   screenBuffer=screenTitleBuffer,
@@ -31,12 +80,63 @@ Button.create{
 }
 screenTitleBuffer.render()
 
-local screenBuffer = ScreenBuffer.createFullScreenFromTop{screen=screen, topOffset=2, bgColor=colors.purple, textColor=colors.white}
+local controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1,topOffset=1, bgColor=colors.blue, textColor=colors.white}
+controlScreenBuffer.write{text="  "}
+Button.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text="+",
+  textColor=colors.white,
+  bgColor=colors.green,
+  leftClickCallback=increaseSpeed
+}
+Button.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text="-",
+  textColor=colors.white,
+  bgColor=colors.red,
+  leftClickCallback=decreaseSpeed
+}
+controlScreenBuffer.write{text=" Speed: "}
+
+speedScreenContent = ScreenContent.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text=tostring(tapeSpeed)
+}
+
+--Adds padding
+controlScreenBuffer.write{text="      "}
+
+Button.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text="+",
+  textColor=colors.white,
+  bgColor=colors.green,
+  leftClickCallback=increaseVolume
+}
+Button.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text="-",
+  textColor=colors.white,
+  bgColor=colors.red,
+  leftClickCallback=decreaseVolume
+}
+
+controlScreenBuffer.write{text=" Volume: "}
+volumeScreenContent = ScreenContent.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text=tostring(tapeVolume)
+}
+controlScreenBuffer.render()
+
+local screenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=2, bgColor=colors.purple, textColor=colors.white}
 screenBuffer.ln()
 local radioGroup = RadioGroup.create()
-local progressDisplay = nil
-local isWritingMusic = false
-local currentFileWrittenToTape = nil
 
 
 function getAllMusicAndCreateButtons(radioGroup)

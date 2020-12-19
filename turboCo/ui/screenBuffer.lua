@@ -524,92 +524,29 @@ local function create(args)
   }
 end
 
-local function createFullScreen(args)
-  local screen = args.screen
+local function createFromOverrides(args)
+  local screen, leftOffset, rightOffset, topOffset, bottomOffset, widthOverride, heightOverride = args.screen,
+    args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0,
+    args.bottomOffset or 0, args.widthOverride, args.heightOverride
   local width,height = screen.getSize()
-  return create{screen=screen, 
-    xStartingScreenPos=1, 
-    yStartingScreenPos=1, 
-    width=width, 
-    height=height, 
-    bgColor=args.bgColor, 
-    color=args.color
-  }
-end
-
-local function createFullScreenAtTopWithHeight(args)
-  local screen,height = args.screen,args.height
-  local width,_ = screen.getSize()
-  return create{screen=screen, 
-    xStartingScreenPos=1, 
-    yStartingScreenPos=1, 
-    width=width, 
-    height=height, 
-    bgColor=args.bgColor, 
-    textColor=args.textColor
-  }
-end
-
-local function createFullScreenFromTop(args)
-  local screen,topOffset = args.screen, args.topOffset
-  local width,height = screen.getSize()
-  return create{screen=screen,
-    xStartingScreenPos=1, 
-    yStartingScreenPos=topOffset + 1,
-    width=width, 
-    height=height-topOffset, 
-    bgColor=args.bgColor,
-    textColor=args.textColor
-  }
-end
-
-local function createFullScreenAtBottomWithHeight(args)
-  local screen,desiredHeight = args.screen, args.height
-  local width,height = screen.getSize()
-  return create{screen=screen, 
-    xStartingScreenPos=1, 
-    yStartingScreenPos=height-desiredHeight+1, 
-    width=width, 
-    height=desiredHeight, 
-    bgColor=args.bgColor, 
-    textColor=args.textColor
-  }
-end
-
-local function createFullScreenFromTopAndBottom(args)
-  local screen,topOffset,bottomOffset = args.screen, args.topOffset, args.bottomOffset
-  local width,height = screen.getSize()
-  return create{screen=screen, 
-    xStartingScreenPos=1, 
-    yStartingScreenPos=topOffset + 1,
-    width=width, 
-    height=height-topOffset-bottomOffset, 
-    bgColor=args.bgColor, 
-    textColor=args.textColor
-  }
-end
-
-local function createFromOffsets(args)
-  local screen, leftOffset, rightOffset, topOffset, bottomOffset = args.screen, 
-    args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0, args.bottomOffset or 0
-  local width,height = screen.getSize()
+  if widthOverride == nil then
+    widthOverride = width
+  end
+  if heightOverride == nil then
+    heightOverride = height
+  end
   return create{
       screen=screen, 
       xStartingScreenPos=1 + leftOffset,
       yStartingScreenPos=1 + topOffset,
-      width=width-leftOffset-rightOffset,
-      height=height-topOffset-bottomOffset,
+      width=widthOverride-leftOffset-rightOffset,
+      height=heightOverride-topOffset-bottomOffset,
       bgColor=args.bgColor,
       textColor=args.textColor
   }
 end
 
 screenBuffer.create = create
-screenBuffer.createFullScreen = createFullScreen
-screenBuffer.createFullScreenAtTopWithHeight = createFullScreenAtTopWithHeight
-screenBuffer.createFullScreenFromTop = createFullScreenFromTop
-screenBuffer.createFullScreenAtBottomWithHeight = createFullScreenAtBottomWithHeight
-screenBuffer.createFullScreenFromTopAndBottom = createFullScreenFromTopAndBottom
-screenBuffer.createFromOffsets = createFromOffsets
+screenBuffer.createFromOverrides = createFromOverrides
 
 return screenBuffer

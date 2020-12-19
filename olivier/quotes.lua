@@ -47,6 +47,7 @@ if screen == nil then
   end
 end
 screen.clear()
+local width,height = screen.getSize()
 
 function getQuotes(pageNumber)
   local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
@@ -87,6 +88,7 @@ function getAndWriteQuotes(screenBuffer, pageNumber)
   quotesResponse = getQuotes(pageNumber)
   if quotesResponse ~= nil then
     quotes = quotesResponse['quotes']
+    screenBuffer.ln()
     for _,quote in pairs(quotes) do
       writeQuote(screenBuffer, quote)
     end
@@ -109,7 +111,7 @@ function updatePageTracker()
 end
 
 function createNewQuotePage()
-  local newPageScreenBuffer = ScreenBuffer.createFullScreenFromTopAndBottom{screen=screen, topOffset=3, bottomOffset=1}
+  local newPageScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=2, bottomOffset=1}
   local newPage = Page.create{screenBuffer=newPageScreenBuffer}
   pageViewManager.addPage(newPage)
   getAndWriteQuotes(newPageScreenBuffer, pageViewManager.getPageIndex() + 1)
@@ -134,14 +136,13 @@ function getNextQuotes()
   end
 end
 
-screenTopBuffer = ScreenBuffer.createFullScreenAtTopWithHeight{screen=screen, height=3}
-screenTopBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=2, color=colors.lightBlue, bgColor=colors.gray}
 screenTopBuffer.writeCenterLn{text="Quotes of the Day", color=colors.lightBlue, bgColor=colors.gray}
 screenTopBuffer.writeFullLineLn{text="-", color=colors.lightBlue, bgColor=colors.gray}
 screenTopBuffer.render()
 
-screenBottomBuffer = ScreenBuffer.createFullScreenAtBottomWithHeight{screen=screen, height=1}
-screenBottomBuffer.writeFullLineThenResetCursor{text=" ", color=colors.lightBlue, bgColor=colors.gray}
+screenBottomBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1, topOffset=height-1, color=colors.lightBlue, bgColor=colors.gray}
+screenBottomBuffer.writeFullLineThenResetCursor{text=" ", }
 
 scrollHandler = ScrollHandler.create{eventHandler=eventHandler}
 scrollHandler.makeActive()

@@ -2,7 +2,7 @@
 
 local function pull_events(event_type)
     while true do
-        local event_data = os.pullEvent()
+        local event_data = {os.pullEvent()}
         if event_data[1] == event_type then
             return event_data
         end

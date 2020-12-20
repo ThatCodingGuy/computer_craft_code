@@ -33,8 +33,8 @@ describe("Fake OS", function()
         local pulled_event_1 = os.pullEvent()
         local pulled_event_2 = os.pullEvent()
 
-        assert.are.same({"event 1"}, pulled_event_1)
-        assert.are.same({"event 2"}, pulled_event_2)
+        assert.are.equal("event 1", pulled_event_1)
+        assert.are.equal("event 2", pulled_event_2)
     end)
 
     it("should pull events until one matches filter", function()
@@ -44,7 +44,7 @@ describe("Fake OS", function()
 
         local pulled_event = os.pullEvent("event 3")
 
-        assert.are.same({"event 3"}, pulled_event)
+        assert.are.equal("event 3", pulled_event)
         assert.is_false(os.event_queue.contains({"event 1"}))
         assert.is_false(os.event_queue.contains({"event 2"}))
     end)
@@ -61,9 +61,9 @@ describe("Fake OS", function()
         local timer_id_1 = os.startTimer(123)
         os.queueEvent("event")
         local timer_id_2 = os.startTimer(234)
-        local event_1 = os.pullEvent()
-        local event_2 = os.pullEvent()
-        local event_3 = os.pullEvent()
+        local event_1 = {os.pullEvent()}
+        local event_2 = {os.pullEvent()}
+        local event_3 = {os.pullEvent()}
 
         assert.are.same({ "timer", timer_id_1 }, event_1)
         assert.are.same({"event"}, event_2)
@@ -82,9 +82,9 @@ describe("Fake OS", function()
         local alarm_1 = os.setAlarm(123)
         os.queueEvent("event")
         local alarm_2 = os.setAlarm(234)
-        local event_1 = os.pullEvent()
-        local event_2 = os.pullEvent()
-        local event_3 = os.pullEvent()
+        local event_1 = {os.pullEvent()}
+        local event_2 = {os.pullEvent()}
+        local event_3 = {os.pullEvent()}
 
         assert.are.same({ "alarm", alarm_1 }, event_1)
         assert.are.same({"event"}, event_2)

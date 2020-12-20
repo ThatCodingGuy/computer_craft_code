@@ -9,13 +9,8 @@ describe("Events", function()
             last_event_data = event_data
         end
     }
-    --local return_value
-    --local get_return_value = function()
-    --    return return_value
-    --end
 
     before_each(function()
-        --return_value = nil
         os = FakeOs.new()
         os.impersonate()
         spy.on(caller, "callback")

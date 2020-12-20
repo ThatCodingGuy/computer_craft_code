@@ -54,7 +54,11 @@ local FakeOs = class({}, function()
             repeat
                 removed_event = table.remove(self.event_queue, 1)
             until event == nil or removed_event == nil or removed_event[1] == event
-            return removed_event
+            if removed_event == nil then
+                return nil
+            else
+                return unpack(removed_event)
+            end
         end,
         pullEventRaw = function(event)
         end,

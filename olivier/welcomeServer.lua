@@ -99,7 +99,6 @@ local function exitPlayerIfNeeded(playerName)
 end
 
 local function handleRestone(eventData)
-  print("yo")
   local welcomePlateActivated = rs.getInput("top")
   local exitPlateActivated = rs.getInput("left")
   if welcomePlateActivated or exitPlateActivated then
@@ -118,7 +117,7 @@ local function handleRestone(eventData)
       elseif exitPlateActivated then
         exitPlayerIfNeeded(closestPlayer.name)
       end
-      print(string.format("greeting player: \"%s\" with distance to plate: \"%s\". distance to radar: \"%s\"", closestPlayer.name, closestDistance, closestPlayer.distance))
+      print(string.format("messaging player: \"%s\" with distance to plate: \"%s\". distance to radar: \"%s\"", closestPlayer.name, closestDistance, closestPlayer.distance))
     end
   end
 end

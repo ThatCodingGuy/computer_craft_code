@@ -24,17 +24,17 @@ function round(num, numDecimalPlaces)
   return math.floor(num * mult + 0.5) / mult
 end
 
-local function getRealTapeSpeed()
-  return round(tapeSpeed, 2)
+local function getDisplayedTapeSpeed()
+  return string.format("%sx", round(tapeSpeed, 2))
 end
 
-local function getRealTapeVolume()
-  return round(tapeVolume, 2)
+local function getDisplayedTapeVolume()
+  return string.format("%s%%", math.floor(tapeVolume * 100))
 end
 
 if tapeDrive ~= nil then
-  tapeDrive.setVolume(getRealTapeVolume())
-  tapeDrive.setSpeed(getRealTapeSpeed())
+  tapeDrive.setVolume(tapeVolume)
+  tapeDrive.setSpeed(tapeSpeed)
 end
 
 local eventHandler = EventHandler.create()
@@ -75,8 +75,8 @@ end
 
 function increaseVolume()
   tapeVolume = tapeVolume + 0.1
-  if tapeVolume > 10 then
-    tapeVolume = 10
+  if tapeVolume > 1 then
+    tapeVolume = 1
   end
   tapeDrive.setVolume(tapeVolume)
   volumeScreenContent.updateText{text=tostring(getRealTapeVolume()), render=true}
@@ -118,11 +118,11 @@ controlScreenBuffer.write{text=" Speed: "}
 speedScreenContent = ScreenContent.create{
   screenBuffer=controlScreenBuffer,
   eventHandler=eventHandler,
-  text=tostring(tapeSpeed)
+  text=getDisplayedTapeSpeed()
 }
 
 --Adds padding
-controlScreenBuffer.write{text="      "}
+controlScreenBuffer.write{text="        "}
 
 Button.create{
   screenBuffer=controlScreenBuffer,
@@ -145,7 +145,7 @@ controlScreenBuffer.write{text=" Volume: "}
 volumeScreenContent = ScreenContent.create{
   screenBuffer=controlScreenBuffer,
   eventHandler=eventHandler,
-  text=tostring(tapeVolume)
+  text=getDisplayedTapeVolume()
 }
 controlScreenBuffer.render()
 

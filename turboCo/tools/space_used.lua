@@ -36,6 +36,7 @@ local logger = Logger.new()
 local dir = arg[1]
 if dir == nil or not fs.exists(dir) then
     logger.error("Expected a valid file path as argument")
+    return
 end
 
 local size = traverse(dir)

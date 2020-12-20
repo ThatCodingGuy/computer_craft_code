@@ -94,7 +94,7 @@ local function exitPlayerIfNeeded(playerName)
   if playerName == "Corpsefire03" then
     chatBox.say(string.format("Have a nice trip, Master Olivier"))
   else
-    chatBox.say(string.format("Welcome to the party house, %s", greetingName))
+    chatBox.say(string.format("I hope you enjoyed your stay, %s", greetingName))
   end
 end
 

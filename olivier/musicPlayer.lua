@@ -52,7 +52,7 @@ function increaseSpeed()
     tapeSpeed = 2.0
   end
   tapeDrive.setSpeed(tapeSpeed)
-  speedScreenContent.updateText{text=tostring(getRealTapeSpeed()), render=true}
+  speedScreenContent.updateText{text=tostring(getDisplayedTapeSpeed()), render=true}
 end
 
 function decreaseSpeed()
@@ -61,7 +61,7 @@ function decreaseSpeed()
     tapeSpeed = 0.25
   end
   tapeDrive.setSpeed(tapeSpeed)
-  speedScreenContent.updateText{text=tostring(getRealTapeSpeed()), render=true}
+  speedScreenContent.updateText{text=tostring(getDisplayedTapeSpeed()), render=true}
 end
 
 function decreaseVolume()
@@ -70,7 +70,7 @@ function decreaseVolume()
     tapeVolume = 0
   end
   tapeDrive.setVolume(tapeVolume)
-  volumeScreenContent.updateText{text=tostring(getRealTapeVolume()), render=true}
+  volumeScreenContent.updateText{text=tostring(getDisplayedTapeVolume()), render=true}
 end
 
 function increaseVolume()
@@ -79,7 +79,7 @@ function increaseVolume()
     tapeVolume = 1
   end
   tapeDrive.setVolume(tapeVolume)
-  volumeScreenContent.updateText{text=tostring(getRealTapeVolume()), render=true}
+  volumeScreenContent.updateText{text=tostring(getDisplayedTapeVolume()), render=true}
 end
 
 local screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1, bgColor=colors.yellow, textColor=colors.gray}

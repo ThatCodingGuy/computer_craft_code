@@ -2,7 +2,8 @@ local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 
 local customEntranceDialogues = {
   ['corpsefire03'] = {
-    "Welcome home, master Olivier."
+    "Welcome home, master Olivier.",
+    "Greetings, master Olivier. I hope that your day has been swell"
   },
   ['shasta_the_dude'] = {
     "YOOOOO, LEOOOOOOOOOO",
@@ -48,7 +49,7 @@ if not chatBox then
   error("connect a chatBox.")
 end
 local RADAR_APPROX_DOOR_DISTANCE = 4.6
-local MINIMUM_EPOCH_TIME_ELAPSED = 5000 --5 seconds
+local MINIMUM_EPOCH_TIME_ELAPSED = 10000 --10 seconds
 
 if not chatBox.getName() then
   chatBox.setName("PartyHouse")
@@ -98,6 +99,7 @@ local function exitPlayerIfNeeded(playerName)
 end
 
 local function handleRestone(eventData)
+  print("yo")
   local welcomePlateActivated = rs.getInput("top")
   local exitPlateActivated = rs.getInput("left")
   if welcomePlateActivated or exitPlateActivated then

@@ -1,9 +1,19 @@
 --- Contains helpers for scheduling tasks on events as they're received.
 
+local function pull_events(event_type)
+    while true do
+        local event_data = os.pullEvent()
+        if event_data[1] == event_type then
+            return event_data
+        end
+        os.queueEvent(unpack(event_data))
+    end
+end
+
 --- Waits for an event of type `event_type` to occur and then calls `callback`.
 -- `callback` is expected to be able to handle whatever event parameters are passed to it.
 local function listen(callback, event_type)
-    callback(os.pullEvent(event_type))
+    callback(pull_events(event_type))
 end
 
 --- Waits for a turtle inventory change event to occur.
@@ -22,8 +32,7 @@ local function schedule(callback, delay)
     local timer_id = os.startTimer(delay)
     return function()
         repeat
-            local event_data = os.pullEvent("timer")
-            local received_timer_id = event_data[2]
+            local received_timer_id = pull_events("timer")[2]
         until received_timer_id == timer_id
         callback()
     end

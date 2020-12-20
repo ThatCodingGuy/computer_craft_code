@@ -23,7 +23,7 @@ function human_readable_of(size)
     local current_size = size
     for i = 2, #suffixes do
         local new_size = current_size / 1024
-        if new_size < 0 then
+        if new_size < 1 then
             return current_size .. suffixes[i - 1]
         end
         current_size = new_size

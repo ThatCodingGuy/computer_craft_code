@@ -1,3 +1,4 @@
+local json = dofile("./gitlib/turboCo/json.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local RadioGroup = dofile("./gitlib/turboCo/ui/radioGroup.lua")
@@ -8,16 +9,28 @@ local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
 local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
+local MUSIC_CONFIG_PATH = "musicConfig.json"
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
 
 local screen = peripheral.find("monitor")
 if screen == nil then
   screen = term.current()
 end
+local width,height = screen.getSize()
 
-local tapeDrive = peripheral.find("tape_drive")
+local musicConfig = nil
+local selectedTapeDrive = nil
+local selectedFilePath = nil
+local isWritingMusic = false
 local tapeSpeed = 1.0
 local tapeVolume = 0.5
+
+local eventHandler = EventHandler.create()
+local exitHandler = ExitHandler.createFromScreen(screen, eventHandler)
+local progressDisplay = nil
+local speedScreenContent = nil
+local volumeScreenContent = nil
+local controlScreenBuffer = nil
 
 function round(num, numDecimalPlaces)
   local mult = 10^(numDecimalPlaces or 0)
@@ -29,29 +42,116 @@ local function getDisplayedTapeSpeed()
 end
 
 local function getDisplayedTapeVolume()
-  return string.format("%s%%", math.floor(tapeVolume * 100))
+  return string.format("%s%%", math.floor(round(tapeVolume, 2) * 100))
 end
 
-if tapeDrive ~= nil then
-  tapeDrive.setVolume(tapeVolume)
-  tapeDrive.setSpeed(tapeSpeed)
+function loadMusicConfig()
+  if not fs.exists(MUSIC_CONFIG_PATH) then
+    musicConfig = {}
+    return
+  end
+  local f = fs.open(MUSIC_CONFIG_PATH, 'r')
+  musicConfig = json.decode(f.read("*all"))
+  f.close()
 end
 
-local eventHandler = EventHandler.create()
-local exitHandler = ExitHandler.createFromScreen(screen, eventHandler)
-local progressDisplay = nil
-local isWritingMusic = false
-local currentFileWrittenToTape = nil
-local speedScreenContent = nil
-local volumeScreenContent = nil
-local controlScreenBuffer = nil
+function addAndPersistMusicConfig(config)
+  local f = fs.open(MUSIC_CONFIG_PATH, 'w')
+  table.insert(musicConfig, config)
+  f.write(json.encode(musicConfig))
+  f.close()
+end
+
+function getTapeDriveToWriteTo(fileSize)
+  local tapeDrives = {}
+  local nameToTapeDriveData = {}
+  for _,periphName in pairs(peripheral.getNames()) do
+    local periphType = peripheral.getType(periphName)
+    if periphType == "tape_drive" then
+      local tapeDrive = peripheral.wrap(periphName)
+      table.insert(tapeDrives, tapeDrive)
+      nameToTapeDriveData[periphName] = {
+        tapeDrive=tapeDrive,
+        lastPosition=0
+      }
+    end
+  end
+  if #tapeDrives == 0 then
+    error("no tape drives found, add tape drives.")
+  end
+  --Figure out the last position of each tape drives
+  for _,value in pairs(musicConfig) do
+    local tapeDriveData = nameToTapeDriveData[value.tapeDriveName]
+    if tapeDriveData == nil then
+      error(string.format("tapeDrive \"%s\" is missing. Please add it back or delete the config file.", value.tapeDriveName))
+    end
+    if value.tapePositionEnd > tapeDriveData.lastPosition then
+      tapeDriveData.lastPosition = value.tapePositionEnd
+    end
+  end
+  local tapeDriveToWriteTo = nil
+  --Figure out the tapeDrive with the smallest remaining valid size
+  for tapeDriveName,tapeDriveData in pairs(nameToTapeDriveData) do
+    local remainingSize = tapeDriveData.tapeDrive.getSize() - tapeDriveData.lastPosition
+    if remainingSize > fileSize and (tapeDriveToWriteTo == nil or (remainingSize < tapeDriveToWriteTo.remainingSize)) then
+        tapeDriveToWriteTo = {
+          tapeDrive = tapeDriveData.tapeDrive,
+          tapeDriveName = tapeDriveName,
+          remainingSize = remainingSize,
+          startPosition = tapeDriveData.lastPosition + 1
+        }
+    end
+  end
+  if tapeDriveToWriteTo == nil then
+    error("There is not enough space on any of the tape drives. Please plug in more tape drives.")
+  end
+  return tapeDriveToWriteTo
+end
+
+--[[
+
+]]
+function getMusicConfigForFileOrCreate(filePath)
+  for _,value in pairs(musicConfig) do
+    if value.filePath == filePath then
+      return false, value
+    end
+  end
+  local f = fs.open(filePath, "rb")
+  if not f then
+    error(string.format("music file on path \"%s\" not found", filePath))
+  end
+  local fileSize = f.seek("end")
+  f.close()
+  local tapeDriveData = getTapeDriveToWriteTo(fileSize)
+  local newConfig = {
+    filePath = filePath,
+    tapeDriveName = tapeDriveData.tapeDriveName,
+    tapePositionStart = tapeDriveData.startPosition,
+    tapePositionEnd = tapeDriveData.startPosition + fileSize - 1
+  }
+  return true, newConfig
+end
+
+function switchToTapeDrive(tapeDriveStr)
+  selectedTapeDrive = peripheral.wrap(tapeDriveStr)
+  if selectedTapeDrive == nil then
+    error(string.format("\"%s\" is not a found peripheral."))
+  elseif selectedTapeDrive.getType() ~= "tape_drive" then
+    error(string.format("\"%s\" is a peripheral but not a tape_drive."))
+  end
+  selectedTapeDrive.setSpeed(tapeSpeed)
+  selectedTapeDrive.setVolume(tapeVolume)
+end
 
 function increaseSpeed()
   tapeSpeed = tapeSpeed + 0.1
   if tapeSpeed > 2.0 then
     tapeSpeed = 2.0
   end
-  tapeDrive.setSpeed(tapeSpeed)
+  if selectedTapeDrive ~= nil then
+    selectedTapeDrive.setSpeed(tapeSpeed)
+  end
   speedScreenContent.updateText{text=tostring(getDisplayedTapeSpeed()), render=true}
 end
 
@@ -60,7 +160,9 @@ function decreaseSpeed()
   if tapeSpeed < 0.25 then
     tapeSpeed = 0.25
   end
-  tapeDrive.setSpeed(tapeSpeed)
+  if selectedTapeDrive ~= nil then
+    selectedTapeDrive.setSpeed(tapeSpeed)
+  end
   speedScreenContent.updateText{text=tostring(getDisplayedTapeSpeed()), render=true}
 end
 
@@ -69,7 +171,9 @@ function decreaseVolume()
   if tapeVolume < 0 then
     tapeVolume = 0
   end
-  tapeDrive.setVolume(tapeVolume)
+  if selectedTapeDrive ~= nil then
+    selectedTapeDrive.setVolume(tapeVolume)
+  end
   volumeScreenContent.updateText{text=tostring(getDisplayedTapeVolume()), render=true}
 end
 
@@ -78,7 +182,9 @@ function increaseVolume()
   if tapeVolume > 1 then
     tapeVolume = 1
   end
-  tapeDrive.setVolume(tapeVolume)
+  if selectedTapeDrive ~= nil then
+    selectedTapeDrive.setVolume(tapeVolume)
+  end
   volumeScreenContent.updateText{text=tostring(getDisplayedTapeVolume()), render=true}
 end
 
@@ -149,10 +255,9 @@ volumeScreenContent = ScreenContent.create{
 }
 controlScreenBuffer.render()
 
-local screenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=2, bgColor=colors.purple, textColor=colors.white}
+local screenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=2, bottomOffset=2, bgColor=colors.purple, textColor=colors.white}
 screenBuffer.ln()
 local radioGroup = RadioGroup.create()
-
 
 function getAllMusicAndCreateButtons(radioGroup)
   local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
@@ -169,92 +274,91 @@ function getAllMusicAndCreateButtons(radioGroup)
   end
 end
 
+function setupTapeFromConfig(config)
+  selectedTapeDrive = config.tapeDrive
+  selectedFilePath = config.filePath
+  local seekAmount = config.tapePositionStart - selectedTapeDrive.getPosition()
+  selectedTapeDrive.seek(seekAmount)
+  selectedTapeDrive.setSpeed(tapeSpeed)
+  selectedTapeDrive.setVolume(tapeVolume)
+end
+
+function playTapeFromConfig(config)
+  setupTapeFromConfig(config)
+  selectedTapeDrive.play()
+end
+
 function writeTapeUnit(eventData)
-  local filePath, currByteCounter, fileSize = eventData[2], eventData[3], eventData[4]
-  local maxByte = currByteCounter + BYTE_WRITE_UNIT
+  local config, currFilePosition = eventData[2], eventData[3]
+  local fileSize = config.tapePositionEnd - config.tapePositionStart
+  local maxByte = currFilePosition + BYTE_WRITE_UNIT
   if maxByte > fileSize then
-    maxByte = fileSize
+    maxByte = config.tapePositionEnd
   end
-  local sourceFile = fs.open(filePath, "rb")
-  sourceFile.seek("set", currByteCounter)
-  for i=currByteCounter,maxByte do
+  local sourceFile = fs.open(config.filePath, "rb")
+  sourceFile.seek("set", currFilePosition)
+  for i=currFilePosition,maxByte do
     local byte = sourceFile.read()
     if byte then
-      tapeDrive.write(byte)
+      config.tapeDrive.write(byte)
     end
   end
-  local percentage = math.floor((maxByte / fileSize) * 100)
+  local percentage = math.floor((maxByte / config.tapePositionEnd) * 100)
   --Update screen with progress
   local progressText = string.format("Writing: %s%% complete", percentage)
-  progressDisplay.updateText{text=progressText}
-  screenBuffer.render()
+  progressDisplay.updateText{text=progressText, render=true}
 
   --Stop if done, and actually play the tape, if not, put another event in the queue
-  if maxByte == fileSize then
-    currentFileWrittenToTape = filePath
-    progressDisplay.updateText{text=""}
-    screenBuffer.render()
-    rewind()
-    tapeDrive.play()
+  if maxByte == config.tapePositionEnd then
+    progressDisplay.updateText{text="", render=true}
+    addAndPersistMusicConfig(config)
+    playTapeFromConfig(config)
     isWritingMusic = false
   else
-    os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, maxByte + 1, fileSize)
+    os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, maxByte + 1)
   end
   sourceFile.close()
 end
 
-function queueWrite(filePath)
-  local f = fs.open(filePath, "rb")
-  if f then
-    local current = f.seek()
-    local fileSize = f.seek("end")
-    f.seek("set", current) --go back to beggining after we just went to end
-    f.close()
-    isWritingMusic = true
-    os.queueEvent(TAPE_WRITE_EVENT_TYPE, filePath, current, fileSize)
+function queueWrite(config)
+  if selectedTapeDrive ~= nil then
+    selectedTapeDrive.stop()
   end
-end
-
-function rewind()
-  local position = tapeDrive.getPosition()
-  if position <= 0 then
-    return
-  end
-  tapeDrive.seek(position * -1)
+  isWritingMusic = true
+  setupTapeFromConfig(config)
+  os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, 0)
 end
 
 function play()
   if not isWritingMusic then
-    local fileName = radioGroup.getSelected().getId()
-    if fileName then
-      
-      if currentFileWrittenToTape == fileName then
-        --resume if we are already loaded
-        tapeDrive.play()
-      else
-        --if we are not loaded, write the new song
-        tapeDrive.stop()
-        rewind()
-        queueWrite(fileName)
-      end
+    local filePath = radioGroup.getSelected().getId()
+    local isNew, config = getMusicConfigForFileOrCreate(filePath)
+    if selectedFilePath == filePath then
+      --resume if we are already loaded
+      selectedTapeDrive.play()
+    elseif isNew then
+      --if this is a new config, write the new song to the tape
+      queueWrite(config)
     else
-      error("file doesn't exist. plz fix.")
+      --if config is already written, then we simply play from it
+      playTapeFromConfig(config)
     end
   end
 end
 
 function stop()
-  if not isWritingMusic then
-    tapeDrive.stop()
+  if selectedTapeDrive ~= nil and not isWritingMusic then
+    selectedTapeDrive.stop()
   end
 end
 
 getAllMusicAndCreateButtons(radioGroup)
+screenBuffer.render()
 
-screenBuffer.ln()
+local screenBottomBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-2, height=2, bgColor=colors.yellow, textColor=colors.white}
 local playButton = Button.create{
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeLeft,
+  screenBuffer=screenBottomBuffer,
+  screenBufferWriteFunc=screenBottomBuffer.writeLeft,
   eventHandler=eventHandler, 
   text=" Play ", 
   textColor=colors.white, 
@@ -263,8 +367,8 @@ local playButton = Button.create{
 }
 
 local stopButton = Button.create{
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeRight,
+  screenBuffer=screenBottomBuffer,
+  screenBufferWriteFunc=screenBottomBuffer.writeRight,
   eventHandler=eventHandler, 
   text=" Stop ", 
   textColor=colors.white,
@@ -273,13 +377,14 @@ local stopButton = Button.create{
 }
 
 progressDisplay = ScreenContent.create{
-  screenBuffer=screenBuffer,
-  screenBufferWriteFunc=screenBuffer.writeCenter,
+  screenBuffer=screenBottomBuffer,
+  screenBufferWriteFunc=screenBottomBuffer.writeCenter,
   text="",
 }
-
-screenBuffer.render()
+screenBottomBuffer.render()
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
+
+loadMusicConfig()
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

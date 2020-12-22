@@ -74,7 +74,11 @@ function getTapeDriveToWriteTo(fileSize)
       }
     end
   end
-  if #nameToTapeDriveData == 0 then
+  local hasTapeDrives = false
+  for _,_ in pairs(nameToTapeDriveData) do
+    hasTapeDrives = true
+  end
+  if not hasTapeDrives then
     error("no tape drives found, add tape drives.")
   end
   --Figure out the last position of each tape drives

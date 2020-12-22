@@ -63,20 +63,18 @@ function addAndPersistMusicConfig(config)
 end
 
 function getTapeDriveToWriteTo(fileSize)
-  local tapeDrives = {}
   local nameToTapeDriveData = {}
   for _,periphName in pairs(peripheral.getNames()) do
     local periphType = peripheral.getType(periphName)
     if periphType == "tape_drive" then
       local tapeDrive = peripheral.wrap(periphName)
-      table.insert(tapeDrives, tapeDrive)
       nameToTapeDriveData[periphName] = {
         tapeDrive=tapeDrive,
         lastPosition=0
       }
     end
   end
-  if #tapeDrives == 0 then
+  if #nameToTapeDriveData == 0 then
     error("no tape drives found, add tape drives.")
   end
   --Figure out the last position of each tape drives
@@ -109,7 +107,8 @@ function getTapeDriveToWriteTo(fileSize)
 end
 
 --[[
-
+  returns first if the musicConfig is newly created,
+  second has the actual config object
 ]]
 function getMusicConfigForFileOrCreate(filePath)
   for _,value in pairs(musicConfig) do
@@ -132,17 +131,6 @@ function getMusicConfigForFileOrCreate(filePath)
     tapePositionEnd = tapeDriveData.startPosition + fileSize - 1
   }
   return true, newConfig
-end
-
-function switchToTapeDrive(tapeDriveStr)
-  selectedTapeDrive = peripheral.wrap(tapeDriveStr)
-  if selectedTapeDrive == nil then
-    error(string.format("\"%s\" is not a found peripheral."))
-  elseif selectedTapeDrive.getType() ~= "tape_drive" then
-    error(string.format("\"%s\" is a peripheral but not a tape_drive."))
-  end
-  selectedTapeDrive.setSpeed(tapeSpeed)
-  selectedTapeDrive.setVolume(tapeVolume)
 end
 
 function increaseSpeed()
@@ -291,6 +279,8 @@ end
 
 function writeTapeUnit(eventData)
   local config, currFilePosition = eventData[2], eventData[3]
+  print()
+  print(textutils.serializeJSON(config))
   local fileSize = config.tapePositionEnd - config.tapePositionStart
   local maxByte = currFilePosition + BYTE_WRITE_UNIT
   if maxByte > fileSize then
@@ -327,6 +317,7 @@ function queueWrite(config)
   end
   isWritingMusic = true
   setupTapeFromConfig(config)
+  print(textutils.serializeJSON(config))
   os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, 0)
 end
 

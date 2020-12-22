@@ -56,10 +56,12 @@ function loadMusicConfig()
 end
 
 function addAndPersistMusicConfig(config)
-  local f = fs.open(MUSIC_CONFIG_PATH, 'w')
   table.insert(musicConfig, config)
-  f.write(json.encode(musicConfig))
-  f.close()
+  local f = fs.open(MUSIC_CONFIG_PATH, 'w')
+  if f then
+    f.write(json.encode(musicConfig))
+    f.close()
+  end
 end
 
 function getTapeDriveToWriteTo(fileSize)

@@ -126,6 +126,7 @@ function getMusicConfigForFileOrCreate(filePath)
   local tapeDriveData = getTapeDriveToWriteTo(fileSize)
   local newConfig = {
     filePath = filePath,
+    tapeDrive = tapeDriveData.tapeDrive,
     tapeDriveName = tapeDriveData.tapeDriveName,
     tapePositionStart = tapeDriveData.startPosition,
     tapePositionEnd = tapeDriveData.startPosition + fileSize - 1

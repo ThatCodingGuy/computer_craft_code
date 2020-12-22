@@ -283,8 +283,6 @@ end
 
 function writeTapeUnit(eventData)
   local config, currFilePosition = eventData[2], eventData[3]
-  print()
-  print(textutils.serializeJSON(config))
   local fileSize = config.tapePositionEnd - config.tapePositionStart
   local maxByte = currFilePosition + BYTE_WRITE_UNIT
   if maxByte > fileSize then
@@ -321,7 +319,6 @@ function queueWrite(config)
   end
   isWritingMusic = true
   setupTapeFromConfig(config)
-  print(textutils.serializeJSON(config))
   os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, 0)
 end
 

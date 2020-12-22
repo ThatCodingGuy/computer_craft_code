@@ -97,7 +97,6 @@ function getTapeDriveToWriteTo(fileSize)
     local remainingSize = tapeDriveData.tapeDrive.getSize() - tapeDriveData.lastPosition
     if remainingSize > fileSize and (tapeDriveToWriteTo == nil or (remainingSize < tapeDriveToWriteTo.remainingSize)) then
         tapeDriveToWriteTo = {
-          tapeDrive = tapeDriveData.tapeDrive,
           tapeDriveName = tapeDriveName,
           remainingSize = remainingSize,
           startPosition = tapeDriveData.lastPosition + 1
@@ -129,7 +128,6 @@ function getMusicConfigForFileOrCreate(filePath)
   local tapeDriveData = getTapeDriveToWriteTo(fileSize)
   local newConfig = {
     filePath = filePath,
-    tapeDrive = tapeDriveData.tapeDrive,
     tapeDriveName = tapeDriveData.tapeDriveName,
     tapePositionStart = tapeDriveData.startPosition,
     tapePositionEnd = tapeDriveData.startPosition + fileSize - 1
@@ -268,7 +266,7 @@ function getAllMusicAndCreateButtons(radioGroup)
 end
 
 function setupTapeFromConfig(config)
-  selectedTapeDrive = config.tapeDrive
+  selectedTapeDrive = peripheral.wrap(config.tapeDriveName)
   selectedFilePath = config.filePath
   local seekAmount = config.tapePositionStart - selectedTapeDrive.getPosition()
   selectedTapeDrive.seek(seekAmount)
@@ -283,10 +281,7 @@ end
 
 function writeTapeUnit(eventData)
   local config, currFilePosition = eventData[2], eventData[3]
-  print()
-  print(config)
-  print(config.tapeDrive.write)
-  print(config.tapeDriveName)
+  local tapeDrive = peripheral.wrap(config.tapeDriveName)
   local fileSize = config.tapePositionEnd - config.tapePositionStart
   local maxByte = currFilePosition + BYTE_WRITE_UNIT
   if maxByte > fileSize then
@@ -297,7 +292,7 @@ function writeTapeUnit(eventData)
   for i=currFilePosition,maxByte do
     local byte = sourceFile.read()
     if byte then
-      config.tapeDrive.write(byte)
+      tapeDrive.write(byte)
     end
   end
   local percentage = math.floor((maxByte / config.tapePositionEnd) * 100)
@@ -323,9 +318,6 @@ function queueWrite(config)
   end
   isWritingMusic = true
   setupTapeFromConfig(config)
-  print(config)
-  print(config.tapeDrive.write)
-  print(config.tapeDriveName)
   os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, 0)
 end
 

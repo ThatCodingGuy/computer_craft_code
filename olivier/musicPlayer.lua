@@ -304,7 +304,7 @@ function writeTapeUnit(eventData)
   progressDisplay.updateText{text=progressText, render=true}
 
   --Stop if done, and actually play the tape, if not, put another event in the queue
-  if maxByte == config.tapePositionEnd then
+  if maxByte == fileSize then
     progressDisplay.updateText{text="", render=true}
     addAndPersistMusicConfig(config)
     playTapeFromConfig(config)

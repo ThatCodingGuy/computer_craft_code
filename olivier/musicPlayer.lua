@@ -72,7 +72,7 @@ function getTapeDriveToWriteTo(fileSize)
       local tapeDrive = peripheral.wrap(periphName)
       nameToTapeDriveData[periphName] = {
         tapeDrive=tapeDrive,
-        lastPosition=0
+        lastPosition=-1
       }
     end
   end
@@ -132,7 +132,7 @@ function getMusicConfigForFileOrCreate(filePath)
     filePath = filePath,
     tapeDriveName = tapeDriveData.tapeDriveName,
     tapePositionStart = tapeDriveData.startPosition,
-    tapePositionEnd = tapeDriveData.startPosition + fileSize - 1
+    tapePositionEnd = tapeDriveData.startPosition + fileSize
   }
   return true, newConfig
 end
@@ -287,7 +287,7 @@ function writeTapeUnit(eventData)
   local fileSize = config.tapePositionEnd - config.tapePositionStart
   local maxByte = currFilePosition + BYTE_WRITE_UNIT
   if maxByte > fileSize then
-    maxByte = config.tapePositionEnd
+    maxByte = fileSize
   end
   local sourceFile = fs.open(config.filePath, "rb")
   sourceFile.seek("set", currFilePosition)
@@ -297,7 +297,8 @@ function writeTapeUnit(eventData)
       tapeDrive.write(byte)
     end
   end
-  local percentage = math.floor((maxByte / config.tapePositionEnd) * 100)
+  sourceFile.close()
+  local percentage = math.floor((maxByte / fileSize) * 100)
   --Update screen with progress
   local progressText = string.format("Writing: %s%% complete", percentage)
   progressDisplay.updateText{text=progressText, render=true}
@@ -311,7 +312,6 @@ function writeTapeUnit(eventData)
   else
     os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, maxByte + 1)
   end
-  sourceFile.close()
 end
 
 function queueWrite(config)

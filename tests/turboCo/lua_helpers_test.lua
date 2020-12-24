@@ -1,10 +1,11 @@
 local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
+
 local class = lua_helpers.class
 local enum = lua_helpers.enum
+local split = lua_helpers.split
 
 describe("Lua helpers", function()
     describe("class", function()
-
         it("should return a valid prototype with constructor", function()
             local MyClass = class({
                 static_var = 123,
@@ -76,6 +77,58 @@ describe("Lua helpers", function()
             assert.are.equal(1, FakeEnum.ONE)
             assert.are.equal(2, FakeEnum.TWO)
             assert.are.equal(3, FakeEnum.THREE)
+        end)
+    end)
+
+    describe("split", function()
+        it("should split text into tokens, excluding the delimiter", function()
+            assert.are.same({
+                "some",
+                "text",
+                "has",
+                "been",
+                "split",
+            },
+                    split("some8text8has8been8split", "8"))
+        end)
+
+        it("should return a single-element array with the text if no delimiter exists", function()
+            assert.are.same({
+                "some text has been split",
+            },
+                    split("some text has been split", ","))
+        end)
+
+        it("should return empty strings when delimiter is preceeded or followed by nothing", function()
+            assert.are.same({
+                "",
+                " but rest of text",
+            },
+                    split("a but rest of text", "a"))
+            assert.are.same({
+                "rest of text but",
+                "",
+            },
+                    split("rest of text buta", "a"))
+        end)
+
+        it("should support multiple characters as delimiter", function()
+            assert.are.same({
+                "some text and a ",
+                " but rest ",
+                " and of text",
+            },
+                    split("some text and a big delimiter but rest big delimiter and of text", "big delimiter"))
+            assert.are.same({
+                "",
+                " but rest of text",
+            },
+                    split("big delimiter but rest of text", "big delimiter"))
+            assert.are.same({
+                "rest of text but ",
+                "",
+            },
+                    split("rest of text but big delimiter", "big delimiter"))
         end)
     end)
 end)

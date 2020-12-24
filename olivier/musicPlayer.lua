@@ -51,7 +51,7 @@ function loadMusicConfig()
     return
   end
   local f = fs.open(MUSIC_CONFIG_PATH, 'r')
-  musicConfig = json.decode(f.read("*all"))
+  musicConfig = json.decode(f.readAll())
   f.close()
 end
 

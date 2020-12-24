@@ -376,7 +376,10 @@ progressDisplay = ScreenContent.create{
   text="",
 }
 musicControlsBuffer.render()
-local progressBarBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, height=1, bgColor=colors.blue, textColor=colors.white}
+
+local progressBarBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, height=1, bgColor=colors.yellow, textColor=colors.white}
+progressBarBuffer.render()
+
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
 
 loadMusicConfig()

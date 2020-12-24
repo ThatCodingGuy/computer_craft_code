@@ -1,34 +1,33 @@
-
 local function create(args)
   local self = {
     screenBuffer=args.screenBuffer,
-    buttons = args.buttons or {}
+    clickables = args.clickables or {}
   }
 
   local getScreenBuffer = function()
     return self.screenBuffer
   end
 
-  local addButton = function(button)
-    table.insert(self.buttons, button)
+  local addClickable = function(clickable)
+    table.insert(self.clickables, clickable)
   end
 
   local makeInactive = function()
-    for _, button in pairs(self.buttons) do
-      button.makeInactive()
+    for _, clickable in pairs(self.clickables) do
+      clickable.makeInactive()
     end
   end
 
   local makeActive = function()
-    for _, button in pairs(self.buttons) do
-      button.makeActive()
+    for _, clickable in pairs(self.clickables) do
+      clickable.makeActive()
     end
     self.screenBuffer.render()
   end
 
   return {
     getScreenBuffer=getScreenBuffer,
-    addButton=addButton,
+    addClickable=addClickable,
     makeInactive=makeInactive,
     makeActive=makeActive
   }

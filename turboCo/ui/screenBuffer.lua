@@ -135,11 +135,9 @@ local function create(args)
   -- Text wrapping should be handled by writeWrap() function
   local writeTextToBuffer = function(args)
     local text, color, bgColor, bufferCursorPos = args.text, args.color, args.bgColor, args.bufferCursorPos
+    --If no override is passed, then we want to update the screen's actual cursor position
     if bufferCursorPos == nil then
-      bufferCursorPos = {
-        x=self.screenState.cursorPos.x,
-        y=self.screenState.cursorPos.y
-      }
+      bufferCursorPos = self.screenState.cursorPos
     end
     local screenCursor = {
       screenCursorPosBefore = getScreenCursorPos(),
@@ -159,11 +157,6 @@ local function create(args)
       local char = safeSubstring(text, i, i)
       row[bufferCursorPos.x] = { color=color, bgColor=bgColor, char=char}
       bufferCursorPos.x = bufferCursorPos.x + 1
-    end
-    --if no bufferCursorPos override is passed, then we want the cursor to be tracked
-    if args.bufferCursorPos == nil then
-      self.screenState.cursorPos.x = bufferCursorPos.x
-      self.screenState.cursorPos.y = bufferCursorPos.y
     end
     return screenCursor
   end
@@ -259,10 +252,12 @@ local function create(args)
 
   local setCursorToNextLine = function(args)
     --If we were providing an override to bufferCursorPos, then we do not want to set the cursor
-    if args == nil or args.bufferCursorPos == nil then
-      self.screenState.cursorPos.x = 1
-      self.screenState.cursorPos.y = self.screenState.cursorPos.y + 1
+    local bufferCursorPos = self.screenState.cursorPos
+    if args ~= nil and args.bufferCursorPos ~= nil then
+      bufferCursorPos = args.bufferCursorPos
     end
+    bufferCursorPos.x = 1
+    bufferCursorPos.y = bufferCursorPos.y + 1
   end
 
   -- Clears the screen for the screenBuffer then resets the cursor pointer
@@ -319,21 +314,23 @@ local function create(args)
   end
 
   local writeWrapImpl = function(args)
-    cloneArgs(args)
-    local text, color, bgColor = args.text, args.color, args.bgColor
+    local text, color, bgColor, bufferCursorPos = args.text, args.color, args.bgColor, args.bufferCursorPos
+    if bufferCursorPos == nil then
+      bufferCursorPos = self.screenState.cursorPos
+    end
     local remainingText = text
     local writeData = nil
     while string.len(remainingText) > 0 do
-      local remainingX = self.width - self.screenState.cursorPos.x + 1
+      local remainingX = self.width - bufferCursorPos.x + 1
       if remainingX > 1 then
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
-        local tempWriteData = writeTextToBuffer{text=remainingLineText, color=color, bgColor=bgColor}
+        local tempWriteData = writeTextToBuffer{text=remainingLineText, color=color, bgColor=bgColor, bufferCursorPos=bufferCursorPos}
         if writeData ~= nil then
           writeData = tempWriteData
         end
       end
-      if (self.screenState.cursorPos.x > self.width) then
-        setCursorToNextLine()
+      if (bufferCursorPos.x > self.width) then
+        setCursorToNextLine(args)
       end
       remainingText = safeSubstring(remainingText, remainingX + 1, -1)
     end
@@ -532,7 +529,7 @@ local function createFromOverrides(args)
   local width,height = screen.getSize()
   widthOverride = width - leftOffset - rightOffset
   heightOverride = height - topOffset - bottomOffset
-  
+
   return create{
     screen=screen, 
     xStartingScreenPos=1 + leftOffset,

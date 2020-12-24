@@ -21,7 +21,32 @@ local function create(args)
     text="^",
     textColor=colors.black, 
     bgColor=colors.gray,
-    leftClickCallback=scrollBarScreenBuffer.scrollUp
+    leftClickCallback=trackingScreenBuffer.scrollUp
+  }
+
+  local scrollDownButton = Button.create{
+    screenBuffer=scrollBarScreenBuffer,
+    eventHandler=eventHandler, 
+    text="v",
+    textColor=colors.black, 
+    bgColor=colors.gray,
+    leftClickCallback=trackingScreenBuffer.scrollDown
+  }
+
+  local self = {
+    screen = args.screen,
+    eventHandler = args.eventHandler,
+    trackingScreenBuffer = args.trackingScreenBuffer,
+    trackingScreenBufferDimensions = { width = 0, height = 0 },
+    scrollBarScreenBuffer = scrollBarScreenBuffer,
+    scrollUpButton = scrollUpButton,
+    scrollDownButton = scrollDownButton,
+    screenStartingPos = { x=args.xStartingScreenPos, y=args.yStartingScreenPos },
+    height = args.height,
+    barColor = args.barColor or colors.gray,
+    trackerColor = args.trackerColor or colors.white,
+    monitorTouchKeyHandlerId = nil,
+    leftClickKeyHandlerId = nil,
   }
 
   local getBarLength = function()
@@ -39,31 +64,6 @@ local function create(args)
     screenBuffer = scrollBarScreenBuffer,
     text = getBarText(),
     bgColor = colors.lightBlue
-  }
-
-  local scrollDownButton = Button.create{
-    screenBuffer=scrollBarScreenBuffer,
-    eventHandler=eventHandler, 
-    text="v",
-    textColor=colors.black, 
-    bgColor=colors.gray,
-    leftClickCallback=scrollBarScreenBuffer.scrollDown
-  }
-
-  local self = {
-    screen = args.screen,
-    eventHandler = args.eventHandler,
-    trackingScreenBuffer = args.trackingScreenBuffer,
-    trackingScreenBufferDimensions = { width = 0, height = 0 },
-    scrollBarScreenBuffer = scrollBarScreenBuffer,
-    scrollUpButton = scrollUpButton,
-    scrollDownButton = scrollDownButton,
-    screenStartingPos = { x=args.xStartingScreenPos, y=args.yStartingScreenPos },
-    height = args.height,
-    barColor = args.barColor or colors.gray,
-    trackerColor = args.trackerColor or colors.white,
-    monitorTouchKeyHandlerId = nil,
-    leftClickKeyHandlerId = nil,
   }
 
   local monitorTouchHandler = function(eventData)
@@ -87,7 +87,8 @@ local function create(args)
     return y >= self.currentScreenPos.y and y <= maxPosY and x == self.currentScreenPos.x
   end
 
-  local render()
+  local render = function()
+    self.trackingScreenBuffer.render()
     self.scrollBarScreenBuffer.render()
   end
 
@@ -114,6 +115,23 @@ local function create(args)
 
 end
 
+local function createFromOverrides(args)
+  local screen, leftOffset, topOffset, bottomOffset = args.screen,
+    args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0, args.bottomOffset or 0
+  local _,height = screen.getSize()
+  heightOverride = height - topOffset - bottomOffset
+  
+  return create{
+    screen=screen, 
+    xStartingScreenPos=1 + leftOffset,
+    yStartingScreenPos=1 + topOffset,
+    height=heightOverride,
+    bgColor=args.bgColor,
+    textColor=args.textColor
+  }
+end
+
 return {
-  create=create
+  create=create,
+  createFromOverrides=createFromOverrides
 }

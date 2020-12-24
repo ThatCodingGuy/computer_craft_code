@@ -27,9 +27,9 @@ local function createFromScreenBufferAndScrollBar(args)
 end
 
 local function create(args)
-  local screen, xStartingScreenPos, yStartingScreenPos, width, height, bgColor = 
+  local screen, xStartingScreenPos, yStartingScreenPos, width, height, color, bgColor = 
         args.screen, args.xStartingScreenPos, args.yStartingScreenPos,
-        args.width, args.height, args.bgColor
+        args.width, args.height, args.color, args.bgColor
 
   local screenBuffer = ScreenBuffer.create{
     screen = screen,
@@ -37,12 +37,14 @@ local function create(args)
     yStartingScreenPos = yStartingScreenPos,
     width = width - 1,
     height = height,
+    color = color,
     bgColor = bgColor
   }
 
   local scrollBar = ScrollBar.create{
     screen = screen,
-    xStartingScreenPos = xStartingScreenPos + width,
+    trackingScreenBuffer = screenBuffer,
+    xStartingScreenPos = xStartingScreenPos + width - 1,
     yStartingScreenPos = yStartingScreenPos,
     height = height
   }
@@ -54,12 +56,6 @@ local function createFromOverrides(args)
   local screen, leftOffset, rightOffset, topOffset, bottomOffset = args.screen,
     args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0,args.bottomOffset or 0
   local width,height = screen.getSize()
-  if widthOverride == nil then
-    widthOverride = width - leftOffset - rightOffset
-  end
-  if heightOverride == nil then
-    heightOverride = height - topOffset - bottomOffset
-  end
 
   local screenBuffer = ScreenBuffer.createFromOverrides{
     screen=screen,
@@ -69,9 +65,12 @@ local function createFromOverrides(args)
     bottomOffset=bottomOffset,
   }
 
-  local scrollBar = ScrollBar.create{
+  local scrollBar = ScrollBar.createFromOverrides{
     screen=screen,
-
+    trackingScreenBuffer=screenBuffer,
+    leftOffset=width - 1 - rightOffset,
+    topOffset=topOffset,
+    bottomOffset=bottomOffset
   }
   return createFromScreenBufferAndScrollBar{screenBuffer=screenBuffer, scrollBar=scrollBar}
 end

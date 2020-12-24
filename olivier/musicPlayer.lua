@@ -295,9 +295,9 @@ function musicProgressTrack(eventData)
     else
       musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
     end
-    local relativeStart = position - selectedMusicConfig.tapePositionStart
+    local relativePosition = position - selectedMusicConfig.tapePositionStart
     local relativeEnd = selectedMusicConfig.tapePositionEnd - selectedMusicConfig.tapePositionStart
-    local percentage = math.floor((relativeStart / relativeEnd) * 100)
+    local percentage = math.floor((relativePosition / relativeEnd) * 100)
     progressDisplay.updateText{text = string.format("Progress: %s%%", percentage), render=true}
   end
 end

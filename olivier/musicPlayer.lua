@@ -10,6 +10,7 @@ local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
 local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
 local MUSIC_CONFIG_PATH = "musicConfig.json"
+local MUSIC_PROGRESS_TRACK_DELAY = 0.5
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
 
 local screen = peripheral.find("monitor")
@@ -21,6 +22,8 @@ local width,height = screen.getSize()
 local musicConfig = nil
 local selectedTapeDrive = nil
 local selectedFilePath = nil
+local selectedMusicConfig = nil
+local musicProgressTimerId = nil
 local isWritingMusic = false
 local tapeSpeed = 1.0
 local tapeVolume = 0.5
@@ -267,17 +270,42 @@ function getAllMusicAndCreateButtons(radioGroup)
   end
 end
 
+function seekTapeToPosition(tapePosition)
+  local seekAmount = tapePosition - selectedTapeDrive.getPosition()
+  selectedTapeDrive.seek(seekAmount)
+end
+
 function setupTapeFromConfig(config)
+  selectedMusicConfig = config
   selectedTapeDrive = peripheral.wrap(config.tapeDriveName)
   selectedFilePath = config.filePath
-  local seekAmount = config.tapePositionStart - selectedTapeDrive.getPosition()
-  selectedTapeDrive.seek(seekAmount)
+  seekTapeToPosition(config.tapePositionStart)
   selectedTapeDrive.setSpeed(tapeSpeed)
   selectedTapeDrive.setVolume(tapeVolume)
 end
 
+function musicProgressTrack(eventData)
+  local timerId = eventData[2]
+  if musicProgressTimerId == timerId then
+    local position = selectedTapeDrive.getPosition()
+    if position > selectedMusicConfig.tapePositionEnd then
+      position = selectedMusicConfig.tapePositionEnd
+      seekTapeToPosition(position)
+      selectedTapeDrive.stop()
+    else
+      musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
+    end
+    local relativeStart = position - selectedMusicConfig.tapePositionStart
+    local relativeEnd = selectedMusicConfig.tapePositionEnd - selectedMusicConfig.tapePositionStart
+    local percentage = math.floor((relativeStart / relativeEnd) * 100)
+    progressDisplay.updateText{text = string.format("Progress: %s%%", percentage), render=true}
+  end
+end
+
 function playTapeFromConfig(config)
   setupTapeFromConfig(config)
+  progressDisplay.updateText{text = "Progress: 0%", render=true}
+  musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
   selectedTapeDrive.play()
 end
 
@@ -381,6 +409,7 @@ local progressBarBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOff
 progressBarBuffer.render()
 
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
+eventHandler.addHandle("timer", musicProgressTrack)
 
 loadMusicConfig()
 

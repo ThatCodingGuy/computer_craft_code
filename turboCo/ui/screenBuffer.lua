@@ -527,16 +527,12 @@ local function create(args)
 end
 
 local function createFromOverrides(args)
-  local screen, leftOffset, rightOffset, topOffset, bottomOffset, widthOverride, heightOverride = args.screen,
-    args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0,
-    args.bottomOffset or 0, args.width, args.height
+  local screen, leftOffset, rightOffset, topOffset, bottomOffset  = args.screen,
+    args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0, args.bottomOffset or 0
   local width,height = screen.getSize()
-  if widthOverride == nil then
-    widthOverride = width - leftOffset - rightOffset
-  end
-  if heightOverride == nil then
-    heightOverride = height - topOffset - bottomOffset
-  end
+  widthOverride = width - leftOffset - rightOffset
+  heightOverride = height - topOffset - bottomOffset
+  
   return create{
     screen=screen, 
     xStartingScreenPos=1 + leftOffset,

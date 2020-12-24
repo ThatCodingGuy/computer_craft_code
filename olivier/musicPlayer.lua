@@ -184,7 +184,7 @@ function increaseVolume()
   volumeScreenContent.updateText{text=tostring(getDisplayedTapeVolume()), render=true}
 end
 
-local screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1, bgColor=colors.yellow, textColor=colors.gray}
+local screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, bottomOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
 screenTitleBuffer.writeCenter{text="-- Music Player --"}
 Button.create{
   screenBuffer=screenTitleBuffer,
@@ -197,7 +197,7 @@ Button.create{
 }
 screenTitleBuffer.render()
 
-controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1, topOffset=1, bgColor=colors.blue, textColor=colors.white}
+controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=1, bottomOffset=height-2, bgColor=colors.blue, textColor=colors.white}
 controlScreenBuffer.write{text="  "}
 Button.create{
   screenBuffer=controlScreenBuffer,
@@ -377,7 +377,7 @@ end
 getAllMusicAndCreateButtons(radioGroup)
 screenBuffer.render()
 
-local musicControlsBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-2, height=1, bgColor=colors.blue, textColor=colors.white}
+local musicControlsBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-2, bottomOffset=1, bgColor=colors.blue, textColor=colors.white}
 local playButton = Button.create{
   screenBuffer=musicControlsBuffer,
   screenBufferWriteFunc=musicControlsBuffer.writeLeft,
@@ -405,7 +405,7 @@ progressDisplay = ScreenContent.create{
 }
 musicControlsBuffer.render()
 
-local progressBarBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, height=1, bgColor=colors.yellow, textColor=colors.white}
+local progressBarBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, bgColor=colors.yellow, textColor=colors.white}
 progressBarBuffer.render()
 
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)

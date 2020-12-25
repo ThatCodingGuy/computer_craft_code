@@ -6,6 +6,7 @@ local RadioInput = dofile("./gitlib/turboCo/ui/radioInput.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
+local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
 
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
 local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
@@ -251,8 +252,9 @@ volumeScreenContent = ScreenContent.create{
 }
 controlScreenBuffer.render()
 
-local screenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=2, bottomOffset=2, bgColor=colors.purple, textColor=colors.white}
-screenBuffer.ln()
+local musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=colors.purple, color=colors.white}
+local musicViewScreenBuffer = musicView.getScreenBuffer()
+musicViewScreenBuffer.ln()
 local radioGroup = RadioGroup.create()
 
 function getAllMusicAndCreateButtons(radioGroup)
@@ -263,8 +265,8 @@ function getAllMusicAndCreateButtons(radioGroup)
     radioGroup.addRadioInput(RadioInput.create{
       id=f,
       title=name,
-      screenBuffer=screenBuffer,
-      screenBufferWriteFunc=screenBuffer.writeLn,
+      screenBuffer=musicViewScreenBuffer,
+      screenBufferWriteFunc=musicViewScreenBuffer.writeLn,
       eventHandler=eventHandler
     })
   end
@@ -375,7 +377,7 @@ function stop()
 end
 
 getAllMusicAndCreateButtons(radioGroup)
-screenBuffer.render()
+musicViewScreenBuffer.render()
 
 local musicControlsBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-2, bottomOffset=1, bgColor=colors.blue, textColor=colors.white}
 local playButton = Button.create{

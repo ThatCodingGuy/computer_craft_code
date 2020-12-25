@@ -1,5 +1,5 @@
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
-local ScrollBar = dofile("./gitlib/turboCo/ui/scrollbar.lua")
+local ScrollBar = dofile("./gitlib/turboCo/ui/scrollBar.lua")
 
 local function createFromScreenBufferAndScrollBar(args)
   local self = {
@@ -53,12 +53,14 @@ local function create(args)
 end
 
 local function createFromOverrides(args)
-  local screen, leftOffset, rightOffset, topOffset, bottomOffset = args.screen,
-    args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0,args.bottomOffset or 0
-  local width,height = screen.getSize()
+  local screen, eventHandler, color, bgColor, leftOffset, rightOffset, topOffset, bottomOffset = args.screen,
+    args.eventHandler, args.color, args.bgColor, args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0,args.bottomOffset or 0
+  local width,_ = screen.getSize()
 
   local screenBuffer = ScreenBuffer.createFromOverrides{
     screen=screen,
+    color=color,
+    bgColor=bgColor,
     leftOffset=leftOffset,
     rightOffset=rightOffset + 1,
     topOffset=topOffset,
@@ -67,11 +69,13 @@ local function createFromOverrides(args)
 
   local scrollBar = ScrollBar.createFromOverrides{
     screen=screen,
+    eventHandler=eventHandler,
     trackingScreenBuffer=screenBuffer,
     leftOffset=width - 1 - rightOffset,
     topOffset=topOffset,
     bottomOffset=bottomOffset
   }
+
   return createFromScreenBufferAndScrollBar{screenBuffer=screenBuffer, scrollBar=scrollBar}
 end
 

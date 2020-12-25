@@ -283,6 +283,7 @@ local function create(args)
   --Sets cursor to the beggining of the next line after writing
   local writeLn = function(args)
     cloneArgs(args)
+    --print(args.text)
     local writeData = writeTextToBuffer(args)
     setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
@@ -322,10 +323,10 @@ local function create(args)
     local writeData = nil
     while string.len(remainingText) > 0 do
       local remainingX = self.width - bufferCursorPos.x + 1
-      if remainingX > 1 then
+      if remainingX > 0 then
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
         local tempWriteData = writeTextToBuffer{text=remainingLineText, color=color, bgColor=bgColor, bufferCursorPos=bufferCursorPos}
-        if writeData ~= nil then
+        if writeData == nil then
           writeData = tempWriteData
         end
       end

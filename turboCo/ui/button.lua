@@ -35,7 +35,7 @@ local function create(args)
   local monitorTouch = function()
     --We want to flip the colors
     self.clickable.updateText{text=self.text, textColor=self.bgColor, bgColor=self.textColor}
-    self.monitorClickTimerId = os.startTimer(0.05) --flip back the colors after a short time
+    self.monitorClickTimerId = os.startTimer(0.1) --flip back the colors after a short time
   end
 
   local timerCallback = function(eventData)

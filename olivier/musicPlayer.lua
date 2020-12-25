@@ -288,7 +288,7 @@ end
 
 function musicProgressTrack(eventData)
   local timerId = eventData[2]
-  if musicProgressTimerId == timerId then
+  if musicProgressTimerId == timerId and not isWritingMusic then
     local position = selectedTapeDrive.getPosition()
     if position > selectedMusicConfig.tapePositionEnd then
       position = selectedMusicConfig.tapePositionEnd

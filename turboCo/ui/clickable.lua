@@ -98,8 +98,8 @@ local function create(args)
   end
   
   local screenBufferCallback = function(callbackData)
-    self.currentScreenPos.x = self.currentScreenPos.x + callbackData.movementOffset.x
-    self.currentScreenPos.y = self.currentScreenPos.y + callbackData.movementOffset.y
+    self.currentScreenPos.x = self.currentScreenPos.x - callbackData.movementOffset.x
+    self.currentScreenPos.y = self.currentScreenPos.y - callbackData.movementOffset.y
   end
 
   local isActive = function()

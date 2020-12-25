@@ -15,7 +15,6 @@ local MUSIC_PROGRESS_TRACK_DELAY = 0.5
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
 
 local tArgs = { ... }
-print(#tArgs)
 local screen = nil
 if #tArgs > 0 then
   local screenSide = tArgs[1]
@@ -369,8 +368,13 @@ function queueWrite(config)
 end
 
 function play()
-  if not isWritingMusic then
-    local filePath = radioGroup.getSelected().getId()
+  local selected = radioGroup.getSelected()
+  if not isWritingMusic and selected ~= nil then
+    local filePath = selected.getId()
+    if DEBUG_MODE then
+      print("filePath: " .. filePath)
+      print("currentSelectedFilePath: " .. tostring(selectedFilePath))
+    end
     local isNew, config = getMusicConfigForFileOrCreate(filePath)
     if selectedFilePath == filePath then
       --resume if we are already loaded
@@ -379,6 +383,9 @@ function play()
       --if this is a new config, write the new song to the tape
       queueWrite(config)
     else
+      if DEBUG_MODE then
+        print("config: " .. textutils.serializeJSON(config))
+      end
       --if config is already written, then we simply play from it
       playTapeFromConfig(config)
     end

@@ -496,6 +496,9 @@ local function create(args)
   end
 
   return {
+    getScreenStartingPos = function() return {x = self.screenStartingPos.x, y=self.screenStartingPos.y} end,
+    getWidth = function() return self.width end,
+    getHeight = function() return self.height end,
     render=render,
     clear=clear,
     ln=ln,

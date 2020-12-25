@@ -22,6 +22,9 @@ local function create(args)
     leftMouseUpCallbacks={},
     rightMouseDownCallbacks={},
     rightMouseUpCallbacks={},
+    screenStartingPos = args.screenBuffer.getScreenStartingPos(),
+    screenBufferWidth = args.screenBuffer.getWidth(),
+    screenBufferHeight = args.screenBuffer.getHeight(),
     currentScreenPos= { x=0, y=0 },
     bufferCursorPos= { x=0, y=0 },
     monitorTouchHandlerId = nil,
@@ -32,8 +35,16 @@ local function create(args)
   }
 
   local wasClicked = function(x, y)
-    local maxPosX = self.currentScreenPos.x + #self.text - 1
-    return x >= self.currentScreenPos.x and x <= maxPosX and y == self.currentScreenPos.y
+    local maxClickablePosX = self.currentScreenPos.x + #self.text - 1
+    local maxScreenPosX = self.screenStartingPos.x + self.screenBufferWidth - 1
+    local maxScreenPosY = self.screenStartingPos.y + self.screenBufferHeight - 1
+    local wasClickedVal = self.currentScreenPos.x >= self.screenStartingPos.x and self.currentScreenPos.x <= maxScreenPosX and --make sure the clickable is within screenBuffer render view on X
+      self.currentScreenPos.y >= self.screenStartingPos.y and self.currentScreenPos.y <= maxScreenPosY and --make sure the clickable is within screenBuffer render view on Y
+      x >= self.currentScreenPos.x and x <= maxClickablePosX and y == self.currentScreenPos.y --now we make sure it was this clickable which was clicked
+    --[[if wasClickedVal then
+      print("clickable clicked: " .. tostring(self.id))
+    end]]
+    return wasClickedVal
   end
 
   local executeMonitorTouchCallbacks = function()

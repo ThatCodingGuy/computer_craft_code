@@ -14,10 +14,25 @@ local MUSIC_CONFIG_PATH = "musicConfig.json"
 local MUSIC_PROGRESS_TRACK_DELAY = 0.5
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
 
-local screen = peripheral.find("monitor")
-if screen == nil then
-  screen = term.current()
+local tArgs = { ... }
+print(#tArgs)
+local screen = nil
+if #tArgs > 0 then
+  local screenSide = tArgs[1]
+  if screenSide == "term" then
+    screen = term.current()
+  else
+    screen = peripheral.wrap(screenSide)
+  end
 end
+
+if screen == nil then
+  screen = peripheral.find("monitor")
+  if screen == nil then
+    screen = term.current()
+  end
+end
+screen.clear()
 local width,height = screen.getSize()
 
 local musicConfig = nil

@@ -14,26 +14,34 @@ end
 -- follows:
 --
 -- {
---   long_name -- The name of the command line parameter, which may consist of multiple characters.
---                It should be preceded by two dashes (--) on the command line. If short_name is
---                unset, then this value is required.
---   short_name -- The name of the command line parameter consisting of a single character. It
---                 should be preceded by a single dash (-) on the command line. If long_name is,
---                 unset, then this value is required.
+--   long_name   -- The name of the command line parameter, which may consist of multiple
+--                  characters. It should be preceded by two dashes (--) on the command line. If
+--                  short_name is unset, then this value is required.
+--   short_name  -- The name of the command line parameter consisting of a single character. It
+--                  should be preceded by a single dash (-) on the command line. If long_name is,
+--                  unset, then this value is required.
+--   transform   -- An optional function that will be called to process a parsed argument. The
+--                  transformer will receive the key and value as arguments and is expected to
+--                  return the final value that should be associated with the key.
 -- }
 local CliArgumentParser = class({}, function(definitions)
     local self = {
         long_argument_definitions = {},
-        short_argument_definitions = {}
+        short_argument_definitions = {},
+        merged_argument_definitions = {},
     }
 
     for _, definition in ipairs(definitions) do
         if definition.long_name ~= nil then
             self.long_argument_definitions[definition.long_name] = definition
+            self.merged_argument_definitions[definition.long_name] = definition
         end
 
         if definition.short_name ~= nil then
             self.short_argument_definitions[definition.short_name] = definition
+            if definition.long_name == nil then
+                self.merged_argument_definitions[definition.short_name] = definition
+            end
         end
     end
 
@@ -151,6 +159,19 @@ local CliArgumentParser = class({}, function(definitions)
         return returned_arguments
     end
 
+    local function transform_values(keyed_arguments)
+        local returned_arguments = {}
+        for key, value in pairs(keyed_arguments) do
+            local transform = self.merged_argument_definitions[key].transform
+            local final_value = value
+            if transform ~= nil then
+                final_value = transform(key, value)
+            end
+            returned_arguments[key] = final_value
+        end
+        return returned_arguments
+    end
+
     --- Returns a table containing values parsed from args associated with keys contained in the
     -- definitions held by this parser instance. Any arguments that could not be associated with one
     -- of the defined keys is made available through the positional_arguments value in the table as
@@ -161,7 +182,7 @@ local CliArgumentParser = class({}, function(definitions)
         end
 
         local keyed_arguments, positional_arguments = capture_arguments(args)
-        local returned_arguments = filter_keys(clean_values(keyed_arguments))
+        local returned_arguments = transform_values(filter_keys(clean_values(keyed_arguments)))
 
         if #positional_arguments > 0 then
             returned_arguments.positional_arguments = positional_arguments

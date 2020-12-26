@@ -203,4 +203,45 @@ describe("CLI argument parser", function()
             "-l=1",
         })
     end)
+
+    it("should apply argument transformer upon parsing a value", function()
+        local definitions = {
+            {
+                long_name = "long",
+                transform = function(key, value)
+                    return 123
+                end
+            },
+            {
+                long_name = "snake",
+                short_name = "s",
+                transform = function(key, value)
+                    return "abc"
+                end
+            },
+            {
+                short_name = "m",
+                transform = function(key, value)
+                    return true
+                end
+            },
+        }
+        local parser = CliArgumentParser.new(definitions)
+        spy.on(definitions[1], "transform")
+        spy.on(definitions[2], "transform")
+        spy.on(definitions[3], "transform")
+
+        assert.are.same({
+            long = 123,
+            snake = "abc",
+            m = true
+        }, parser.parse {
+            "--long=1",
+            "-s=2",
+            "-m=3"
+        })
+        assert.spy(definitions[1].transform).was.called_with("long", "1")
+        assert.spy(definitions[2].transform).was.called_with("snake", "2")
+        assert.spy(definitions[3].transform).was.called_with("m", "3")
+    end)
 end)

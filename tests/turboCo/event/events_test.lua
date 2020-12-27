@@ -36,23 +36,26 @@ describe("Events", function()
     end)
 
     describe("when calling schedule", function()
-        it("calls the callback when event is timer and ID matches and requeues unmatched events", function()
-            os.queueEvent("some event")
+        it("calls the callback when event is timer and ID matches and requeues unmatched events",
+                function()
+                    os.queueEvent("some event")
 
-            events.schedule(caller.callback, 9999)()
+                    events.schedule(caller.callback, 9999)()
 
-            assert.spy(caller.callback).was.called(1)
-            assert.spy(caller.callback).was.called_with()
-            assert.is_true(os.event_queue.contains({"some event"}))
-        end)
+                    assert.spy(caller.callback).was.called(1)
+                    assert.spy(caller.callback).was.called_with()
+                    assert.is_true(os.event_queue.contains({ "some event" }))
+                end)
 
-        it("skips the callback when event timer ID does not match", function()
-            os.queueEvent("timer", 765)
+        it("skips the callback when event timer ID does not match and reschedules the event",
+                function()
+                    os.queueEvent("timer", 765)
 
-            events.schedule(caller.callback, 9999)()
+                    events.schedule(caller.callback, 9999)()
 
-            assert.spy(caller.callback).was.called(1)
-        end)
+                    assert.spy(caller.callback).was.called(1)
+                    assert.is_true(os.event_queue.contains({ "timer", 765 }))
+                end)
 
         it("sleeps for correct amount of time", function()
             spy.on(os, "startTimer")

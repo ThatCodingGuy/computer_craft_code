@@ -2,12 +2,16 @@ local events = dofile("./gitlib/turboCo/event/events.lua")
 local inventory = dofile("./gitlib/carlos/inventory.lua")
 local Logger = dofile("./gitlib/turboCo/logger.lua")
 local RecurringTask = dofile("./gitlib/turboCo/recurring_task.lua")
+local common_argument_definitions = dofile("./gitlib/turboCo/app/common_argument_definitions.lua")
+local common_argument_parsers = dofile("./gitlib/turboCo/app/common_argument_parsers.lua")
+
+local number_def = common_argument_definitions.number_def
 
 --- Controls a turtle to feed whatever items it has in its hands to animals below it.
-local COW_BREED_COOLDOWN = 60 * 5.5 -- 5 minutes 30 seconds
-local FOOD_CHECK_PERIOD = 30 -- 30 seconds
+local COW_BREED_COOLDOWN_DEFAULT = 60 * 5.5 -- 5 minutes 30 seconds
 local FOOD_LABEL = "minecraft:wheat"
 local DELTAS_TO_STOP_FEEDING = 10
+local cow_breed_cooldown = COW_BREED_COOLDOWN_DEFAULT
 local logger = Logger.new()
 local inform_food_strategy
 local check_for_more_food
@@ -66,8 +70,20 @@ local function inform_food()
 end
 
 local function run()
-    Logger.log_level_filter = Logger.LoggingLevel.INFO
-    local feed_cows_task = RecurringTask.new(COW_BREED_COOLDOWN, feed_cows)
+    local argument_parser = common_argument_parsers.default_parser {
+        number_def {
+            long_name = "breed_cooldown",
+            short_name = "c",
+            description = "The amount of time to wait before attempting to feed the cows again.",
+        }
+    }
+    local parsed_arguments = argument_parser.parse(arg)
+    if parsed_arguments.breed_cooldown ~= nil then
+        cow_breed_cooldown = parsed_arguments.breed_cooldown
+    end
+    logger.info("Will feed cows every " .. cow_breed_cooldown .. " seconds.")
+
+    local feed_cows_task = RecurringTask.new(cow_breed_cooldown, feed_cows)
     if has_food() then
         inform_food_strategy = detect_food_outages
     else

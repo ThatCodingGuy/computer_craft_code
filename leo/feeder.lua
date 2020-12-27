@@ -89,7 +89,7 @@ local function run()
     else
         inform_food_strategy = check_for_more_food
     end
-    parallel.waitForAll(inform_food, feed_cows_task.run)
+    parallel.waitForAny(inform_food, feed_cows_task.run)
 end
 
 run()

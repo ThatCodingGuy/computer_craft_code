@@ -1,8 +1,12 @@
 --- Contains helpers for scheduling tasks on events as they're received.
 
+local Logger = dofile("./gitlib/turboCo/logger.lua")
+local logger = Logger.new()
+
 local function pull_events(event_type)
     while true do
         local event_data = {os.pullEvent()}
+        logger.debug("Pulled event data: " .. event_data[1])
         if event_data[1] == event_type then
             return event_data
         end

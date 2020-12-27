@@ -23,6 +23,7 @@ end
 --   transform   -- An optional function that will be called to process a parsed argument. The
 --                  transformer will receive the key and value as arguments and is expected to
 --                  return the final value that should be associated with the key.
+--   description -- An optional string description to document what the argument does.
 -- }
 local CliArgumentParser = class({}, function(definitions)
     local self = {

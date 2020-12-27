@@ -1,5 +1,7 @@
 --- Contains prepasses for processing common CLI arguments.
 
+local Logger = dofile("./gitlib/turboCo/logger.lua")
+
 local function pad(s, max_width)
     local num_spaces = max_width - #s
     local returned = s
@@ -46,10 +48,21 @@ local function prepass_help_argument(definitions, arguments)
         end
     end
     print(help_output)
-     -- Since Computercraft doesn't have an os.exit() function we need to force an exit here.
+    -- Since Computercraft doesn't have an os.exit() function we need to force an exit here.
     error()
+end
+
+--- A prepass for processing the --logging_level/-l CLI argument.
+-- It configures the application logger to log at the logging level passed as the argument.
+local function prepass_logging_level(definitions, arguments)
+    if arguments.logging_level == nil then
+        return
+    end
+
+    Logger.log_level_filter = arguments.logging_level
 end
 
 return {
     prepass_help_argument = prepass_help_argument,
+    prepass_logging_level = prepass_logging_level,
 }

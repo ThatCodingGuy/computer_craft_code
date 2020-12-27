@@ -1,6 +1,8 @@
+local Logger = dofile("./gitlib/turboCo/logger.lua")
 local common_argument_prepasses = dofile("./gitlib/turboCo/app/common_argument_prepasses.lua")
 
 local prepass_help_argument = common_argument_prepasses.prepass_help_argument
+local prepass_logging_level = common_argument_prepasses.prepass_logging_level
 
 describe("Common argument prepasses", function()
     describe("when prepassing help arguments", function()
@@ -71,6 +73,22 @@ describe("Common argument prepasses", function()
 
             assert.is_nil(last_printed)
             assert.is_false(error_triggered)
+        end)
+    end)
+
+    describe("when prepassing logging level arguments", function()
+        it("should set the log level when argument is defined", function()
+            prepass_logging_level({}, { logging_level = Logger.LoggingLevel.DEBUG })
+
+            assert.are.equal(Logger.LoggingLevel.DEBUG, Logger.log_level_filter)
+        end)
+
+        it("should do nothing when argument is not defined", function()
+            local initial_log_level_filter = Logger.log_level_filter
+
+            prepass_logging_level({}, {})
+
+            assert.are.equal(initial_log_level_filter, Logger.log_level_filter)
         end)
     end)
 end)

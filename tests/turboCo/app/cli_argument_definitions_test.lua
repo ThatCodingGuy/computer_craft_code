@@ -1,10 +1,10 @@
 local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
-local cli_argument_definitions = dofile("./gitlib/turboCo/app/cli_argument_definitions.lua")
+local common_argument_definitions = dofile("./gitlib/turboCo/app/common_argument_definitions.lua")
 
 local enum = lua_helpers.enum
-local number_def = cli_argument_definitions.number_def
-local boolean_def = cli_argument_definitions.boolean_def
-local enum_def = cli_argument_definitions.enum_def
+local number_def = common_argument_definitions.number_def
+local boolean_def = common_argument_definitions.boolean_def
+local enum_def = common_argument_definitions.enum_def
 
 describe("CLI argument definitions", function()
     describe("when creating number definition", function()

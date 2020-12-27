@@ -7,6 +7,13 @@ local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
+local Logger = dofile("./gitlib/turboCo/logger.lua")
+local logger = Logger.new()
+local loggingLevel = "ERROR"
+if LOGGING_LEVEL then
+  loggingLevel = LOGGING_LEVEL
+end
+Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
 
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
 local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
@@ -163,7 +170,9 @@ function increaseSpeed()
   if selectedTapeDrive ~= nil then
     selectedTapeDrive.setSpeed(tapeSpeed)
   end
-  speedScreenContent.updateText{text=tostring(getDisplayedTapeSpeed()), render=true}
+  local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
+  speedScreenContent.updateText{text=displayedTapeSpeed, render=true}
+  logger.debug("increasing speed to: ", displayedTapeSpeed)
 end
 
 function decreaseSpeed()
@@ -174,7 +183,9 @@ function decreaseSpeed()
   if selectedTapeDrive ~= nil then
     selectedTapeDrive.setSpeed(tapeSpeed)
   end
-  speedScreenContent.updateText{text=tostring(getDisplayedTapeSpeed()), render=true}
+  local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
+  speedScreenContent.updateText{text=displayedTapeSpeed, render=true}
+  logger.debug("decreasing speed to: ", displayedTapeSpeed)
 end
 
 function decreaseVolume()
@@ -185,7 +196,9 @@ function decreaseVolume()
   if selectedTapeDrive ~= nil then
     selectedTapeDrive.setVolume(tapeVolume)
   end
-  volumeScreenContent.updateText{text=tostring(getDisplayedTapeVolume()), render=true}
+  local displayedTapeVolume = tostring(getDisplayedTapeVolume())
+  volumeScreenContent.updateText{text=displayedTapeVolume, render=true}
+  logger.debug("decreasing volume to: ", displayedTapeVolume)
 end
 
 function increaseVolume()
@@ -196,7 +209,9 @@ function increaseVolume()
   if selectedTapeDrive ~= nil then
     selectedTapeDrive.setVolume(tapeVolume)
   end
-  volumeScreenContent.updateText{text=tostring(getDisplayedTapeVolume()), render=true}
+  local displayedTapeVolume = tostring(getDisplayedTapeVolume())
+  volumeScreenContent.updateText{text=displayedTapeVolume, render=true}
+  logger.debug("decreasing volume to: ", displayedTapeVolume)
 end
 
 local screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, bottomOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
@@ -274,8 +289,10 @@ local radioGroup = RadioGroup.create()
 function getAllMusicAndCreateButtons(radioGroup)
   local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
   local files = fs.find(searchTerm)
+  logger.debug("looking for files on path: ", searchTerm)
   for _,f in pairs(files) do
     local name = fs.getName(f)
+    logger.debug("found music file with name: ", name)
     radioGroup.addRadioInput(RadioInput.create{
       id=f,
       title=name,
@@ -349,6 +366,7 @@ function writeTapeUnit(eventData)
 
   --Stop if done, and actually play the tape, if not, put another event in the queue
   if maxByte == fileSize then
+    logger.debug("writing new music done: ", fileSize, " bytes written.")
     progressDisplay.updateText{text="", render=true}
     addAndPersistMusicConfig(config)
     playTapeFromConfig(config)
@@ -359,6 +377,7 @@ function writeTapeUnit(eventData)
 end
 
 function queueWrite(config)
+  logger.debug("queue writing new music")
   if selectedTapeDrive ~= nil then
     selectedTapeDrive.stop()
   end
@@ -371,10 +390,8 @@ function play()
   local selected = radioGroup.getSelected()
   if not isWritingMusic and selected ~= nil then
     local filePath = selected.getId()
-    if DEBUG_MODE then
-      print("filePath: " .. filePath)
-      print("currentSelectedFilePath: " .. tostring(selectedFilePath))
-    end
+    logger.debug("filePath: ", filePath)
+    logger.debug("currentSelectedFilePath: ", tostring(selectedFilePath))
     local isNew, config = getMusicConfigForFileOrCreate(filePath)
     if selectedFilePath == filePath then
       --resume if we are already loaded
@@ -383,9 +400,7 @@ function play()
       --if this is a new config, write the new song to the tape
       queueWrite(config)
     else
-      if DEBUG_MODE then
-        print("config: " .. textutils.serializeJSON(config))
-      end
+      logger.debug("config: " .. textutils.serializeJSON(config))
       --if config is already written, then we simply play from it
       playTapeFromConfig(config)
     end

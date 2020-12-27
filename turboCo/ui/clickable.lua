@@ -4,6 +4,9 @@
   Probably won't be used directly, but used as part of button / radioInput for example
 ]]
 
+local Logger = dofile("./gitlib/turboCo/logger.lua")
+local logger = Logger.new()
+
 local function create(args)
   if args.screenBufferWriteFunc == nil then
     args.screenBufferWriteFunc = args.screenBuffer.write
@@ -41,9 +44,9 @@ local function create(args)
     local wasClickedVal = self.currentScreenPos.x >= self.screenStartingPos.x and self.currentScreenPos.x <= maxScreenPosX and --make sure the clickable is within screenBuffer render view on X
       self.currentScreenPos.y >= self.screenStartingPos.y and self.currentScreenPos.y <= maxScreenPosY and --make sure the clickable is within screenBuffer render view on Y
       x >= self.currentScreenPos.x and x <= maxClickablePosX and y == self.currentScreenPos.y --now we make sure it was this clickable which was clicked
-    --[[if wasClickedVal then
-      print("clickable clicked: " .. tostring(self.id))
-    end]]
+    if wasClickedVal then
+      logger.debug("clickable clicked: ", self.id, ", on posX: ", x, ", posY: ", y)
+    end
     return wasClickedVal
   end
 
@@ -80,6 +83,7 @@ local function create(args)
   local monitorTouchHandler = function(eventData)
     local x, y = eventData[3], eventData[4]
     if wasClicked(x, y) then
+      logger.debug("monitor touch for clickable: ", self.text, ", on posX: ", x, ", posY: ", y)
       executeMonitorTouchCallbacks()
     end
   end
@@ -88,9 +92,11 @@ local function create(args)
     local button, x, y = eventData[2], eventData[3], eventData[4]
     if wasClicked(x, y) then
       if button == 1 then
+        logger.debug("left-mouse down for clickable: ", self.text, ", on posX: ", x, ", posY: ", y)
         self.isLeftMouseHeldDown = true
         executeLeftMouseDownCallbacks()
       elseif button == 2 then
+        logger.debug("right-mouse down for clickable: ", self.text, ", on posX: ", x, ", posY: ", y)
         self.isRightMouseHeldDown = true
         executeRightMouseDownCallbacks()
       end
@@ -100,9 +106,11 @@ local function create(args)
   local mouseUpHandler = function(eventData)
     local button, x, y = eventData[2], eventData[3], eventData[4]
     if button == 1 and self.isLeftMouseHeldDown then
+      logger.debug("left-mouse up for clickable: ", self.text, ", on posX: ", x, ", posY: ", y)
       self.isLeftMouseHeldDown = false
       executeLeftMouseUpCallbacks()
     elseif button == 2 and self.isRightMouseHeldDown then
+      logger.debug("right-mouse up for clickable: ", self.text, ", on posX: ", x, ", posY: ", y)
       self.isRightMouseHeldDown = false
       executeRightMouseUpCallbacks()
     end

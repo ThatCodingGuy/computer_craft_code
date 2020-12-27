@@ -2,6 +2,8 @@
 --Has monitor touch, mouse click, and mouse up handling
 
 local Clickable = dofile("./gitlib/turboCo/ui/clickable.lua")
+local Logger = dofile("./gitlib/turboCo/logger.lua")
+local logger = Logger.new()
 
 local function create(args)
 
@@ -23,16 +25,19 @@ local function create(args)
   }
 
   local mouseDown = function()
+    logger.debug("left-mouse down for button: ", self.text, ", inverting text colors")
     --We want to flip the colors
     self.clickable.updateText{text=self.text, textColor=self.bgColor, bgColor=self.textColor}
   end
 
   local mouseUp = function()
+    logger.debug("left-mouse up for button: ", self.text, ", reverting text colors")
     --We want to flip back the colors to normal
     self.clickable.updateText{text=self.text, textColor=self.textColor, bgColor=self.bgColor}
   end
 
   local monitorTouch = function()
+    logger.debug("monitor touch for button: ", self.text, ", inverting text colors")
     --We want to flip the colors
     self.clickable.updateText{text=self.text, textColor=self.bgColor, bgColor=self.textColor}
     self.monitorClickTimerId = os.startTimer(0.1) --flip back the colors after a short time
@@ -41,6 +46,7 @@ local function create(args)
   local timerCallback = function(eventData)
     --we want to flip back the colors 
     if eventData[2] == self.monitorClickTimerId then
+      logger.debug("monitor touch for button: ", self.text, ", reverting text colors")
       self.clickable.updateText{text=self.text, textColor=self.textColor, bgColor=self.bgColor}
       self.monitorClickTimerId = nil
     end

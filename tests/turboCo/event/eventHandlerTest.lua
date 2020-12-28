@@ -20,7 +20,6 @@ describe("Event handler", function()
     end
 
     before_each(function()
-        print("************************************")
         event_handler = EventHandler.create()
         os = FakeOs.new()
         os.impersonate()
@@ -49,12 +48,10 @@ describe("Event handler", function()
         local callbacks
         callbacks = {
             callback_1 = function()
-                print("Callback 1")
                 event_handler.removeHandle(handle_1)
                 event_handler.removeHandle(handle_2)
             end,
             callback_2 = function()
-                print("Callback 2")
             end,
         }
         spy.on(callbacks, "callback_1")
@@ -101,10 +98,8 @@ describe("Event handler", function()
         local call_count = 0
         local handle_id
         local callback = function()
-            print("Callback")
             call_count = call_count + 1
             if call_count >= 3 then
-                print("Killing callback")
                 event_handler.removeHandle(handle_id)
                 event_handler.setListening(false)
             end

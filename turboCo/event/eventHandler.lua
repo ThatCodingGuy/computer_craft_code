@@ -69,11 +69,8 @@ local function create()
     local pullEvents = function()
         while self.listening do
             local eventData = { os.pullEvent() }
-            print("There are ", #self.callbackDataList, "handlers. Currently processing ",
-                    eventData[1])
 
             for index, value in pairs(self.callbackDataList) do
-                print("Attempting ", value.id)
                 local is_removed = nil ~= findFirst(self.toBeRemoved,
                         function(removed_id)
                             return value.id == removed_id
@@ -83,12 +80,10 @@ local function create()
                 end
             end
             for _, removed_id in pairs(self.toBeRemoved) do
-                print("Attempting to remove ", removed_id)
                 local indexToRemove = findFirst(self.callbackDataList, function(callback)
                     return callback.id == removed_id
                 end)
                 if indexToRemove ~= nil then
-                    print("Removing ", removed_id)
                     table.remove(self.callbackDataList, indexToRemove)
                 end
             end

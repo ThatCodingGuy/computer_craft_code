@@ -102,9 +102,9 @@ local function run()
     logger.info(
             "Will feed cows every "
                     .. cow_breed_cooldown
-                    .. " seconds and check food every"
+                    .. " seconds and check food every "
                     .. check_food_cooldown
-                    .. "seconds.")
+                    .. " seconds.")
 
     if has_food() then
         detect_food_outages()

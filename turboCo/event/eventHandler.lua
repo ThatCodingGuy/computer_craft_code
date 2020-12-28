@@ -5,54 +5,106 @@
 local eventHandler = {}
 
 local function create()
-  local self = {
-    callbackDataList={},
-    currId=1,
-    listening=true
-  }
+    local self = {
+        callbackDataList = {},
+        currId = 1,
+        listening = true,
+        toBeRemoved = {},
+    }
 
     --add an event handler for a certain type
-  local addHandle = function(eventType, callback)
-    local handleId = self.currId
-    table.insert(self.callbackDataList, {callback=callback, eventType=eventType, id=self.currId })
-    self.currId = self.currId + 1
-    return handleId
-  end
-
-  local removeHandle = function(id)
-    for index,value in pairs(self.callbackDataList) do
-      if value.id == id then
-        return table.remove(self.callbackDataList, index)
-      end
+    local addHandle = function(eventType, callback)
+        local handleId = self.currId
+        table.insert(self.callbackDataList,
+                { callback = callback, eventType = eventType, id = self.currId })
+        self.currId = self.currId + 1
+        return handleId
     end
-  end
 
-  local isListening = function()
-    return self.listening
-  end
+    local removeHandle = function(id)
+        table.insert(self.toBeRemoved, id)
+    end
 
-  local setListening = function(listening)
-    self.listening = listening
-  end
+    -- Schedules `callback` to run in `delay` seconds.
+    local schedule = function(callback, delay)
+        local timerId = os.startTimer(delay)
+        local handleId
+        handleId = addHandle("timer", function(eventData)
+            if eventData[2] == timerId then
+                removeHandle(handleId)
+                callback()
+            end
+        end)
+    end
 
-  local pullEvents = function()
-    while self.listening do
-      local eventData = {os.pullEvent()}
-      for index,value in pairs(self.callbackDataList) do
-        if value.eventType == eventData[1] then
-          value.callback(eventData)
+    -- Schedules `callback` to run every `delay` seconds. Returns the handler ID to allow the task
+    -- to be stopped by calling removeHandle.
+    local scheduleRecurring = function(callback, delay)
+        local timerId = os.startTimer(delay)
+        return addHandle("timer", function(eventData)
+            if eventData[2] == timerId then
+                callback()
+                timerId = os.startTimer(delay)
+            end
+        end)
+    end
+
+    local isListening = function()
+        return self.listening
+    end
+
+    local setListening = function(listening)
+        self.listening = listening
+    end
+
+    local findFirst = function(container, predicate)
+        for key, value in pairs(container) do
+            if predicate(value) then
+                return key
+            end
         end
-      end
+        return nil
     end
-  end
 
-  return {
-    addHandle=addHandle,
-    removeHandle=removeHandle,
-    pullEvents=pullEvents,
-    isListening=isListening,
-    setListening=setListening
-  }
+    local pullEvents = function()
+        while self.listening do
+            local eventData = { os.pullEvent() }
+            print("There are ", #self.callbackDataList, "handlers. Currently processing ",
+                    eventData[1])
+
+            for index, value in pairs(self.callbackDataList) do
+                print("Attempting ", value.id)
+                local is_removed = nil ~= findFirst(self.toBeRemoved,
+                        function(removed_id)
+                            return value.id == removed_id
+                        end)
+                if value.eventType == eventData[1] and not is_removed then
+                    value.callback(eventData)
+                end
+            end
+            for _, removed_id in pairs(self.toBeRemoved) do
+                print("Attempting to remove ", removed_id)
+                local indexToRemove = findFirst(self.callbackDataList, function(callback)
+                    return callback.id == removed_id
+                end)
+                if indexToRemove ~= nil then
+                    print("Removing ", removed_id)
+                    table.remove(self.callbackDataList, indexToRemove)
+                end
+            end
+            self.toBeRemoved = {}
+        end
+    end
+
+    return {
+        addHandle = addHandle,
+        removeHandle = removeHandle,
+        schedule = schedule,
+        scheduleRecurring = scheduleRecurring,
+        pullEvents = pullEvents,
+        isListening = isListening,
+        setListening = setListening
+    }
 end
 
 eventHandler.create = create

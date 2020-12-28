@@ -20,27 +20,10 @@ Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
 local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
 local MUSIC_CONFIG_PATH = "musicConfig.json"
+local MUSIC_PROTOCOL = "music_player"
 local MUSIC_PROGRESS_TRACK_DELAY = 0.5
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
 
-local screenSide = SCREEN_SIDE
-local screen = nil
-if screenSide == nil then
-  screen, screenSide = Util.findPeripheral("monitor")
-  if screen == nil then
-    screen = term.current()
-    screenSide = "term"
-  end
-elseif screenSide == "term" then
-  screen = term.current()
-else
-  screen = peripheral.wrap(screenSide)
-  if screen == nil then
-    error(string.format('screen of side: "%s" is not found. change the config.', screenSide))
-  end
-end
-screen.clear()
-local width,height = screen.getSize()
 
 local musicConfig = nil
 local selectedTapeDrive = nil
@@ -52,11 +35,6 @@ local tapeSpeed = 1.0
 local tapeVolume = 0.5
 
 local eventHandler = EventHandler.create()
-local exitHandler = ExitHandler.createFromScreen(screen, eventHandler)
-local progressDisplay = nil
-local speedScreenContent = nil
-local volumeScreenContent = nil
-local controlScreenBuffer = nil
 
 function round(num, numDecimalPlaces)
   local mult = 10^(numDecimalPlaces or 0)
@@ -160,7 +138,7 @@ function getMusicConfigForFileOrCreate(filePath)
   return true, newConfig
 end
 
-function increaseSpeed()
+function increaseSpeed(command)
   tapeSpeed = tapeSpeed + 0.1
   if tapeSpeed > 2.0 then
     tapeSpeed = 2.0
@@ -169,11 +147,10 @@ function increaseSpeed()
     selectedTapeDrive.setSpeed(tapeSpeed)
   end
   local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
-  speedScreenContent.updateText{text=displayedTapeSpeed, render=true}
   logger.debug("increasing speed to: ", displayedTapeSpeed)
 end
 
-function decreaseSpeed()
+function decreaseSpeed(command)
   tapeSpeed = tapeSpeed - 0.1
   if tapeSpeed < 0.25 then
     tapeSpeed = 0.25
@@ -182,11 +159,10 @@ function decreaseSpeed()
     selectedTapeDrive.setSpeed(tapeSpeed)
   end
   local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
-  speedScreenContent.updateText{text=displayedTapeSpeed, render=true}
   logger.debug("decreasing speed to: ", displayedTapeSpeed)
 end
 
-function decreaseVolume()
+function decreaseVolume(command)
   tapeVolume = tapeVolume - 0.1
   if tapeVolume < 0 then
     tapeVolume = 0
@@ -195,11 +171,10 @@ function decreaseVolume()
     selectedTapeDrive.setVolume(tapeVolume)
   end
   local displayedTapeVolume = tostring(getDisplayedTapeVolume())
-  volumeScreenContent.updateText{text=displayedTapeVolume, render=true}
   logger.debug("decreasing volume to: ", displayedTapeVolume)
 end
 
-function increaseVolume()
+function increaseVolume(command)
   tapeVolume = tapeVolume + 0.1
   if tapeVolume > 1 then
     tapeVolume = 1
@@ -208,96 +183,16 @@ function increaseVolume()
     selectedTapeDrive.setVolume(tapeVolume)
   end
   local displayedTapeVolume = tostring(getDisplayedTapeVolume())
-  volumeScreenContent.updateText{text=displayedTapeVolume, render=true}
   logger.debug("decreasing volume to: ", displayedTapeVolume)
 end
 
-local screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, bottomOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
-screenTitleBuffer.writeCenter{text="-- Music Player --"}
-Button.create{
-  screenBuffer=screenTitleBuffer,
-  screenBufferWriteFunc=screenTitleBuffer.writeRight,
-  eventHandler=eventHandler,
-  text=" x",
-  textColor=colors.white,
-  bgColor=colors.red,
-  leftClickCallback=exitHandler.exit
-}
-screenTitleBuffer.render()
-
-controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=1, bottomOffset=height-2, bgColor=colors.blue, textColor=colors.white}
-controlScreenBuffer.write{text="  "}
-Button.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text="+",
-  textColor=colors.white,
-  bgColor=colors.green,
-  leftClickCallback=increaseSpeed
-}
-Button.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text="-",
-  textColor=colors.white,
-  bgColor=colors.red,
-  leftClickCallback=decreaseSpeed
-}
-controlScreenBuffer.write{text=" Speed: "}
-
-speedScreenContent = ScreenContent.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text=getDisplayedTapeSpeed()
-}
-
---Adds padding
-controlScreenBuffer.write{text="        "}
-
-Button.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text="+",
-  textColor=colors.white,
-  bgColor=colors.green,
-  leftClickCallback=increaseVolume
-}
-Button.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text="-",
-  textColor=colors.white,
-  bgColor=colors.red,
-  leftClickCallback=decreaseVolume
-}
-
-controlScreenBuffer.write{text=" Volume: "}
-volumeScreenContent = ScreenContent.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text=getDisplayedTapeVolume()
-}
-controlScreenBuffer.render()
-
-local musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=colors.purple, color=colors.white}
-local musicViewScreenBuffer = musicView.getScreenBuffer()
-musicViewScreenBuffer.ln()
-local radioGroup = RadioGroup.create()
-
-function getAllMusicAndCreateButtons(radioGroup)
+function getAllMusicAndCreateButtons()
   local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
   local files = fs.find(searchTerm)
   logger.debug("looking for files on path: ", searchTerm)
   for _,f in pairs(files) do
     local name = fs.getName(f)
     logger.debug("found music file with name: ", name)
-    radioGroup.addRadioInput(RadioInput.create{
-      id=f,
-      title=name,
-      screenBuffer=musicViewScreenBuffer,
-      screenBufferWriteFunc=musicViewScreenBuffer.writeLn,
-      eventHandler=eventHandler
-    })
   end
 end
 
@@ -384,7 +279,7 @@ function queueWrite(config)
   os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, 0)
 end
 
-function play()
+function play(command)
   local selected = radioGroup.getSelected()
   if not isWritingMusic and selected ~= nil then
     local filePath = selected.getId()
@@ -405,48 +300,54 @@ function play()
   end
 end
 
-function stop()
+function stop(command)
   if selectedTapeDrive ~= nil and not isWritingMusic then
     selectedTapeDrive.stop()
   end
 end
 
-getAllMusicAndCreateButtons(radioGroup)
-musicViewScreenBuffer.render()
+function getMusicList()
 
-local musicControlsBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-2, bottomOffset=1, bgColor=colors.blue, textColor=colors.white}
-local playButton = Button.create{
-  screenBuffer=musicControlsBuffer,
-  screenBufferWriteFunc=musicControlsBuffer.writeLeft,
-  eventHandler=eventHandler, 
-  text=" Play ", 
-  textColor=colors.white, 
-  bgColor=colors.green,
-  leftClickCallback=play
+end
+
+local commandToFunc = {
+  ['get_music_list']=getMusicList,
+  ['stop']=stop,
+  ['play']=play,
+  ['increase_speed']=increaseSpeed,
+  ['decrease_speed']=decreaseSpeed,
+  ['increase_volume']=increaseVolume
 }
 
-local stopButton = Button.create{
-  screenBuffer=musicControlsBuffer,
-  screenBufferWriteFunc=musicControlsBuffer.writeRight,
-  eventHandler=eventHandler, 
-  text=" Stop ", 
-  textColor=colors.white,
-  bgColor=colors.red,
-  leftClickCallback=stop
-}
+function rednetMessageReceived(eventData)
+  local senderId, message, protocol = eventData[2], eventData[3], eventData[4]
+  if protocol ~= MUSIC_PROTOCOL then
+    return
+  end
+  local messageObj = json.decode(message)
+  if messageObj == nil or messageObj.command == nil then
+    local responseObj = {
+      error='No command was sent. Write a command in the top-level \"command\" field.'
+    }
+    rednet.send(senderId, json.encode(responseObj), MUSIC_PROTOCOL)
+    return
+  end
+  local commandFunc = commandToFunc[messageObj.command]
+  if not commandFunc then
+    local responseObj = {
+      error=string.format('Invalid command "%s" sent.', messageObj.command)
+    }
+    rednet.send(senderId, json.encode(responseObj), MUSIC_PROTOCOL)
+    return
+  end
+  commandFunc(messageObj)
+end
 
-progressDisplay = ScreenContent.create{
-  screenBuffer=musicControlsBuffer,
-  screenBufferWriteFunc=musicControlsBuffer.writeCenter,
-  text="",
-}
-musicControlsBuffer.render()
-
-local progressBarBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, bgColor=colors.yellow, textColor=colors.white}
-progressBarBuffer.render()
+getAllMusicAndCreateButtons()
 
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
 eventHandler.addHandle("timer", musicProgressTrack)
+eventHandler.addHandle("rednet_message", rednetMessageReceived)
 
 loadMusicConfig()
 

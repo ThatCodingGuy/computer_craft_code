@@ -111,6 +111,7 @@ local function run()
     else
         check_for_more_food()
     end
+    attempt_to_feed_cows()
     event_handler.scheduleRecurring(attempt_to_feed_cows, cow_breed_cooldown)
     event_handler.pullEvents()
 end

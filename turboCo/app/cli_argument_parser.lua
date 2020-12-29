@@ -24,6 +24,8 @@ end
 --                  transformer will receive the key and value as arguments and is expected to
 --                  return the final value that should be associated with the key.
 --   description -- An optional string description to document what the argument does.
+--   default     -- An optional value which should be returned for this argument if no value is
+--                  specified on the CLI.
 -- }
 local CliArgumentParser = class({}, function(definitions)
     local self = {
@@ -160,6 +162,18 @@ local CliArgumentParser = class({}, function(definitions)
         return returned_arguments
     end
 
+    local function supply_defaults(keyed_arguments)
+        local returned_arguments = {}
+        for arg_name, definition in pairs(self.merged_argument_definitions) do
+            local value = keyed_arguments[arg_name]
+            if definition.default ~= nil and (value == nil or value == "") then
+                value = definition.default
+            end
+            returned_arguments[arg_name] = value
+        end
+        return returned_arguments
+    end
+
     local function transform_values(keyed_arguments)
         local returned_arguments = {}
         for key, value in pairs(keyed_arguments) do
@@ -178,12 +192,9 @@ local CliArgumentParser = class({}, function(definitions)
     -- of the defined keys is made available through the positional_arguments value in the table as
     -- an array.
     local function parse(args)
-        if #args == 0 then
-            return {}
-        end
-
         local keyed_arguments, positional_arguments = capture_arguments(args)
-        local returned_arguments = transform_values(filter_keys(clean_values(keyed_arguments)))
+        local returned_arguments = transform_values(
+                supply_defaults(filter_keys(clean_values(keyed_arguments))))
 
         if #positional_arguments > 0 then
             returned_arguments.positional_arguments = positional_arguments

@@ -244,4 +244,26 @@ describe("CLI argument parser", function()
         assert.spy(definitions[2].transform).was.called_with("snake", "2")
         assert.spy(definitions[3].transform).was.called_with("m", "3")
     end)
+
+    it("should apply default value if argument unspecified", function()
+        local parser = CliArgumentParser.new {
+            {
+                long_name = "arg_1",
+                default = "123"
+            },
+        }
+
+        assert.are.same({ arg_1 = "123" }, parser.parse {})
+    end)
+
+    it("should apply default value if argument exists with empty value", function()
+        local parser = CliArgumentParser.new {
+            {
+                long_name = "arg_1",
+                default = "123"
+            },
+        }
+
+        assert.are.same({ arg_1 = "123" }, parser.parse { "--arg_1=" })
+    end)
 end)

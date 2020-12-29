@@ -1,15 +1,32 @@
+local Logger = dofile("./gitlib/turboCo/logger.lua")
+local movement = dofile("./gitlib/turboCo/movement.lua")
+local inventory = dofile("/gitlib/carlos/inventory.lua")
+local common_argument_parsers = dofile("./gitlib/turboCo/app/common_argument_parsers.lua")
+local common_argument_definitions = dofile("./gitlib/turboCo/app/common_argument_definitions.lua")
+local refuel = dofile("/gitlib/turboCo/client/refuel.lua")
 
-os.loadAPI("/gitlib/turboCo/movement.lua")
-os.loadAPI("/gitlib/carlos/inventory.lua")
-os.loadAPI("/gitlib/turboCo/client/refuel.lua")
+local number_def = common_argument_definitions.number_def
 
-local tree_blocks = {}
-table.insert(tree_blocks, "minecraft:birch_log")
-table.insert(tree_blocks, "minecraft:birch_leaves")
+local tree_blocks = {
+    "minecraft:birch_log",
+    "minecraft:birch_leaves"
+}
+local logger = Logger.new()
 
 local cut_tree = movement.dig_only_blocks(tree_blocks)
 
-function treeChop(position, adjacent, facing, direction, block_data, map)
+local function drop_off_wood(facing, position, wood_dropoff_coordinates)
+    local x, y, z = movement.split_coord(wood_dropoff_coordinates)
+    facing, position = movement.navigate(position, facing, movement.coord(x, y + 1, z))
+
+    while inventory.countItemWithName("minecraft:birch_log") > 0 do
+        inventory.selectItemWithName("minecraft:birch_log")
+        turtle.placeDown()
+    end
+    return facing, position
+end
+
+local function treeChop(position, adjacent, facing, direction, block_data, map)
     local start_position = position
     local start_facing = facing
 
@@ -38,18 +55,40 @@ function treeChop(position, adjacent, facing, direction, block_data, map)
         end
 
         facing, position = movement.explore_area(tree_area, position, facing, cut_tree)
+        facing, position = drop_off_wood(facing, position, map.wood_dropoff_coordinates)
         facing, position = movement.navigate(position, facing, start_position)
         facing = movement.turn_to_face(facing, start_facing)
     end
 
-    print("wait")
+    logger.info("wait")
     sleep(1)
 
     return facing, position
 end
 
-function run()
-    -- Slot 1 is for saplings
+local function run()
+    local argument_parser = common_argument_parsers.default_parser {
+        number_def {
+            short_name = "x",
+            description = "The X position of the wood drop-off station.",
+        },
+        number_def {
+            short_name = "y",
+            description = "The Y position of the wood drop-off station.",
+        },
+        number_def {
+            short_name = "z",
+            description = "The Z position of the wood drop-off station.",
+        },
+    }
+    local parsed_arguments = argument_parser.parse(arg)
+    if parsed_arguments.x == nil or parsed_arguments.y == nil or parsed_arguments.z == nil then
+        logger.error("Please specify all of the x, y, and z coordinates of the wood drop-off "
+                .. "station.")
+        return
+    end
+    local wood_dropoff_coordinates = movement.coord(
+            parsed_arguments.x, parsed_arguments.y, parsed_arguments.z)
 
     local facing = movement.figure_out_facing()
     if not facing then
@@ -62,18 +101,19 @@ function run()
         error("Could not connect to gps")
         return
     end
-    
+
     local current = movement.coord(start_x, start_y, start_z)
     local tree_spot = movement.coord(start_x + 1, start_y, start_z)
     local turtle_x, turtle_y, turtle_z = movement.split_coord(tree_spot)
 
     while true do
-        facing, current = movement.visit_adjacent(current, tree_spot, facing, treeChop, {})
+        facing, current = movement.visit_adjacent(
+                current,
+                tree_spot,
+                facing,
+                treeChop,
+                { wood_dropoff_coordinates = wood_dropoff_coordinates })
     end
 end
 
-local dropoff = movement.coord(-93, 73, 393)
-run(dropoff)
-
--- -99 65 431
--- -94 64 425
+run()

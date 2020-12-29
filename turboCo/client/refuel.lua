@@ -77,3 +77,7 @@ function refuel(position, facing)
     facing, position = movement.navigate(position, facing, start_pos)
     movement.turn_to_face(facing, start_facing)
 end
+
+return {
+    refuel = refuel,
+}

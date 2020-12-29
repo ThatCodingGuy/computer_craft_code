@@ -1,9 +1,12 @@
 --- CLI argument definition factories for common transformations on CLI arguments.
 
-local function copy_definition(definition)
+local function copy_definition(definition, convert_default)
     local copy = {}
     for key, value in pairs(definition) do
         copy[key] = value
+    end
+    if definition.default ~= nil then
+        copy.default = convert_default(definition.default)
     end
     return copy
 end
@@ -12,7 +15,7 @@ end
 -- @param definition The definition of the argument, without specifying the value for the transform
 -- function.
 local function number_def(definition)
-    local copy = copy_definition(definition)
+    local copy = copy_definition(definition, tostring)
     copy.transform = function(key, value)
         return tonumber(value)
     end
@@ -23,7 +26,7 @@ end
 -- @param definition The definition of the argument, without specifying the value for the transform
 -- function.
 local function boolean_def(definition)
-    local copy = copy_definition(definition)
+    local copy = copy_definition(definition, tostring)
     copy.transform = function(key, value)
         local lowercase_value = value:lower()
         if lowercase_value == "false" then
@@ -42,7 +45,11 @@ end
 -- @param definition The definition of the argument, without specifying the value for the transform
 -- function.
 local function enum_def(enum_type, definition)
-    local copy = copy_definition(definition)
+    local copy = copy_definition(
+            definition,
+            function(default)
+                return enum_type[default]
+            end)
     copy.transform = function(key, value)
         local enum_value = enum_type[value:upper()]
         if enum_value == nil then

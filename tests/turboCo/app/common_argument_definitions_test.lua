@@ -9,7 +9,8 @@ local enum_def = common_argument_definitions.enum_def
 describe("CLI argument definitions", function()
     describe("when creating number definition", function()
         local def = number_def {
-            long_name = "arg_name"
+            long_name = "arg_name",
+            default = 123,
         }
 
         it("should parse strings as numbers", function()
@@ -21,11 +22,16 @@ describe("CLI argument definitions", function()
             assert.is_nil(def.transform("arg_name", "text"))
             assert.is_nil(def.transform("arg_name", "numb3r54nd73x7"))
         end)
+
+        it("should accept defaults as numbers", function()
+            assert.are.equal("123", def.default)
+        end)
     end)
 
     describe("when creating boolean definitions", function()
         local def = boolean_def {
-            long_name = "arg_name"
+            long_name = "arg_name",
+            default = true,
         }
 
         it("should parse strings as booleans", function()
@@ -42,12 +48,17 @@ describe("CLI argument definitions", function()
         it("should parse unknown strings as nil", function()
             assert.is_nil(def.transform("arg_name", "not a boolean"))
         end)
+
+        it("should accept defaults as booleans", function()
+            assert.are.equal("true", def.default)
+        end)
     end)
 
     describe("when creating enum definitions", function()
         local FakeEnum = enum { "ONE", "TWO", "THREE" }
         local def = enum_def(FakeEnum, {
-            long_name = "arg_name"
+            long_name = "arg_name",
+            default = FakeEnum.TWO,
         })
 
         it("should parse valid enum values", function()
@@ -60,6 +71,10 @@ describe("CLI argument definitions", function()
 
         it("should return nil for invalid enum values", function()
             assert.is_nil(def.transform("arg_name", "nope"))
+        end)
+
+        it("should accept defaults as enums", function()
+            assert.are.equal("TWO", def.default)
         end)
     end)
 end)

@@ -1,4 +1,3 @@
-local util = require "turboCo.util"
 local json = dofile("./gitlib/turboCo/json.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
@@ -18,7 +17,7 @@ end
 Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
 
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
-local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
+local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/songs/"
 local MUSIC_CONFIG_PATH = "musicConfig.json"
 local MUSIC_PROGRESS_TRACK_DELAY = 0.5
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
@@ -42,6 +41,17 @@ end
 screen.clear()
 local width,height = screen.getSize()
 
+--UI Components
+local screenTitleBuffer = nil
+local progressDisplay = nil
+local speedScreenContent = nil
+local volumeScreenContent = nil
+local controlScreenBuffer = nil
+local musicView = nil
+local musicViewScreenBuffer = nil
+local musicControlsBuffer = nil
+local progressBarBuffer = nil
+
 local musicConfig = nil
 local selectedTapeDrive = nil
 local selectedFilePath = nil
@@ -51,12 +61,10 @@ local isWritingMusic = false
 local tapeSpeed = 1.0
 local tapeVolume = 0.5
 
+local radioGroup = RadioGroup.create()
 local eventHandler = EventHandler.create()
 local exitHandler = ExitHandler.createFromScreen(screen, eventHandler)
-local progressDisplay = nil
-local speedScreenContent = nil
-local volumeScreenContent = nil
-local controlScreenBuffer = nil
+
 
 function round(num, numDecimalPlaces)
   local mult = 10^(numDecimalPlaces or 0)
@@ -212,78 +220,6 @@ function increaseVolume()
   logger.debug("decreasing volume to: ", displayedTapeVolume)
 end
 
-local screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, bottomOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
-screenTitleBuffer.writeCenter{text="-- Music Player --"}
-Button.create{
-  screenBuffer=screenTitleBuffer,
-  screenBufferWriteFunc=screenTitleBuffer.writeRight,
-  eventHandler=eventHandler,
-  text=" x",
-  textColor=colors.white,
-  bgColor=colors.red,
-  leftClickCallback=exitHandler.exit
-}
-screenTitleBuffer.render()
-
-controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=1, bottomOffset=height-2, bgColor=colors.blue, textColor=colors.white}
-controlScreenBuffer.write{text="  "}
-Button.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text="+",
-  textColor=colors.white,
-  bgColor=colors.green,
-  leftClickCallback=increaseSpeed
-}
-Button.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text="-",
-  textColor=colors.white,
-  bgColor=colors.red,
-  leftClickCallback=decreaseSpeed
-}
-controlScreenBuffer.write{text=" Speed: "}
-
-speedScreenContent = ScreenContent.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text=getDisplayedTapeSpeed()
-}
-
---Adds padding
-controlScreenBuffer.write{text="        "}
-
-Button.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text="+",
-  textColor=colors.white,
-  bgColor=colors.green,
-  leftClickCallback=increaseVolume
-}
-Button.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text="-",
-  textColor=colors.white,
-  bgColor=colors.red,
-  leftClickCallback=decreaseVolume
-}
-
-controlScreenBuffer.write{text=" Volume: "}
-volumeScreenContent = ScreenContent.create{
-  screenBuffer=controlScreenBuffer,
-  eventHandler=eventHandler,
-  text=getDisplayedTapeVolume()
-}
-controlScreenBuffer.render()
-
-local musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=colors.purple, color=colors.white}
-local musicViewScreenBuffer = musicView.getScreenBuffer()
-musicViewScreenBuffer.ln()
-local radioGroup = RadioGroup.create()
-
 function getAllMusicAndCreateButtons(radioGroup)
   local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
   local files = fs.find(searchTerm)
@@ -411,11 +347,82 @@ function stop()
   end
 end
 
+screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, bottomOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
+screenTitleBuffer.writeCenter{text="-- Music Player --"}
+Button.create{
+  screenBuffer=screenTitleBuffer,
+  screenBufferWriteFunc=screenTitleBuffer.writeRight,
+  eventHandler=eventHandler,
+  text=" x",
+  textColor=colors.white,
+  bgColor=colors.red,
+  leftClickCallback=exitHandler.exit
+}
+screenTitleBuffer.render()
+
+controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=1, bottomOffset=height-2, bgColor=colors.blue, textColor=colors.white}
+controlScreenBuffer.write{text="  "}
+Button.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text="+",
+  textColor=colors.white,
+  bgColor=colors.green,
+  leftClickCallback=increaseSpeed
+}
+Button.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text="-",
+  textColor=colors.white,
+  bgColor=colors.red,
+  leftClickCallback=decreaseSpeed
+}
+controlScreenBuffer.write{text=" Speed: "}
+
+speedScreenContent = ScreenContent.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text=getDisplayedTapeSpeed()
+}
+
+--Adds padding
+controlScreenBuffer.write{text="        "}
+
+Button.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text="+",
+  textColor=colors.white,
+  bgColor=colors.green,
+  leftClickCallback=increaseVolume
+}
+Button.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text="-",
+  textColor=colors.white,
+  bgColor=colors.red,
+  leftClickCallback=decreaseVolume
+}
+
+controlScreenBuffer.write{text=" Volume: "}
+volumeScreenContent = ScreenContent.create{
+  screenBuffer=controlScreenBuffer,
+  eventHandler=eventHandler,
+  text=getDisplayedTapeVolume()
+}
+controlScreenBuffer.render()
+
+musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=colors.purple, color=colors.white}
+musicViewScreenBuffer = musicView.getScreenBuffer()
+musicViewScreenBuffer.ln()
+
 getAllMusicAndCreateButtons(radioGroup)
 musicViewScreenBuffer.render()
 
-local musicControlsBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-2, bottomOffset=1, bgColor=colors.blue, textColor=colors.white}
-local playButton = Button.create{
+musicControlsBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-2, bottomOffset=1, bgColor=colors.blue, textColor=colors.white}
+Button.create{
   screenBuffer=musicControlsBuffer,
   screenBufferWriteFunc=musicControlsBuffer.writeLeft,
   eventHandler=eventHandler, 
@@ -425,7 +432,7 @@ local playButton = Button.create{
   leftClickCallback=play
 }
 
-local stopButton = Button.create{
+Button.create{
   screenBuffer=musicControlsBuffer,
   screenBufferWriteFunc=musicControlsBuffer.writeRight,
   eventHandler=eventHandler, 
@@ -442,7 +449,7 @@ progressDisplay = ScreenContent.create{
 }
 musicControlsBuffer.render()
 
-local progressBarBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, bgColor=colors.yellow, textColor=colors.white}
+progressBarBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, bgColor=colors.yellow, textColor=colors.white}
 progressBarBuffer.render()
 
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)

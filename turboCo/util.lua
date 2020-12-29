@@ -22,7 +22,7 @@ end
 local function findPeripheral(peripheralType)
   local peripherals = findPeripherals(peripheralType)
   if #peripherals > 0 then
-    return peripheral[1].periph, peripheral[1].name
+    return peripherals[1].periph, peripherals[1].name
   end
 end
 

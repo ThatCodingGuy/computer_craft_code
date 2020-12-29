@@ -1,15 +1,8 @@
-local util = require "turboCo.util"
 local json = dofile("./gitlib/turboCo/json.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
-local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
-local RadioGroup = dofile("./gitlib/turboCo/ui/radioGroup.lua")
-local RadioInput = dofile("./gitlib/turboCo/ui/radioInput.lua")
-local Button = dofile("./gitlib/turboCo/ui/button.lua")
-local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
-local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
-local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
 local Util = dofile("./gitlib/turboCo/util.lua")
 local Logger = dofile("./gitlib/turboCo/logger.lua")
+local MusicConstants = dofile("./gitlib/turboCo/musicConstants.lua")
 local logger = Logger.new()
 local loggingLevel = "ERROR"
 if LOGGING_LEVEL then
@@ -18,14 +11,14 @@ end
 Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
 
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
-local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/"
+local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/songs/"
 local MUSIC_CONFIG_PATH = "musicConfig.json"
-local MUSIC_PROTOCOL = "music_player"
 local MUSIC_PROGRESS_TRACK_DELAY = 0.5
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
 
-
+local connectedClients = {}
 local musicConfig = nil
+local musicList = nil
 local selectedTapeDrive = nil
 local selectedFilePath = nil
 local selectedMusicConfig = nil
@@ -35,6 +28,24 @@ local tapeSpeed = 1.0
 local tapeVolume = 0.5
 
 local eventHandler = EventHandler.create()
+
+local function sendMessageToClient(senderId, messageObj)
+  local message = json.encode(messageObj)
+  rednet.send(senderId, message)
+end
+
+local function sendMessageToClients(messageObj)
+  local message = json.encode(messageObj)
+  rednet.broadcast(message, MusicConstants.MUSIC_CLIENT_PROTOCOL)
+end
+
+local function validateNotNil(senderId, messageObj, objPath)
+  if not messageObj and messageObj[objPath] then
+    sendMessageToClient(senderId, {error=string.format('message is missing parameter: \"%s\"', objPath)})
+    return false
+  end
+  return true
+end
 
 function round(num, numDecimalPlaces)
   local mult = 10^(numDecimalPlaces or 0)
@@ -56,6 +67,10 @@ function loadMusicConfig()
   end
   local f = fs.open(MUSIC_CONFIG_PATH, 'r')
   musicConfig = json.decode(f.readAll())
+  musicList = {}
+  for _,config in pairs(musicConfig) do
+    table.insert(musicList, {filePath=config.filePath, fileName=fs.getName(config.filePath)})
+  end
   f.close()
 end
 
@@ -82,13 +97,15 @@ function getTapeDriveToWriteTo(fileSize)
     hasTapeDrives = true
   end
   if not hasTapeDrives then
-    error("no tape drives found, add tape drives.")
+    sendMessageToClients({error="no tape drives found, add tape drives."})
+    return false
   end
   --Figure out the last position of each tape drives
   for _,value in pairs(musicConfig) do
     local tapeDriveData = nameToTapeDriveData[value.tapeDriveName]
     if tapeDriveData == nil then
-      error(string.format("tapeDrive \"%s\" is missing. Please add it back or delete the config file.", value.tapeDriveName))
+      sendMessageToClients({error=(string.format("tapeDrive \"%s\" is missing. Please add it back or delete the music server config file.", value.tapeDriveName))}
+      return false
     end
     if value.tapePositionEnd > tapeDriveData.lastPosition then
       tapeDriveData.lastPosition = value.tapePositionEnd
@@ -107,86 +124,43 @@ function getTapeDriveToWriteTo(fileSize)
     end
   end
   if tapeDriveToWriteTo == nil then
-    error("There is not enough space on any of the tape drives. Please plug in more tape drives.")
+    sendMessageToClients({error="There is not enough space on any of the tape drives. Please plug in more tape drives."})
+    return false
   end
-  return tapeDriveToWriteTo
+  return true, tapeDriveToWriteTo
 end
 
 --[[
-  returns first if the musicConfig is newly created,
-  second has the actual config object
+  returns first if getting the music config was successful
+          second if the musicConfig is newly created,
+          third has the actual config object
 ]]
-function getMusicConfigForFileOrCreate(filePath)
+function getMusicConfigForFileOrCreate(senderId, filePath)
   for _,value in pairs(musicConfig) do
     if value.filePath == filePath then
-      return false, value
+      return true, false, value
     end
   end
   local f = fs.open(filePath, "rb")
   if not f then
-    error(string.format("music file on path \"%s\" not found", filePath))
+    sendMessageToClient(string.format("music file on path \"%s\" not found", filePath))
   end
   local fileSize = f.seek("end")
   f.close()
-  local tapeDriveData = getTapeDriveToWriteTo(fileSize)
-  local newConfig = {
-    filePath = filePath,
-    tapeDriveName = tapeDriveData.tapeDriveName,
-    tapePositionStart = tapeDriveData.startPosition,
-    tapePositionEnd = tapeDriveData.startPosition + fileSize
-  }
-  return true, newConfig
+  local success, tapeDriveData = getTapeDriveToWriteTo(fileSize)
+  local newConfig = nil
+  if success then
+    newConfig = {
+      filePath = filePath,
+      tapeDriveName = tapeDriveData.tapeDriveName,
+      tapePositionStart = tapeDriveData.startPosition,
+      tapePositionEnd = tapeDriveData.startPosition + fileSize
+    }
+  end
+  return success, true, newConfig
 end
 
-function increaseSpeed(command)
-  tapeSpeed = tapeSpeed + 0.1
-  if tapeSpeed > 2.0 then
-    tapeSpeed = 2.0
-  end
-  if selectedTapeDrive ~= nil then
-    selectedTapeDrive.setSpeed(tapeSpeed)
-  end
-  local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
-  logger.debug("increasing speed to: ", displayedTapeSpeed)
-end
-
-function decreaseSpeed(command)
-  tapeSpeed = tapeSpeed - 0.1
-  if tapeSpeed < 0.25 then
-    tapeSpeed = 0.25
-  end
-  if selectedTapeDrive ~= nil then
-    selectedTapeDrive.setSpeed(tapeSpeed)
-  end
-  local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
-  logger.debug("decreasing speed to: ", displayedTapeSpeed)
-end
-
-function decreaseVolume(command)
-  tapeVolume = tapeVolume - 0.1
-  if tapeVolume < 0 then
-    tapeVolume = 0
-  end
-  if selectedTapeDrive ~= nil then
-    selectedTapeDrive.setVolume(tapeVolume)
-  end
-  local displayedTapeVolume = tostring(getDisplayedTapeVolume())
-  logger.debug("decreasing volume to: ", displayedTapeVolume)
-end
-
-function increaseVolume(command)
-  tapeVolume = tapeVolume + 0.1
-  if tapeVolume > 1 then
-    tapeVolume = 1
-  end
-  if selectedTapeDrive ~= nil then
-    selectedTapeDrive.setVolume(tapeVolume)
-  end
-  local displayedTapeVolume = tostring(getDisplayedTapeVolume())
-  logger.debug("decreasing volume to: ", displayedTapeVolume)
-end
-
-function getAllMusicAndCreateButtons()
+function getAllMusicAndCreateConfig()
   local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
   local files = fs.find(searchTerm)
   logger.debug("looking for files on path: ", searchTerm)
@@ -224,15 +198,19 @@ function musicProgressTrack(eventData)
     local relativePosition = position - selectedMusicConfig.tapePositionStart
     local relativeEnd = selectedMusicConfig.tapePositionEnd - selectedMusicConfig.tapePositionStart
     local percentage = math.floor((relativePosition / relativeEnd) * 100)
-    progressDisplay.updateText{text = string.format("Progress: %s%%", percentage), render=true}
+    sendMessageToClients({command=MusicConstants.PLAYING_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, percentage=percentage})
   end
+end
+
+function playTape()
+  selectedTapeDrive.play()
+  sendMessageToClients({command=MusicConstants.PLAY_COMMAND, filePath=selectedFilePath})
 end
 
 function playTapeFromConfig(config)
   setupTapeFromConfig(config)
-  progressDisplay.updateText{text = "Progress: 0%", render=true}
   musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
-  selectedTapeDrive.play()
+  playTape()
 end
 
 function writeTapeUnit(eventData)
@@ -254,13 +232,11 @@ function writeTapeUnit(eventData)
   sourceFile.close()
   local percentage = math.floor((maxByte / fileSize) * 100)
   --Update screen with progress
-  local progressText = string.format("Writing: %s%% complete", percentage)
-  progressDisplay.updateText{text=progressText, render=true}
+  sendMessageToClients({command=MusicConstants.TAPE_WRITE_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, percentage=percentage})
 
   --Stop if done, and actually play the tape, if not, put another event in the queue
   if maxByte == fileSize then
     logger.debug("writing new music done: ", fileSize, " bytes written.")
-    progressDisplay.updateText{text="", render=true}
     addAndPersistMusicConfig(config)
     playTapeFromConfig(config)
     isWritingMusic = false
@@ -279,71 +255,144 @@ function queueWrite(config)
   os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, 0)
 end
 
-function play(command)
-  local selected = radioGroup.getSelected()
-  if not isWritingMusic and selected ~= nil then
-    local filePath = selected.getId()
+function connect(senderId, messageObj)
+  local connected = false
+  for _,client in pairs(connectedClients) do
+    if client == senderId then
+      connected = true
+    end
+  end
+  if not connected then
+    table.insert(connectedClients, senderId)
+  end
+  rednet.send(senderId, json.encode({command=MusicConstants.CONNECT_COMMAND, connected=true}))
+end
+
+function disconnect(senderId, messageObj)
+  for index,client in pairs(connectedClients) do
+    if client == senderId then
+      table.remove(connectedClients, index)
+    end
+  end
+  rednet.send(senderId, json.encode({command=MusicConstants.DISCONNECT_COMMAND, disconnected=true}))
+end
+
+function play(senderId, messageObj)
+  if not validateNotNil(senderId, messageObj, 'filePath') then
+    return
+  end
+  if not isWritingMusic then
+    local filePath = messageObj.filePath
     logger.debug("filePath: ", filePath)
-    logger.debug("currentSelectedFilePath: ", tostring(selectedFilePath))
+    logger.debug("currentSelectedFilePath: ", selectedFilePath)
     local isNew, config = getMusicConfigForFileOrCreate(filePath)
     if selectedFilePath == filePath then
       --resume if we are already loaded
-      selectedTapeDrive.play()
+      playTape()
     elseif isNew then
       --if this is a new config, write the new song to the tape
       queueWrite(config)
     else
-      logger.debug("config: " .. textutils.serializeJSON(config))
+      logger.debug("config: ", textutils.serializeJSON(config))
       --if config is already written, then we simply play from it
       playTapeFromConfig(config)
     end
   end
 end
 
-function stop(command)
+function stop(senderId, messageObj)
   if selectedTapeDrive ~= nil and not isWritingMusic then
     selectedTapeDrive.stop()
   end
+  sendMessageToClients({command=MusicConstants.STOP_COMMAND, stopped=true})
 end
 
-function getMusicList()
+function getMusicList(senderId, messageObj)
+  sendMessageToClient(senderId, {command=MusicConstants.GET_MUSIC_LIST_COMMAND, musicList=musicList})
+end
 
+function increaseSpeed(senderId, messageObj)
+  tapeSpeed = tapeSpeed + 0.1
+  if tapeSpeed > 2.0 then
+    tapeSpeed = 2.0
+  end
+  if selectedTapeDrive ~= nil then
+    selectedTapeDrive.setSpeed(tapeSpeed)
+  end
+  local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
+  logger.debug("increasing speed to: ", displayedTapeSpeed)
+  sendMessageToClients({command=MusicConstants.INCREASE_SPEED_COMMAND, tapeSpeed=displayedTapeSpeed})
+end
+
+function decreaseSpeed(senderId, messageObj)
+  tapeSpeed = tapeSpeed - 0.1
+  if tapeSpeed < 0.25 then
+    tapeSpeed = 0.25
+  end
+  if selectedTapeDrive ~= nil then
+    selectedTapeDrive.setSpeed(tapeSpeed)
+  end
+  local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
+  logger.debug("decreasing speed to: ", displayedTapeSpeed)
+  sendMessageToClients({command=MusicConstants.DECREASE_SPEED_COMMAND, tapeSpeed=displayedTapeSpeed})
+end
+
+function decreaseVolume(senderId, messageObj)
+  tapeVolume = tapeVolume - 0.1
+  if tapeVolume < 0 then
+    tapeVolume = 0
+  end
+  if selectedTapeDrive ~= nil then
+    selectedTapeDrive.setVolume(tapeVolume)
+  end
+  local displayedTapeVolume = tostring(getDisplayedTapeVolume())
+  logger.debug("decreasing volume to: ", displayedTapeVolume)
+  sendMessageToClients({command=MusicConstants.DECREASE_VOLUME_COMMAND, tapeVolume=displayedTapeVolume})
+end
+
+function increaseVolume(senderId, messageObj)
+  tapeVolume = tapeVolume + 0.1
+  if tapeVolume > 1 then
+    tapeVolume = 1
+  end
+  if selectedTapeDrive ~= nil then
+    selectedTapeDrive.setVolume(tapeVolume)
+  end
+  local displayedTapeVolume = tostring(getDisplayedTapeVolume())
+  logger.debug("decreasing volume to: ", displayedTapeVolume)
+  sendMessageToClients({command=MusicConstants.INCREASE_VOLUME_COMMAND, tapeVolume=displayedTapeVolume})
 end
 
 local commandToFunc = {
-  ['get_music_list']=getMusicList,
-  ['stop']=stop,
-  ['play']=play,
-  ['increase_speed']=increaseSpeed,
-  ['decrease_speed']=decreaseSpeed,
-  ['increase_volume']=increaseVolume
+  [MusicConstants.CONNECT_COMMAND]=connect,
+  [MusicConstants.DISCONNECT_COMMAND]=disconnect,
+  [MusicConstants.GET_MUSIC_LIST_COMMAND]=getMusicList,
+  [MusicConstants.STOP_COMMAND]=stop,
+  [MusicConstants.PLAY_COMMAND]=play,
+  [MusicConstants.INCREASE_SPEED_COMMAND]=increaseSpeed,
+  [MusicConstants.DECREASE_SPEED_COMMAND]=decreaseSpeed,
+  [MusicConstants.INCREASE_VOLUME_COMMAND]=increaseVolume,
+  [MusicConstants.DECREASE_VOLUME_COMMAND]=decreaseVolume
 }
 
 function rednetMessageReceived(eventData)
   local senderId, message, protocol = eventData[2], eventData[3], eventData[4]
-  if protocol ~= MUSIC_PROTOCOL then
+  if protocol ~= MusicConstants.MUSIC_SERVER_PROTOCOL then
     return
   end
   local messageObj = json.decode(message)
-  if messageObj == nil or messageObj.command == nil then
-    local responseObj = {
-      error='No command was sent. Write a command in the top-level \"command\" field.'
-    }
-    rednet.send(senderId, json.encode(responseObj), MUSIC_PROTOCOL)
+  if not validateNotNil(senderId, messageObj, 'command') then
     return
   end
   local commandFunc = commandToFunc[messageObj.command]
   if not commandFunc then
-    local responseObj = {
-      error=string.format('Invalid command "%s" sent.', messageObj.command)
-    }
-    rednet.send(senderId, json.encode(responseObj), MUSIC_PROTOCOL)
+    sendMessageToClient(senderId, {error=string.format('Invalid command "%s" sent.', messageObj.command)})
     return
   end
-  commandFunc(messageObj)
+  commandFunc(senderId, messageObj)
 end
 
-getAllMusicAndCreateButtons()
+getAllMusicAndCreateConfig()
 
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
 eventHandler.addHandle("timer", musicProgressTrack)

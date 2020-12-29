@@ -104,7 +104,7 @@ function getTapeDriveToWriteTo(fileSize)
   for _,value in pairs(musicConfig) do
     local tapeDriveData = nameToTapeDriveData[value.tapeDriveName]
     if tapeDriveData == nil then
-      sendMessageToClients({error=(string.format("tapeDrive \"%s\" is missing. Please add it back or delete the music server config file.", value.tapeDriveName))}
+      sendMessageToClients({error=(string.format("tapeDrive \"%s\" is missing. Please add it back or delete the music server config file.", value.tapeDriveName))})
       return false
     end
     if value.tapePositionEnd > tapeDriveData.lastPosition then
@@ -143,7 +143,8 @@ function getMusicConfigForFileOrCreate(senderId, filePath)
   end
   local f = fs.open(filePath, "rb")
   if not f then
-    sendMessageToClient(string.format("music file on path \"%s\" not found", filePath))
+    sendMessageToClient(senderId, {error=string.format("music file on path \"%s\" not found", filePath)})
+    return false, false, nil
   end
   local fileSize = f.seek("end")
   f.close()
@@ -207,6 +208,13 @@ function playTape()
   sendMessageToClients({command=MusicConstants.PLAY_COMMAND, filePath=selectedFilePath})
 end
 
+function stopTape()
+  if selectedTapeDrive ~= nil and not isWritingMusic then
+    selectedTapeDrive.stop()
+  end
+  sendMessageToClients({command=MusicConstants.STOP_COMMAND, filepath=selectedFilePath, stopped=true})
+end
+
 function playTapeFromConfig(config)
   setupTapeFromConfig(config)
   musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
@@ -237,9 +245,9 @@ function writeTapeUnit(eventData)
   --Stop if done, and actually play the tape, if not, put another event in the queue
   if maxByte == fileSize then
     logger.debug("writing new music done: ", fileSize, " bytes written.")
+    isWritingMusic = false
     addAndPersistMusicConfig(config)
     playTapeFromConfig(config)
-    isWritingMusic = false
   else
     os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, maxByte + 1)
   end
@@ -285,15 +293,18 @@ function play(senderId, messageObj)
     local filePath = messageObj.filePath
     logger.debug("filePath: ", filePath)
     logger.debug("currentSelectedFilePath: ", selectedFilePath)
-    local isNew, config = getMusicConfigForFileOrCreate(filePath)
-    if selectedFilePath == filePath then
+    local success, isNew, config = getMusicConfigForFileOrCreate(senderId, filePath)
+    if not success then
+      --We failed to get the music config and already sent an error message
+      return
+    elseif selectedFilePath == filePath then
       --resume if we are already loaded
       playTape()
     elseif isNew then
       --if this is a new config, write the new song to the tape
       queueWrite(config)
     else
-      logger.debug("config: ", textutils.serializeJSON(config))
+      --logger.debug("config: ", textutils.serializeJSON(config))
       --if config is already written, then we simply play from it
       playTapeFromConfig(config)
     end
@@ -301,10 +312,7 @@ function play(senderId, messageObj)
 end
 
 function stop(senderId, messageObj)
-  if selectedTapeDrive ~= nil and not isWritingMusic then
-    selectedTapeDrive.stop()
-  end
-  sendMessageToClients({command=MusicConstants.STOP_COMMAND, stopped=true})
+  stopTape()
 end
 
 function getMusicList(senderId, messageObj)
@@ -399,6 +407,8 @@ eventHandler.addHandle("timer", musicProgressTrack)
 eventHandler.addHandle("rednet_message", rednetMessageReceived)
 
 loadMusicConfig()
+
+rednet.host(MusicConstants.MUSIC_SERVER_PROTOCOL, os.getComputerLabel())
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

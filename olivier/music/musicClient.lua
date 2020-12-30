@@ -345,7 +345,7 @@ nowPlayingScreenContent = ScreenContent.create{
 nowPlayingBuffer.render()
 
 eventHandler.addHandle("rednet_message", rednetMessageReceived)
-getMusicList()
+getMusicState()
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

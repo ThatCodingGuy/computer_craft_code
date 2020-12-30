@@ -229,7 +229,7 @@ function rednetMessageReceived(eventData)
     return
   end
   local responseFunc = responseToFunc[messageObj.command]
-  if not responseFunc then
+  if responseFunc == nil then
     error(string.format('Unrecognized command "%s" sent.', messageObj.command))
     return
   end

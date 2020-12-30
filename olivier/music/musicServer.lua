@@ -297,7 +297,7 @@ end
 
 function getMusicState(senderId, messageObj)
   sendMessageToClient(senderId, {
-    command=MusicConstants.GET_MUSIC_LIST_COMMAND,
+    command=MusicConstants.GET_MUSIC_STATE_COMMAND,
     musicList=musicList,
     tapeSpeed=getDisplayedTapeSpeed(),
     tapeVolume=getDisplayedTapeVolume()

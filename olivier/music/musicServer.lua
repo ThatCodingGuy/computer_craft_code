@@ -63,6 +63,18 @@ local function getDisplayedTapeVolume()
   return string.format("%s%%", math.floor(round(tapeVolume, 2) * 100))
 end
 
+function getAllMusicAndCreateMusicList()
+  local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
+  local files = fs.find(searchTerm)
+  logger.debug("looking for files on path: ", searchTerm)
+  musicList = {}
+  for _,f in pairs(files) do
+    local name = fs.getName(f)
+    logger.debug("found music file with name: ", name) 
+    table.insert(musicList, {filePath=f, fileName=fs.getName(f)})
+  end
+end
+
 function loadMusicConfig()
   if not fs.exists(MUSIC_CONFIG_PATH) then
     musicConfig = {}
@@ -70,11 +82,8 @@ function loadMusicConfig()
   end
   local f = fs.open(MUSIC_CONFIG_PATH, 'r')
   musicConfig = json.decode(f.readAll())
-  musicList = {}
-  for _,config in pairs(musicConfig) do
-    table.insert(musicList, {filePath=config.filePath, fileName=fs.getName(config.filePath)})
-  end
   f.close()
+  getAllMusicAndCreateMusicList()
 end
 
 function addAndPersistMusicConfig(config)
@@ -162,16 +171,6 @@ function getMusicConfigForFileOrCreate(senderId, filePath)
     }
   end
   return success, true, newConfig
-end
-
-function getAllMusicAndCreateConfig()
-  local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
-  local files = fs.find(searchTerm)
-  logger.debug("looking for files on path: ", searchTerm)
-  for _,f in pairs(files) do
-    local name = fs.getName(f)
-    logger.debug("found music file with name: ", name)
-  end
 end
 
 function seekTapeToPosition(tapePosition)
@@ -402,8 +401,6 @@ function rednetMessageReceived(eventData)
   end
   commandFunc(senderId, messageObj)
 end
-
-getAllMusicAndCreateConfig()
 
 eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
 eventHandler.addHandle("timer", musicProgressTrack)

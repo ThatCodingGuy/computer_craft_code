@@ -41,7 +41,7 @@ local width,height = screen.getSize()
 
 --UI Components
 local screenTitleBuffer = nil
-local progressDisplay = nil
+local progressScreenContent = nil
 local speedScreenContent = nil
 local volumeScreenContent = nil
 local controlScreenBuffer = nil
@@ -121,7 +121,7 @@ function writeMusicProgress(messageObj)
   if not validateNotNil(messageObj, 'fileName') then
     error('no fileName given from response')
   end
-  progressDisplay.updateText{text = string.format("%s%%", messageObj.percentage), render=true}
+  progressScreenContent.updateText{text = string.format("%s%%", messageObj.percentage), render=true}
   nowPlayingScreenContent.updateText{text=string.format("%s", messageObj.fileName), render=true}
 end
 
@@ -130,7 +130,8 @@ function writeTapeProgress(messageObj)
     error('no percentage given from response')
   end
   local progressText = string.format("%s%%", messageObj.percentage)
-  progressDisplay.updateText{text=progressText, render=true}
+  progressScreenContent.updateText{text=progressText, render=true}
+  nowPlayingScreenContent.updateText{text="Writing...", render=true}
 end
 
 function musicPlayed(messageObj)
@@ -146,9 +147,15 @@ function musicStopped(messageObj)
   nowPlayingScreenContent.updateText{text=nowPlayingText, render=true}
 end
 
-function musicListReceived(messageObj)
+function musicStateReceived(messageObj)
   if not validateNotNil(messageObj, 'musicList') then
     error('no musicList given from response')
+  end
+  if not validateNotNil(messageObj, 'tapeSpeed') then
+    error('no tapeSpeed given from response')
+  end
+  if not validateNotNil(messageObj, 'tapeVolume') then
+    error('no tapeVolume given from response')
   end
   musicViewScreenBuffer.clear()
   musicViewScreenBuffer.ln()
@@ -163,10 +170,12 @@ function musicListReceived(messageObj)
     })
   end
   musicViewScreenBuffer.render()
+  speedScreenContent.updateText({text=messageObj.tapeSpeed, render=true})
+  volumeScreenContent.updateText({text=messageObj.tapeVolume, render=true})
 end
 
-function getMusicList()
-  sendMessageToServer({command=MusicConstants.GET_MUSIC_LIST_COMMAND})
+function getMusicState()
+  sendMessageToServer({command=MusicConstants.GET_MUSIC_STATE_COMMAND})
 end
 
 function play()
@@ -189,15 +198,15 @@ function decreaseSpeed()
 end
 
 function increaseVolume()
-  sendMessageToServer({command=MusicConstants.INCREASE_SPEED_COMMAND})
+  sendMessageToServer({command=MusicConstants.INCREASE_VOLUME_COMMAND})
 end
 
 function decreaseVolume()
-  sendMessageToServer({command=MusicConstants.DECREASE_SPEED_COMMAND})
+  sendMessageToServer({command=MusicConstants.DECREASE_VOLUME_COMMAND})
 end
 
 local responseToFunc = {
-  [MusicConstants.GET_MUSIC_LIST_COMMAND]=musicListReceived,
+  [MusicConstants.GET_MUSIC_STATE_COMMAND]=musicStateReceived,
   [MusicConstants.STOP_COMMAND]=musicStopped,
   [MusicConstants.PLAY_COMMAND]=musicPlayed,
   [MusicConstants.TAPE_WRITE_PROGRESS_RESPONSE_TYPE]=writeTapeProgress,
@@ -214,7 +223,9 @@ function rednetMessageReceived(eventData)
     return
   end
   local messageObj = json.decode(message)
-  if not validateNotNil(messageObj, 'command') then
+  if messageObj ~= nil  and messageObj.error then
+    error(messageObj.error)
+  elseif not validateNotNil(messageObj, 'command') then
     return
   end
   local responseFunc = responseToFunc[messageObj.command]
@@ -265,7 +276,8 @@ speedScreenContent = ScreenContent.create{
 }
 
 --Adds padding
-controlScreenBuffer.write{text="        "}
+--controlScreenBuffer.write{text="        "}
+controlScreenBuffer.write{text=" "}
 
 Button.create{
   screenBuffer=controlScreenBuffer,
@@ -317,7 +329,7 @@ Button.create{
   leftClickCallback=stop
 }
 
-progressDisplay = ScreenContent.create{
+progressScreenContent = ScreenContent.create{
   screenBuffer=musicControlsBuffer,
   screenBufferWriteFunc=musicControlsBuffer.writeCenter,
   text="",
@@ -333,7 +345,7 @@ nowPlayingScreenContent = ScreenContent.create{
 nowPlayingBuffer.render()
 
 eventHandler.addHandle("rednet_message", rednetMessageReceived)
-getMusicList()
+getMusicState()
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

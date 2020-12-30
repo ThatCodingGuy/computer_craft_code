@@ -265,28 +265,6 @@ function queueWrite(config)
   os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, 0)
 end
 
-function connect(senderId, messageObj)
-  local connected = false
-  for _,client in pairs(connectedClients) do
-    if client == senderId then
-      connected = true
-    end
-  end
-  if not connected then
-    table.insert(connectedClients, senderId)
-  end
-  rednet.send(senderId, json.encode({command=MusicConstants.CONNECT_COMMAND, connected=true}))
-end
-
-function disconnect(senderId, messageObj)
-  for index,client in pairs(connectedClients) do
-    if client == senderId then
-      table.remove(connectedClients, index)
-    end
-  end
-  rednet.send(senderId, json.encode({command=MusicConstants.DISCONNECT_COMMAND, disconnected=true}))
-end
-
 function play(senderId, messageObj)
   if not validateNotNil(senderId, messageObj, 'filePath') then
     return
@@ -374,8 +352,6 @@ function increaseVolume(senderId, messageObj)
 end
 
 local commandToFunc = {
-  [MusicConstants.CONNECT_COMMAND]=connect,
-  [MusicConstants.DISCONNECT_COMMAND]=disconnect,
   [MusicConstants.GET_MUSIC_LIST_COMMAND]=getMusicList,
   [MusicConstants.STOP_COMMAND]=stop,
   [MusicConstants.PLAY_COMMAND]=play,

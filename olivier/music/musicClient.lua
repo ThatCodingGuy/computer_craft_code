@@ -118,7 +118,11 @@ function writeMusicProgress(messageObj)
   if not validateNotNil(messageObj, 'percentage') then
     error('no percentage given from response')
   end
+  if not validateNotNil(messageObj, 'fileName') then
+    error('no fileName given from response')
+  end
   progressDisplay.updateText{text = string.format("Progress: %s%%", messageObj.percentage), render=true}
+  nowPlayingScreenContent.updateText{text=string.format("Now Playing: %s", messageObj.fileName), render=true}
 end
 
 function writeTapeProgress(messageObj)

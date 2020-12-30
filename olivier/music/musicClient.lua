@@ -212,9 +212,9 @@ local responseToFunc = {
   [MusicConstants.TAPE_WRITE_PROGRESS_RESPONSE_TYPE]=writeTapeProgress,
   [MusicConstants.PLAYING_PROGRESS_RESPONSE_TYPE]=writeMusicProgress,
   [MusicConstants.INCREASE_SPEED_COMMAND]=speedIncreased,
-  [MusicConstants.DECREASE_SPEED_COMMAND]=decreaseSpeed,
-  [MusicConstants.INCREASE_VOLUME_COMMAND]=increaseVolume,
-  [MusicConstants.DECREASE_VOLUME_COMMAND]=decreaseVolume
+  [MusicConstants.DECREASE_SPEED_COMMAND]=speedDecreased,
+  [MusicConstants.INCREASE_VOLUME_COMMAND]=volumeIncreased,
+  [MusicConstants.DECREASE_VOLUME_COMMAND]=volumeDecreased
 }
 
 function rednetMessageReceived(eventData)

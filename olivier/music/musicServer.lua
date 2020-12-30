@@ -358,7 +358,7 @@ function increaseVolume(senderId, messageObj)
     selectedTapeDrive.setVolume(tapeVolume)
   end
   local displayedTapeVolume = tostring(getDisplayedTapeVolume())
-  logger.debug("decreasing volume to: ", displayedTapeVolume)
+  logger.debug("increasing volume to: ", displayedTapeVolume)
   sendMessageToClients({command=MusicConstants.INCREASE_VOLUME_COMMAND, tapeVolume=displayedTapeVolume})
 end
 

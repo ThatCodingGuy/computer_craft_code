@@ -32,6 +32,10 @@ local tapeVolume = 0.5
 
 local eventHandler = EventHandler.create()
 
+local function isTapeStopped()
+  return selectedTapeDrive == nil or selectedTapeDrive.getState() == "STOPPED"
+end
+
 local function sendMessageToClient(senderId, messageObj)
   local message = json.encode(messageObj)
   rednet.send(senderId, message, MusicConstants.MUSIC_CLIENT_PROTOCOL)
@@ -189,7 +193,7 @@ end
 
 function musicProgressTrack(eventData)
   local timerId = eventData[2]
-  if musicProgressTimerId == timerId and not isWritingMusic then
+  if musicProgressTimerId == timerId and not isWritingMusic and not isTapeStopped() then
     local position = selectedTapeDrive.getPosition()
     if position > selectedMusicConfig.tapePositionEnd then
       position = selectedMusicConfig.tapePositionEnd
@@ -213,8 +217,8 @@ end
 function stopTape()
   if selectedTapeDrive ~= nil and not isWritingMusic then
     selectedTapeDrive.stop()
+    sendMessageToClients({command=MusicConstants.STOP_COMMAND, filepath=selectedFilePath, stopped=true})
   end
-  sendMessageToClients({command=MusicConstants.STOP_COMMAND, filepath=selectedFilePath, stopped=true})
 end
 
 function playTapeFromConfig(config)
@@ -299,6 +303,8 @@ function getMusicState(senderId, messageObj)
   sendMessageToClient(senderId, {
     command=MusicConstants.GET_MUSIC_STATE_COMMAND,
     musicList=musicList,
+    filePath=selectedFilePath,
+    fileName=fs.getName(selectedFilePath),
     tapeSpeed=getDisplayedTapeSpeed(),
     tapeVolume=getDisplayedTapeVolume()
   })

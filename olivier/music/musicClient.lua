@@ -250,7 +250,8 @@ Button.create{
 screenTitleBuffer.render()
 
 controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=1, bottomOffset=height-2, bgColor=colors.blue, textColor=colors.white}
-controlScreenBuffer.write{text="  "}
+--Adds Padding
+--controlScreenBuffer.write{text="  "}
 Button.create{
   screenBuffer=controlScreenBuffer,
   eventHandler=eventHandler,

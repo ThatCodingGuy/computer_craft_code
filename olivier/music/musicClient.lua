@@ -79,7 +79,7 @@ local function sendMessageToServer(messageObj)
     end
   end
   local message = json.encode(messageObj)
-  rednet.send(serverId, message)
+  rednet.send(serverId, message, MusicConstants.MUSIC_SERVER_PROTOCOL)
 end
 
 function speedIncreased(messageObj)

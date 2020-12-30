@@ -149,7 +149,7 @@ function musicListReceived(messageObj)
   musicViewScreenBuffer.clear()
   musicViewScreenBuffer.ln()
   radioGroup.clear()
-  for music in pairs(messageObj.musicList) do
+  for _,music in pairs(messageObj.musicList) do
     radioGroup.addRadioInput(RadioInput.create{
       id=music.filePath,
       title=music.fileName,

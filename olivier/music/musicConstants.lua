@@ -4,9 +4,7 @@ return {
   MUSIC_SERVER_PROTOCOL='music_server',
 
   --commands
-  CONNECT_COMMAND='connect',
-  DISCONNECT_COMMAND='disconnect',
-  GET_MUSIC_LIST_COMMAND='get_music_list',
+  GET_MUSIC_STATE_COMMAND='get_music_state',
   STOP_COMMAND='stop',
   PLAY_COMMAND='play',
   INCREASE_SPEED_COMMAND='increase_speed',

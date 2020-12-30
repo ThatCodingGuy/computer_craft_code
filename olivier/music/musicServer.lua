@@ -295,8 +295,13 @@ function stop(senderId, messageObj)
   stopTape()
 end
 
-function getMusicList(senderId, messageObj)
-  sendMessageToClient(senderId, {command=MusicConstants.GET_MUSIC_LIST_COMMAND, musicList=musicList})
+function getMusicState(senderId, messageObj)
+  sendMessageToClient(senderId, {
+    command=MusicConstants.GET_MUSIC_LIST_COMMAND,
+    musicList=musicList,
+    tapeSpeed=getDisplayedTapeSpeed(),
+    tapeVolume=getDisplayedTapeVolume()
+  })
 end
 
 function increaseSpeed(senderId, messageObj)
@@ -352,7 +357,7 @@ function increaseVolume(senderId, messageObj)
 end
 
 local commandToFunc = {
-  [MusicConstants.GET_MUSIC_LIST_COMMAND]=getMusicList,
+  [MusicConstants.GET_MUSIC_STATE_COMMAND]=getMusicState,
   [MusicConstants.STOP_COMMAND]=stop,
   [MusicConstants.PLAY_COMMAND]=play,
   [MusicConstants.INCREASE_SPEED_COMMAND]=increaseSpeed,

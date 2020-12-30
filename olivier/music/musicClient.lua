@@ -172,6 +172,9 @@ function musicStateReceived(messageObj)
   musicViewScreenBuffer.render()
   speedScreenContent.updateText({text=messageObj.tapeSpeed, render=true})
   volumeScreenContent.updateText({text=messageObj.tapeVolume, render=true})
+  if messageObj.fileName then
+    nowPlayingScreenContent.updateText({text=messageObj.fileName, render=true})
+  end
 end
 
 function getMusicState()

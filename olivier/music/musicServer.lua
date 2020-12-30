@@ -300,11 +300,15 @@ function stop(senderId, messageObj)
 end
 
 function getMusicState(senderId, messageObj)
+  local fileName = nil
+  if selectedFilePath ~= nil then
+    fileName = fs.getName(selectedFilePath)
+  end
   sendMessageToClient(senderId, {
     command=MusicConstants.GET_MUSIC_STATE_COMMAND,
     musicList=musicList,
     filePath=selectedFilePath,
-    fileName=fs.getName(selectedFilePath),
+    fileName=fileName,
     tapeSpeed=getDisplayedTapeSpeed(),
     tapeVolume=getDisplayedTapeVolume()
   })

@@ -8,6 +8,7 @@ local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
 local Util = dofile("./gitlib/turboCo/util.lua")
+local MusicConstants = dofile("./gitlib/olivier/music/musicConstants.lua")
 local Logger = dofile("./gitlib/turboCo/logger.lua")
 local logger = Logger.new()
 local loggingLevel = "ERROR"
@@ -15,6 +16,9 @@ if LOGGING_LEVEL then
   loggingLevel = LOGGING_LEVEL
 end
 Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
+
+os.loadAPI('./gitlib/turboCo/modem.lua')
+modem.openModems()
 
 local screenSide = SCREEN_SIDE
 local screen = nil
@@ -44,11 +48,11 @@ local controlScreenBuffer = nil
 local musicView = nil
 local musicViewScreenBuffer = nil
 local musicControlsBuffer = nil
-local progressBarBuffer = nil
+local nowPlayingBuffer = nil
+local nowPlayingScreenContent = nil
 
-
-local selectedFilePath = nil
-local isWritingMusic = false
+--Client State
+local serverId = nil
 
 local radioGroup = RadioGroup.create()
 local eventHandler = EventHandler.create()
@@ -59,188 +63,162 @@ function round(num, numDecimalPlaces)
   return math.floor(num * mult + 0.5) / mult
 end
 
-local function sendMessageToClient(senderId, messageObj)
+local function validateNotNil(messageObj, objPath)
+  if not messageObj and messageObj[objPath] then
+    error(string.format('message is missing parameter: \"%s\"', objPath))
+    return false
+  end
+  return true
+end
+
+local function sendMessageToServer(messageObj)
+  if serverId == nil then
+    serverId = rednet.lookup(MusicConstants.MUSIC_SERVER_PROTOCOL)
+    if serverId == nil then
+      error('no music server registered for hostname lookup')
+    end
+  end
   local message = json.encode(messageObj)
-  rednet.send(senderId, message)
+  rednet.send(serverId, message)
 end
 
-function increaseSpeed()
-  tapeSpeed = tapeSpeed + 0.1
-  if tapeSpeed > 2.0 then
-    tapeSpeed = 2.0
+function speedIncreased(messageObj)
+  if not validateNotNil(messageObj, 'tapeSpeed') then
+    error('no tapeSpeed given from response')
   end
-  if selectedTapeDrive ~= nil then
-    selectedTapeDrive.setSpeed(tapeSpeed)
-  end
-  local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
-  speedScreenContent.updateText{text=displayedTapeSpeed, render=true}
-  logger.debug("increasing speed to: ", displayedTapeSpeed)
+  speedScreenContent.updateText{text=messageObj.tapeSpeed, render=true}
+  logger.debug("increasing speed to: ", messageObj.tapeSpeed)
 end
 
-function decreaseSpeed()
-  tapeSpeed = tapeSpeed - 0.1
-  if tapeSpeed < 0.25 then
-    tapeSpeed = 0.25
+function speedDecreased(messageObj)
+  if not validateNotNil(messageObj, 'tapeSpeed') then
+    error('no tapeSpeed given from response')
   end
-  if selectedTapeDrive ~= nil then
-    selectedTapeDrive.setSpeed(tapeSpeed)
-  end
-  local displayedTapeSpeed = tostring(getDisplayedTapeSpeed())
-  speedScreenContent.updateText{text=displayedTapeSpeed, render=true}
-  logger.debug("decreasing speed to: ", displayedTapeSpeed)
+  speedScreenContent.updateText{text=messageObj.tapeSpeed, render=true}
+  logger.debug("decreasing speed to: ", messageObj.tapeSpeed)
 end
 
-function decreaseVolume()
-  tapeVolume = tapeVolume - 0.1
-  if tapeVolume < 0 then
-    tapeVolume = 0
+function volumeIncreased(messageObj)
+  if not validateNotNil(messageObj, 'tapeVolume') then
+    error('no tapeVolume given from response')
   end
-  if selectedTapeDrive ~= nil then
-    selectedTapeDrive.setVolume(tapeVolume)
-  end
-  local displayedTapeVolume = tostring(getDisplayedTapeVolume())
-  volumeScreenContent.updateText{text=displayedTapeVolume, render=true}
-  logger.debug("decreasing volume to: ", displayedTapeVolume)
+  volumeScreenContent.updateText{text=messageObj.tapeVolume, render=true}
+  logger.debug("decreasing volume to: ", messageObj.tapeVolume)
 end
 
-function increaseVolume()
-  tapeVolume = tapeVolume + 0.1
-  if tapeVolume > 1 then
-    tapeVolume = 1
+function volumeDecreased(messageObj)
+  if not validateNotNil(messageObj, 'tapeVolume') then
+    error('no tapeVolume given from response')
   end
-  if selectedTapeDrive ~= nil then
-    selectedTapeDrive.setVolume(tapeVolume)
-  end
-  local displayedTapeVolume = tostring(getDisplayedTapeVolume())
-  volumeScreenContent.updateText{text=displayedTapeVolume, render=true}
-  logger.debug("decreasing volume to: ", displayedTapeVolume)
+  volumeScreenContent.updateText{text=messageObj.tapeVolume, render=true}
+  logger.debug("decreasing volume to: ", messageObj.tapeVolume)
 end
 
-function getAllMusicAndCreateButtons(radioGroup)
-  local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
-  local files = fs.find(searchTerm)
-  logger.debug("looking for files on path: ", searchTerm)
-  for _,f in pairs(files) do
-    local name = fs.getName(f)
-    logger.debug("found music file with name: ", name)
+function writeMusicProgress(messageObj)
+  if not validateNotNil(messageObj, 'percentage') then
+    error('no percentage given from response')
+  end
+  progressDisplay.updateText{text = string.format("Progress: %s%%", messageObj.percentage), render=true}
+end
+
+function writeTapeProgress(messageObj)
+  if not validateNotNil(messageObj, 'percentage') then
+    error('no percentage given from response')
+  end
+  local progressText = string.format("Writing: %s%% complete", messageObj.percentage)
+  progressDisplay.updateText{text=progressText, render=true}
+end
+
+function musicPlayed(messageObj)
+  if not validateNotNil(messageObj, 'fileName') then
+    error('no fileName given from response')
+  end
+  local nowPlayingText = string.format("Now Playing: %s", messageObj.nowPlayingBuffer)
+  nowPlayingScreenContent.updateText{text=nowPlayingText, render=true}
+end
+
+function musicStopped(messageObj)
+  local nowPlayingText = "Stopped"
+  nowPlayingScreenContent.updateText{text=nowPlayingText, render=true}
+end
+
+function musicListReceived(messageObj)
+  if not validateNotNil(messageObj, 'musicList') then
+    error('no musicList given from response')
+  end
+  musicViewScreenBuffer.clear()
+  musicViewScreenBuffer.ln()
+  radioGroup.clear()
+  for music in pairs(messageObj.musicList) do
     radioGroup.addRadioInput(RadioInput.create{
-      id=f,
-      title=name,
+      id=music.filePath,
+      title=music.fileName,
       screenBuffer=musicViewScreenBuffer,
       screenBufferWriteFunc=musicViewScreenBuffer.writeLn,
       eventHandler=eventHandler
     })
   end
+  musicViewScreenBuffer.render()
 end
 
-function seekTapeToPosition(tapePosition)
-  local seekAmount = tapePosition - selectedTapeDrive.getPosition()
-  selectedTapeDrive.seek(seekAmount)
-end
-
-function setupTapeFromConfig(config)
-  selectedMusicConfig = config
-  selectedTapeDrive = peripheral.wrap(config.tapeDriveName)
-  selectedFilePath = config.filePath
-  seekTapeToPosition(config.tapePositionStart)
-  selectedTapeDrive.setSpeed(tapeSpeed)
-  selectedTapeDrive.setVolume(tapeVolume)
-end
-
-function musicProgressTrack(eventData)
-  local timerId = eventData[2]
-  if musicProgressTimerId == timerId and not isWritingMusic then
-    local position = selectedTapeDrive.getPosition()
-    if position > selectedMusicConfig.tapePositionEnd then
-      position = selectedMusicConfig.tapePositionEnd
-      seekTapeToPosition(position)
-      selectedTapeDrive.stop()
-    else
-      musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
-    end
-    local relativePosition = position - selectedMusicConfig.tapePositionStart
-    local relativeEnd = selectedMusicConfig.tapePositionEnd - selectedMusicConfig.tapePositionStart
-    local percentage = math.floor((relativePosition / relativeEnd) * 100)
-    progressDisplay.updateText{text = string.format("Progress: %s%%", percentage), render=true}
-  end
-end
-
-function playTapeFromConfig(config)
-  setupTapeFromConfig(config)
-  progressDisplay.updateText{text = "Progress: 0%", render=true}
-  musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
-  selectedTapeDrive.play()
-end
-
-function writeTapeUnit(eventData)
-  local config, currFilePosition = eventData[2], eventData[3]
-  local tapeDrive = peripheral.wrap(config.tapeDriveName)
-  local fileSize = config.tapePositionEnd - config.tapePositionStart
-  local maxByte = currFilePosition + BYTE_WRITE_UNIT
-  if maxByte > fileSize then
-    maxByte = fileSize
-  end
-  local sourceFile = fs.open(config.filePath, "rb")
-  sourceFile.seek("set", currFilePosition)
-  for i=currFilePosition,maxByte do
-    local byte = sourceFile.read()
-    if byte then
-      tapeDrive.write(byte)
-    end
-  end
-  sourceFile.close()
-  local percentage = math.floor((maxByte / fileSize) * 100)
-  --Update screen with progress
-  local progressText = string.format("Writing: %s%% complete", percentage)
-  progressDisplay.updateText{text=progressText, render=true}
-
-  --Stop if done, and actually play the tape, if not, put another event in the queue
-  if maxByte == fileSize then
-    logger.debug("writing new music done: ", fileSize, " bytes written.")
-    progressDisplay.updateText{text="", render=true}
-    addAndPersistMusicConfig(config)
-    playTapeFromConfig(config)
-    isWritingMusic = false
-  else
-    os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, maxByte + 1)
-  end
-end
-
-function queueWrite(config)
-  logger.debug("queue writing new music")
-  if selectedTapeDrive ~= nil then
-    selectedTapeDrive.stop()
-  end
-  isWritingMusic = true
-  setupTapeFromConfig(config)
-  os.queueEvent(TAPE_WRITE_EVENT_TYPE, config, 0)
+function getMusicList()
+  sendMessageToServer({command=MusicConstants.GET_MUSIC_LIST_COMMAND})
 end
 
 function play()
-  local selected = radioGroup.getSelected()
-  if not isWritingMusic and selected ~= nil then
-    local filePath = selected.getId()
-    logger.debug("filePath: ", filePath)
-    logger.debug("currentSelectedFilePath: ", tostring(selectedFilePath))
-    local isNew, config = getMusicConfigForFileOrCreate(filePath)
-    if selectedFilePath == filePath then
-      --resume if we are already loaded
-      selectedTapeDrive.play()
-    elseif isNew then
-      --if this is a new config, write the new song to the tape
-      queueWrite(config)
-    else
-      logger.debug("config: " .. textutils.serializeJSON(config))
-      --if config is already written, then we simply play from it
-      playTapeFromConfig(config)
-    end
+  local selectedRadioInput = radioGroup.getSelected()
+  if selectedRadioInput ~= nil then
+    sendMessageToServer({command=MusicConstants.PLAY_COMMAND, filePath=selectedRadioInput.getId()})
   end
 end
 
 function stop()
-  if selectedTapeDrive ~= nil and not isWritingMusic then
-    selectedTapeDrive.stop()
+  sendMessageToServer({command=MusicConstants.STOP_COMMAND})
+end
+
+function increaseSpeed()
+  sendMessageToServer({command=MusicConstants.INCREASE_SPEED_COMMAND})
+end
+
+function decreaseSpeed()
+  sendMessageToServer({command=MusicConstants.DECREASE_SPEED_COMMAND})
+end
+
+function increaseVolume()
+  sendMessageToServer({command=MusicConstants.INCREASE_SPEED_COMMAND})
+end
+
+function decreaseVolume()
+  sendMessageToServer({command=MusicConstants.DECREASE_SPEED_COMMAND})
+end
+
+local responseToFunc = {
+  [MusicConstants.GET_MUSIC_LIST_COMMAND]=musicListReceived,
+  [MusicConstants.STOP_COMMAND]=musicStopped,
+  [MusicConstants.PLAY_COMMAND]=musicPlayed,
+  [MusicConstants.TAPE_WRITE_PROGRESS_RESPONSE_TYPE]=writeTapeProgress,
+  [MusicConstants.PLAYING_PROGRESS_RESPONSE_TYPE]=writeMusicProgress,
+  [MusicConstants.INCREASE_SPEED_COMMAND]=speedIncreased,
+  [MusicConstants.DECREASE_SPEED_COMMAND]=decreaseSpeed,
+  [MusicConstants.INCREASE_VOLUME_COMMAND]=increaseVolume,
+  [MusicConstants.DECREASE_VOLUME_COMMAND]=decreaseVolume
+}
+
+function rednetMessageReceived(eventData)
+  local senderId, message, protocol = eventData[2], eventData[3], eventData[4]
+  if protocol ~= MusicConstants.MUSIC_CLIENT_PROTOCOL then
+    return
   end
+  local messageObj = json.decode(message)
+  if not validateNotNil(messageObj, 'command') then
+    return
+  end
+  local responseFunc = responseToFunc[messageObj.command]
+  if not responseFunc then
+    error(string.format('Unrecognized command "%s" sent.', messageObj.command))
+    return
+  end
+  responseFunc(messageObj)
 end
 
 screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, bottomOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
@@ -279,7 +257,7 @@ controlScreenBuffer.write{text=" Speed: "}
 speedScreenContent = ScreenContent.create{
   screenBuffer=controlScreenBuffer,
   eventHandler=eventHandler,
-  text=getDisplayedTapeSpeed()
+  text="1x"
 }
 
 --Adds padding
@@ -306,15 +284,12 @@ controlScreenBuffer.write{text=" Volume: "}
 volumeScreenContent = ScreenContent.create{
   screenBuffer=controlScreenBuffer,
   eventHandler=eventHandler,
-  text=getDisplayedTapeVolume()
+  text="50%"
 }
 controlScreenBuffer.render()
 
 musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=colors.purple, color=colors.white}
 musicViewScreenBuffer = musicView.getScreenBuffer()
-musicViewScreenBuffer.ln()
-
-getAllMusicAndCreateButtons(radioGroup)
 musicViewScreenBuffer.render()
 
 musicControlsBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-2, bottomOffset=1, bgColor=colors.blue, textColor=colors.white}
@@ -345,13 +320,16 @@ progressDisplay = ScreenContent.create{
 }
 musicControlsBuffer.render()
 
-progressBarBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, bgColor=colors.yellow, textColor=colors.white}
-progressBarBuffer.render()
+nowPlayingBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
+nowPlayingScreenContent = ScreenContent.create{
+  screenBuffer=nowPlayingBuffer,
+  screenBufferWriteFunc=nowPlayingBuffer.writeCenter,
+  text="",
+}
+nowPlayingBuffer.render()
 
-eventHandler.addHandle(TAPE_WRITE_EVENT_TYPE, writeTapeUnit)
-eventHandler.addHandle("timer", musicProgressTrack)
-
-loadMusicConfig()
+eventHandler.addHandle("rednet_message", rednetMessageReceived)
+getMusicList()
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

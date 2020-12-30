@@ -2,13 +2,16 @@ local json = dofile("./gitlib/turboCo/json.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local Util = dofile("./gitlib/turboCo/util.lua")
 local Logger = dofile("./gitlib/turboCo/logger.lua")
-local MusicConstants = dofile("./gitlib/turboCo/musicConstants.lua")
+local MusicConstants = dofile("./gitlib/olivier/music/musicConstants.lua")
 local logger = Logger.new()
 local loggingLevel = "ERROR"
 if LOGGING_LEVEL then
   loggingLevel = LOGGING_LEVEL
 end
 Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
+
+os.loadAPI('./gitlib/turboCo/modem.lua')
+modem.openModems()
 
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
 local MUSIC_FOLDER_PATH = "/gitlib/olivier/music/songs/"
@@ -199,13 +202,13 @@ function musicProgressTrack(eventData)
     local relativePosition = position - selectedMusicConfig.tapePositionStart
     local relativeEnd = selectedMusicConfig.tapePositionEnd - selectedMusicConfig.tapePositionStart
     local percentage = math.floor((relativePosition / relativeEnd) * 100)
-    sendMessageToClients({command=MusicConstants.PLAYING_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, percentage=percentage})
+    sendMessageToClients({command=MusicConstants.PLAYING_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath), percentage=percentage})
   end
 end
 
 function playTape()
   selectedTapeDrive.play()
-  sendMessageToClients({command=MusicConstants.PLAY_COMMAND, filePath=selectedFilePath})
+  sendMessageToClients({command=MusicConstants.PLAY_COMMAND, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath)})
 end
 
 function stopTape()
@@ -240,7 +243,7 @@ function writeTapeUnit(eventData)
   sourceFile.close()
   local percentage = math.floor((maxByte / fileSize) * 100)
   --Update screen with progress
-  sendMessageToClients({command=MusicConstants.TAPE_WRITE_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, percentage=percentage})
+  sendMessageToClients({command=MusicConstants.TAPE_WRITE_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath), percentage=percentage})
 
   --Stop if done, and actually play the tape, if not, put another event in the queue
   if maxByte == fileSize then
@@ -408,7 +411,11 @@ eventHandler.addHandle("rednet_message", rednetMessageReceived)
 
 loadMusicConfig()
 
-rednet.host(MusicConstants.MUSIC_SERVER_PROTOCOL, os.getComputerLabel())
+local computerLabel = os.getComputerLabel()
+if computerLabel == nil then
+  error('need to define a computer label to use this server.')
+end
+rednet.host(MusicConstants.MUSIC_SERVER_PROTOCOL, computerLabel)
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

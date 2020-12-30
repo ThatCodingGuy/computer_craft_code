@@ -11,6 +11,14 @@ local function create(args)
     self.radioInputs = args.radioInputs
   end
 
+  local clear = function()
+    for _,radioInput in pairs(self.radioInputs) do
+      radioInput.makeInactive()
+    end
+    self.radioInputs = {}
+    self.selectedRadioInput = nil
+  end
+
   local handleRadioInputClicked = function(clickedId)
     for _,radioInput in pairs(self.radioInputs) do
       local isSelected = clickedId == radioInput.getId()
@@ -35,6 +43,7 @@ local function create(args)
   end
 
   return {
+    clear=clear,
     addRadioInput=addRadioInput,
     getSelected=getSelected
   }

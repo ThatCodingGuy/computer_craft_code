@@ -34,7 +34,7 @@ local eventHandler = EventHandler.create()
 
 local function sendMessageToClient(senderId, messageObj)
   local message = json.encode(messageObj)
-  rednet.send(senderId, message)
+  rednet.send(senderId, message, MusicConstants.MUSIC_CLIENT_PROTOCOL)
 end
 
 local function sendMessageToClients(messageObj)

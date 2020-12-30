@@ -1,5 +1,6 @@
-local modem = dofile("./gitlib/turboCo/modem.lua")
+local json = dofile("./gitlib/turboCo/json.lua")
 local Logger = dofile("./gitlib/turboCo/logger.lua")
+local modem = dofile("./gitlib/turboCo/modem.lua")
 local common_argument_parsers = dofile("./gitlib/turboCo/app/common_argument_parsers.lua")
 local common_argument_definitions = dofile("./gitlib/turboCo/app/common_argument_definitions.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
@@ -51,10 +52,10 @@ local function handle_request(event_data)
         return
     end
 
-    local request = textutils.unserializeJSON(message)
+    local request = json.decode(message)
     local request_type = request["type"]
     local response = router[request_type](senderId, request)
-    local serialized_response = textutils.serializeJSON(response)
+    local serialized_response = json.encode(response)
     rednet.send(senderId, serialized_response, PROTOCOL)
 end
 
@@ -87,6 +88,7 @@ function run()
     rednet.host(PROTOCOL, "fuel_station_host")
 
     local fuel_coord_parser = FuelCoordParser.new(parsed_arguments.coord_file_name)
+    observable_station_coords.set_value(fuel_coord_parser.parse())
     local event_handler = EventHandler.create()
     event_handler.scheduleRecurring(function()
         observable_station_coords.set_value(fuel_coord_parser.parse())

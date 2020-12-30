@@ -121,15 +121,15 @@ function writeMusicProgress(messageObj)
   if not validateNotNil(messageObj, 'fileName') then
     error('no fileName given from response')
   end
-  progressDisplay.updateText{text = string.format("Progress: %s%%", messageObj.percentage), render=true}
-  nowPlayingScreenContent.updateText{text=string.format("Now Playing: %s", messageObj.fileName), render=true}
+  progressDisplay.updateText{text = string.format("%s%%", messageObj.percentage), render=true}
+  nowPlayingScreenContent.updateText{text=string.format("%s", messageObj.fileName), render=true}
 end
 
 function writeTapeProgress(messageObj)
   if not validateNotNil(messageObj, 'percentage') then
     error('no percentage given from response')
   end
-  local progressText = string.format("Writing: %s%% complete", messageObj.percentage)
+  local progressText = string.format("%s%%", messageObj.percentage)
   progressDisplay.updateText{text=progressText, render=true}
 end
 
@@ -137,7 +137,7 @@ function musicPlayed(messageObj)
   if not validateNotNil(messageObj, 'fileName') then
     error('no fileName given from response')
   end
-  local nowPlayingText = string.format("Now Playing: %s", messageObj.fileName)
+  local nowPlayingText = string.format("%s", messageObj.fileName)
   nowPlayingScreenContent.updateText{text=nowPlayingText, render=true}
 end
 
@@ -311,7 +311,7 @@ Button.create{
   screenBuffer=musicControlsBuffer,
   screenBufferWriteFunc=musicControlsBuffer.writeRight,
   eventHandler=eventHandler, 
-  text=" Stop ", 
+  text=" Stop ",
   textColor=colors.white,
   bgColor=colors.red,
   leftClickCallback=stop

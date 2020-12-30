@@ -133,7 +133,7 @@ function musicPlayed(messageObj)
   if not validateNotNil(messageObj, 'fileName') then
     error('no fileName given from response')
   end
-  local nowPlayingText = string.format("Now Playing: %s", messageObj.nowPlayingBuffer)
+  local nowPlayingText = string.format("Now Playing: %s", messageObj.fileName)
   nowPlayingScreenContent.updateText{text=nowPlayingText, render=true}
 end
 

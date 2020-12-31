@@ -79,6 +79,7 @@ function getAllMusicAndCreateMusicList()
 end
 
 function loadMusicConfig()
+  getAllMusicAndCreateMusicList()
   if not fs.exists(MUSIC_CONFIG_PATH) then
     musicConfig = {}
     return
@@ -86,7 +87,6 @@ function loadMusicConfig()
   local f = fs.open(MUSIC_CONFIG_PATH, 'r')
   musicConfig = json.decode(f.readAll())
   f.close()
-  getAllMusicAndCreateMusicList()
 end
 
 function addAndPersistMusicConfig(config)

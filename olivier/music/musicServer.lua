@@ -190,6 +190,20 @@ function setupTapeFromConfig(config)
   selectedTapeDrive.setVolume(tapeVolume)
 end
 
+--Assuming validation for playing being valid has already been done
+function playTape()
+  selectedTapeDrive.play()
+  musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
+  sendMessageToClients({command=MusicConstants.PLAY_COMMAND, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath)})
+end
+
+function stopTape()
+  if selectedTapeDrive ~= nil and not isWritingMusic then
+    selectedTapeDrive.stop()
+    sendMessageToClients({command=MusicConstants.STOP_COMMAND, filepath=selectedFilePath, stopped=true})
+  end
+end
+
 function musicProgressTrack(eventData)
   local timerId = eventData[2]
   if musicProgressTimerId == timerId and not isWritingMusic and not isTapeStopped() then
@@ -205,20 +219,6 @@ function musicProgressTrack(eventData)
     local relativeEnd = selectedMusicConfig.tapePositionEnd - selectedMusicConfig.tapePositionStart
     local percentage = math.floor((relativePosition / relativeEnd) * 100)
     sendMessageToClients({command=MusicConstants.PLAYING_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath), percentage=percentage})
-  end
-end
-
---Assuming validation for playing being valid has already been done
-function playTape()
-  selectedTapeDrive.play()
-  musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
-  sendMessageToClients({command=MusicConstants.PLAY_COMMAND, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath)})
-end
-
-function stopTape()
-  if selectedTapeDrive ~= nil and not isWritingMusic then
-    selectedTapeDrive.stop()
-    sendMessageToClients({command=MusicConstants.STOP_COMMAND, filepath=selectedFilePath, stopped=true})
   end
 end
 

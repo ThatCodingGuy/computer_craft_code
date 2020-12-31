@@ -42,6 +42,27 @@ local function split(inputstr, sep)
 end
 
 --[[
+  Fixes the stupid table.concat implementation which doesn't like non-strings and non-numbers
+]]
+local function join(tab, sep)
+  if sep == nil then
+    sep = ""
+  end
+  sep = tostring(sep)
+  local str = ""
+  local first = true
+  for _, value in pairs(tab) do
+    if first then
+      first = false
+    else
+      str = str .. sep
+    end
+    str = str .. tostring(value)
+  end
+  return str
+end
+
+--[[
   @return Does the table have the given value
 ]]
 local function contains(tab, val)

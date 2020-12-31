@@ -1,4 +1,5 @@
 local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
+local Util = dofile("./gitlib/turboCo/util.lua")
 
 local class = lua_helpers.class
 local enum = lua_helpers.enum
@@ -6,12 +7,20 @@ local enum = lua_helpers.enum
 local LoggingLevel = enum {
     "DEBUG", "INFO", "WARNING", "ERROR"
 }
+local log_file_path = "./log.out"
 local print_to_output = print
 local log_level_filter = LoggingLevel.WARNING
 
 -- Make sure there's a single global instance of the Logger module.
 if _G.Logger ~= nil then
     return _G.Logger
+end
+
+--Set print_to_output to this to log to a file instead
+local log_to_file = function(...)
+    local f = fs.open(log_file_path, 'a')
+    f.writeLine(Util.join(arg))
+    f.close()
 end
 
 --- A simple logger that allows writing messages to stdout.

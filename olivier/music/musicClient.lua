@@ -15,6 +15,7 @@ local loggingLevel = "ERROR"
 if LOGGING_LEVEL then
   loggingLevel = LOGGING_LEVEL
 end
+Logger.print_to_output = Logger.log_to_file
 Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
 
 os.loadAPI('./gitlib/turboCo/modem.lua')

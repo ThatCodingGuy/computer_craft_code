@@ -227,9 +227,7 @@ function rednetMessageReceived(eventData)
     return
   end
   local messageObj = json.decode(message)
-  if messageObj == nil then
-  end
-  if messageObj ~= nil  and messageObj.error then
+  if messageObj ~= nil and messageObj.error then
     error(messageObj.error)
   elseif not validateNotNil(messageObj, 'command') then
     return
@@ -279,7 +277,7 @@ controlScreenBuffer.write{text=" Speed: "}
 speedScreenContent = ScreenContent.create{
   screenBuffer=controlScreenBuffer,
   eventHandler=eventHandler,
-  text="1x"
+  text="   "
 }
 
 --Adds padding
@@ -303,11 +301,11 @@ Button.create{
   leftClickCallback=decreaseVolume
 }
 
-controlScreenBuffer.write{text=" Volume: "}
+controlScreenBuffer.write{text=" Vol: "}
 volumeScreenContent = ScreenContent.create{
   screenBuffer=controlScreenBuffer,
   eventHandler=eventHandler,
-  text="50%"
+  text="    "
 }
 controlScreenBuffer.render()
 

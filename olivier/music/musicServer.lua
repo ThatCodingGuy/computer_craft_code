@@ -19,7 +19,6 @@ local MUSIC_CONFIG_PATH = "musicConfig.json"
 local MUSIC_PROGRESS_TRACK_DELAY = 0.5
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
 
-local connectedClients = {}
 local musicConfig = nil
 local musicList = nil
 local selectedTapeDrive = nil
@@ -47,7 +46,7 @@ local function sendMessageToClients(messageObj)
 end
 
 local function validateNotNil(senderId, messageObj, objPath)
-  if not messageObj and messageObj[objPath] then
+  if not messageObj or not messageObj[objPath] then
     sendMessageToClient(senderId, {error=string.format('message is missing parameter: \"%s\"', objPath)})
     return false
   end
@@ -74,7 +73,7 @@ function getAllMusicAndCreateMusicList()
   musicList = {}
   for _,f in pairs(files) do
     local name = fs.getName(f)
-    logger.debug("found music file with name: ", name) 
+    logger.debug("found music file with name: ", name)
     table.insert(musicList, {filePath=f, fileName=fs.getName(f)})
   end
 end

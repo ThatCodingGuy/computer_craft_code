@@ -64,7 +64,7 @@ function round(num, numDecimalPlaces)
 end
 
 local function validateNotNil(messageObj, objPath)
-  if not messageObj and messageObj[objPath] then
+  if not messageObj or not messageObj[objPath] then
     error(string.format('message is missing parameter: \"%s\"', objPath))
     return false
   end
@@ -222,10 +222,13 @@ local responseToFunc = {
 
 function rednetMessageReceived(eventData)
   local senderId, message, protocol = eventData[2], eventData[3], eventData[4]
+  logger.debug("senderId: ", senderId, "protocol: ", protocol)
   if protocol ~= MusicConstants.MUSIC_CLIENT_PROTOCOL then
     return
   end
   local messageObj = json.decode(message)
+  if messageObj == nil then
+  end
   if messageObj ~= nil  and messageObj.error then
     error(messageObj.error)
   elseif not validateNotNil(messageObj, 'command') then

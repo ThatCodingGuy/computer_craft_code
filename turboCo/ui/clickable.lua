@@ -47,7 +47,7 @@ local function create(args)
     if wasClickedVal then
       logger.debug("clickable clicked: ", self.id, ", on posX: ", x, ", posY: ", y)
       logger.debug("self.screenStartingPos.x: ", self.screenStartingPos.x,
-                  ", self.currentScreenPos: ", self.currentScreenPos,
+                  ", self.currentScreenPos.x: ", self.currentScreenPos.x,
                   ", on self.screenBufferWidth: ", self.screenBufferWidth,
                   ", self.screenBufferHeight: ", self.screenBufferHeight)
     end

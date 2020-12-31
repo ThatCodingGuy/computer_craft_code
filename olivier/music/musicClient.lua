@@ -224,7 +224,7 @@ local responseToFunc = {
 
 function rednetMessageReceived(eventData)
   local senderId, message, protocol = eventData[2], eventData[3], eventData[4]
-  logger.debug("senderId: ", senderId, "protocol: ", protocol)
+  logger.debug("senderId: ", senderId, ", protocol: ", protocol)
   if protocol ~= MusicConstants.MUSIC_CLIENT_PROTOCOL then
     return
   end

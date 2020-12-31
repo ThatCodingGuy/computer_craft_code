@@ -32,6 +32,7 @@ function fuel_request(sender_id, request)
     local nearest = stations.find_nearest(request["position"])
 
     if nearest then
+        logger.info("Found fuel nearest available fuel station.")
         local response = {}
         response["status"] = "success"
         response["position"] = nearest
@@ -39,6 +40,7 @@ function fuel_request(sender_id, request)
         return response
     end
 
+    logger.info("Could not find a fuel station.")
     local response = {}
     response["status"] = "none_available"
     return response
@@ -57,12 +59,13 @@ local function handle_request(event_data)
         return
     end
 
-    logger.debug("Processing JSON:\n", message)
+    logger.debug("Processing client request:\n", message)
     local request = json.decode(message)
     local request_type = request["type"]
     logger.info("Processing request type '" .. request_type .. "'.")
     local response = router[request_type](senderId, request)
     local serialized_response = json.encode(response)
+    logger.debug("Sending response to client:\n", serialized_response)
     rednet.send(senderId, serialized_response, PROTOCOL)
 end
 

@@ -678,4 +678,5 @@ return {
     coord = coord,
     gps_locate = gps_locate,
     distance = distance,
+    navigate = navigate,
 }

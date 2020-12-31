@@ -24,7 +24,7 @@ local stations = FuelStationGroup.new(
         observable_station_coords)
 local logger = Logger.new()
 
-function fuel_request(sender_id, request)
+fuel_request = function(sender_id, request)
     local nearest = stations.find_nearest(request["position"])
 
     if nearest then
@@ -40,7 +40,7 @@ function fuel_request(sender_id, request)
     return response
 end
 
-function fuel_done(sender_id, request)
+fuel_done = function(sender_id, request)
     stations.release(sender_id)
     local response = {}
     response["status"] = "success"
@@ -56,7 +56,7 @@ local function handle_request(event_data)
     logger.debug("Processing JSON:\n", message)
     local request = json.decode(message)
     local request_type = request["type"]
-    logger.info("Processing request type '", request_type, "'")
+    logger.info("Processing request type '" .. request_type .. "'.")
     local response = router[request_type](senderId, request)
     local serialized_response = json.encode(response)
     rednet.send(senderId, serialized_response, PROTOCOL)

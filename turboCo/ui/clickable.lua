@@ -41,8 +41,8 @@ local function create(args)
     local maxClickablePosX = self.currentScreenPos.x + #self.text - 1
     local maxScreenPosX = self.screenStartingPos.x + self.screenBufferWidth - 1
     local maxScreenPosY = self.screenStartingPos.y + self.screenBufferHeight - 1
-    local wasClickedVal = self.currentScreenPos.x >= self.screenStartingPos.x and self.currentScreenPos.x <= maxScreenPosX and --make sure the clickable is within screenBuffer render view on X
-      self.currentScreenPos.y >= self.screenStartingPos.y and self.currentScreenPos.y <= maxScreenPosY and --make sure the clickable is within screenBuffer render view on Y
+    local wasClickedVal = x >= self.screenStartingPos.x and x <= maxScreenPosX and --make sure that we are clicking within the screen buffer render view on X
+      y >= self.screenStartingPos.y and y <= maxScreenPosY and --make sure that we are clicking within the screen buffer render view on Y
       x >= self.currentScreenPos.x and x <= maxClickablePosX and y == self.currentScreenPos.y --now we make sure it was this clickable which was clicked
     if wasClickedVal then
       logger.debug("clickable clicked: ", self.id, ", on posX: ", x, ", posY: ", y)

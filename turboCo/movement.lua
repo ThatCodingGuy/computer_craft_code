@@ -680,4 +680,5 @@ return {
     distance = distance,
     navigate = navigate,
     figure_out_facing = figure_out_facing,
+    turn_to_face = turn_to_face,
 }

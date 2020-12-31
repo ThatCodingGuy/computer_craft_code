@@ -22,6 +22,7 @@ local observable_station_coords = ObservableValue.new()
 local stations = FuelStationGroup.new(
         80 * 64 --[[Assumes that a stack of coal/charcoal is being used to refuel.]],
         observable_station_coords)
+local logger = Logger.new()
 
 function fuel_request(sender_id, request)
     local nearest = stations.find_nearest(request["position"])
@@ -52,8 +53,10 @@ local function handle_request(event_data)
         return
     end
 
+    logger.debug("Processing JSON:\n", message)
     local request = json.decode(message)
     local request_type = request["type"]
+    logger.info("Processing request type '", request_type, "'")
     local response = router[request_type](senderId, request)
     local serialized_response = json.encode(response)
     rednet.send(senderId, serialized_response, PROTOCOL)
@@ -77,7 +80,6 @@ function run()
         },
     }
     local parsed_arguments = argument_parser.parse(arg)
-    local logger = Logger.new()
     if parsed_arguments.coord_file_name == nil then
         logger.error("Please specify a file name containing fuel station coordinates using the "
                 .. "--coord_file_name/-f parameter.")

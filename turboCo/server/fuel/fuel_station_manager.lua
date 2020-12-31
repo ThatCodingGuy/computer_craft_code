@@ -16,10 +16,10 @@ local fuel_request
 local fuel_done
 local router = {
     refuel = function(sender_id, request)
-        fuel_request(sender_id, request)
+        return fuel_request(sender_id, request)
     end,
     refuel_done = function(sender_id, request)
-        fuel_done(sender_id, request)
+        return fuel_done(sender_id, request)
     end,
 }
 local observable_station_coords = ObservableValue.new()
@@ -32,7 +32,7 @@ function fuel_request(sender_id, request)
     local nearest = stations.find_nearest(request["position"])
 
     if nearest then
-        logger.info("Found fuel nearest available fuel station.")
+        logger.info("Found nearest available fuel station.")
         local response = {}
         response["status"] = "success"
         response["position"] = nearest

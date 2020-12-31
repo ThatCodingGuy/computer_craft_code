@@ -54,7 +54,11 @@ FuelStationGroup = class({}, function(refuel_amount, observable_coords)
         for station_coords, _ in pairs(self.available_stations) do
             local station_distance = movement.distance(station_coords, from_coords)
             if station_distance < distance and station_distance < self.max_distance then
-                print("Station distance: " .. station_distance .. " " .. station_coords)
+                self.logger.info(
+                        "Station distance: "
+                                .. station_distance
+                                .. "; Coordinates"
+                                .. station_coords)
                 nearest = station_coords
                 distance = station_distance
             end

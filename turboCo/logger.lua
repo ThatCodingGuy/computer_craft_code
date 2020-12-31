@@ -29,6 +29,7 @@ end
 Logger = class({
     LoggingLevel = LoggingLevel,
     print_to_output = print_to_output,
+    log_to_file = log_to_file,
     log_level_filter = log_level_filter,
 
 }, function()

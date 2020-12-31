@@ -1,4 +1,5 @@
 local json = dofile("./gitlib/turboCo/json.lua")
+local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local RadioGroup = dofile("./gitlib/turboCo/ui/radioGroup.lua")
@@ -15,7 +16,6 @@ local loggingLevel = "ERROR"
 if LOGGING_LEVEL then
   loggingLevel = LOGGING_LEVEL
 end
-error(Logger.log_to_file)
 Logger.print_to_output = Logger.log_to_file
 Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
 

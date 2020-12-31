@@ -41,8 +41,81 @@ local function split(text, delimiter)
     return fragments
 end
 
+--- Fixes the stupid table.concat implementation which doesn't like non-strings and non-numbers
+local function join(tab, sep)
+    if sep == nil then
+      sep = ""
+    end
+    sep = tostring(sep)
+    local str = ""
+    local first = true
+    for _, value in pairs(tab) do
+      if first then
+        first = false
+      else
+        str = str .. sep
+      end
+      str = str .. tostring(value)
+    end
+    return str
+  end
+  
+--- a contains function for tables. nuff said.
+-- @return Does the table have the given value
+local function contains(tab, val)
+    for _, value in pairs(tab) do
+        if value == val then
+            return true
+        end
+    end
+    return false
+end
+
+--helper function for tostring
+local function table_print (tt, indent, done)
+    done = done or {}
+    indent = indent or 0
+    if type(tt) == "table" then
+      local sb = {}
+      for key, value in pairs (tt) do
+        table.insert(sb, string.rep (" ", indent)) -- indent it
+        if type (value) == "table" and not done [value] then
+          done [value] = true
+          table.insert(sb, key .. " = {\n");
+          table.insert(sb, table_print (value, indent + 2, done))
+          table.insert(sb, string.rep (" ", indent)) -- indent it
+          table.insert(sb, "}\n");
+        elseif "number" == type(key) then
+          table.insert(sb, string.format("\"%s\"\n", tostring(value)))
+        else
+          table.insert(sb, string.format(
+              "%s = \"%s\"\n", tostring (key), tostring(value)))
+         end
+      end
+      return table.concat(sb)
+    else
+      return tt .. "\n"
+    end
+  end
+  
+--Universal tostring, prints tables well
+local function to_string( tbl )
+    if  "nil"       == type( tbl ) then
+        return tostring(nil)
+    elseif  "table" == type( tbl ) then
+        return table_print(tbl)
+    elseif  "string" == type( tbl ) then
+        return tbl
+    else
+        return tostring(tbl)
+    end
+end
+
 return {
     class = class,
     enum = enum,
     split = split,
+    join = join,
+    contains = contains,
+    to_string = to_string
 }

@@ -26,58 +26,8 @@ local function findPeripheral(peripheralType)
   end
 end
 
---[[
-  Shamelessly stolen from stackoverflow.
-  Splits a string into a table with the seperator given or whitespace by default
-]]
-local function split(inputstr, sep)
-  if sep == nil then
-    sep = "%s"
-  end
-  local t={}
-  for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-    table.insert(t, str)
-  end
-  return t
-end
-
---[[
-  Fixes the stupid table.concat implementation which doesn't like non-strings and non-numbers
-]]
-local function join(tab, sep)
-  if sep == nil then
-    sep = ""
-  end
-  sep = tostring(sep)
-  local str = ""
-  local first = true
-  for _, value in pairs(tab) do
-    if first then
-      first = false
-    else
-      str = str .. sep
-    end
-    str = str .. tostring(value)
-  end
-  return str
-end
-
---[[
-  @return Does the table have the given value
-]]
-local function contains(tab, val)
-  for _, value in pairs(tab) do
-      if value == val then
-          return true
-      end
-  end
-  return false
-end
-
 return {
   findPeripheral=findPeripheral,
   findPeripherals=findPeripherals,
-  split=split,
-  contains=contains
 }
 

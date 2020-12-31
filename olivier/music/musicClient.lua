@@ -19,6 +19,11 @@ end
 Logger.print_to_output = Logger.log_to_file
 Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
 
+local canExit = true
+if CAN_EXIT then
+  canExit = CAN_EXIT
+end
+
 os.loadAPI('./gitlib/turboCo/modem.lua')
 modem.openModems()
 
@@ -84,6 +89,22 @@ local function sendMessageToServer(messageObj)
   rednet.send(serverId, message, MusicConstants.MUSIC_SERVER_PROTOCOL)
 end
 
+local function renderNowPlaying(fileName)
+  local renderText = fileName
+  if #renderText + 14 < width then
+    renderText = "Now Playing: " .. fileName
+  end
+  nowPlayingScreenContent.updateText{text=renderText, render=true}
+end
+
+local function renderWriteTapeProgress(percentage)
+  progressScreenContent.updateText{text=string.format("%s%%", percentage), render=true}
+end
+
+local function renderPlayingProgress(percentage)
+  progressScreenContent.updateText{text=string.format("%s%%", percentage), render=true}
+end
+
 function speedIncreased(messageObj)
   if not validateNotNil(messageObj, 'tapeSpeed') then
     error('no tapeSpeed given from response')
@@ -123,16 +144,15 @@ function writeMusicProgress(messageObj)
   if not validateNotNil(messageObj, 'fileName') then
     error('no fileName given from response')
   end
-  progressScreenContent.updateText{text = string.format("%s%%", messageObj.percentage), render=true}
-  nowPlayingScreenContent.updateText{text=string.format("%s", messageObj.fileName), render=true}
+  renderPlayingProgress(messageObj.percentage)
+  renderNowPlaying(messageObj.fileName)
 end
 
 function writeTapeProgress(messageObj)
   if not validateNotNil(messageObj, 'percentage') then
     error('no percentage given from response')
   end
-  local progressText = string.format("%s%%", messageObj.percentage)
-  progressScreenContent.updateText{text=progressText, render=true}
+  renderWriteTapeProgress(messageObj.percentage)
   nowPlayingScreenContent.updateText{text="Writing...", render=true}
 end
 
@@ -140,8 +160,7 @@ function musicPlayed(messageObj)
   if not validateNotNil(messageObj, 'fileName') then
     error('no fileName given from response')
   end
-  local nowPlayingText = string.format("%s", messageObj.fileName)
-  nowPlayingScreenContent.updateText{text=nowPlayingText, render=true}
+  renderNowPlaying(messageObj.fileName)
 end
 
 function musicStopped(messageObj)
@@ -244,15 +263,17 @@ end
 
 screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, bottomOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
 screenTitleBuffer.writeCenter{text="-- Music Player --"}
-Button.create{
-  screenBuffer=screenTitleBuffer,
-  screenBufferWriteFunc=screenTitleBuffer.writeRight,
-  eventHandler=eventHandler,
-  text=" x",
-  textColor=colors.white,
-  bgColor=colors.red,
-  leftClickCallback=exitHandler.exit
-}
+if canExit then
+  Button.create{
+    screenBuffer=screenTitleBuffer,
+    screenBufferWriteFunc=screenTitleBuffer.writeRight,
+    eventHandler=eventHandler,
+    text=" x",
+    textColor=colors.white,
+    bgColor=colors.red,
+    leftClickCallback=exitHandler.exit
+  }
+end
 screenTitleBuffer.render()
 
 controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=1, bottomOffset=height-2, bgColor=colors.blue, textColor=colors.white}
@@ -274,7 +295,12 @@ Button.create{
   bgColor=colors.red,
   leftClickCallback=decreaseSpeed
 }
-controlScreenBuffer.write{text=" Speed: "}
+
+local speedText = " Speed: "
+if width < 30 then
+  speedText = " Spd: "
+end
+controlScreenBuffer.write{text=speedText}
 
 speedScreenContent = ScreenContent.create{
   screenBuffer=controlScreenBuffer,
@@ -303,7 +329,12 @@ Button.create{
   leftClickCallback=decreaseVolume
 }
 
-controlScreenBuffer.write{text=" Vol: "}
+local volumeText = " Volume: "
+if width < 30 then
+  volumeText = " Vol: "
+end
+controlScreenBuffer.write{text=volumeText}
+
 volumeScreenContent = ScreenContent.create{
   screenBuffer=controlScreenBuffer,
   eventHandler=eventHandler,

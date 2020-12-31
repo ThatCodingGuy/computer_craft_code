@@ -1,3 +1,4 @@
+local lua_helpers = require "turboCo.lua_helpers"
 local json = dofile("./gitlib/turboCo/json.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local Util = dofile("./gitlib/turboCo/util.lua")
@@ -66,15 +67,24 @@ local function getDisplayedTapeVolume()
   return string.format("%s%%", math.floor(round(tapeVolume, 2) * 100))
 end
 
+local function getFileName(filePath)
+  local name = fs.getName(filePath)
+  local parts = lua_helpers.split(name, ".")
+  if #parts == 2 then
+    name = parts[1]
+  end
+  return name
+end
+
 function getAllMusicAndCreateMusicList()
   local searchTerm = MUSIC_FOLDER_PATH .. "*.dfpwm"
   local files = fs.find(searchTerm)
   logger.debug("looking for files on path: ", searchTerm)
   musicList = {}
   for _,f in pairs(files) do
-    local name = fs.getName(f)
-    logger.debug("found music file with name: ", name)
-    table.insert(musicList, {filePath=f, fileName=fs.getName(f)})
+    local fileName = getFileName(f)
+    logger.debug("found music file with name: ", fileName)
+    table.insert(musicList, {filePath=f, fileName=fileName})
   end
 end
 
@@ -194,7 +204,7 @@ end
 function playTape()
   selectedTapeDrive.play()
   musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
-  sendMessageToClients({command=MusicConstants.PLAY_COMMAND, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath)})
+  sendMessageToClients({command=MusicConstants.PLAY_COMMAND, filePath=selectedFilePath, fileName=getFileName(selectedFilePath)})
 end
 
 function stopTape()
@@ -218,7 +228,7 @@ function musicProgressTrack(eventData)
     local relativePosition = position - selectedMusicConfig.tapePositionStart
     local relativeEnd = selectedMusicConfig.tapePositionEnd - selectedMusicConfig.tapePositionStart
     local percentage = math.floor((relativePosition / relativeEnd) * 100)
-    sendMessageToClients({command=MusicConstants.PLAYING_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath), percentage=percentage})
+    sendMessageToClients({command=MusicConstants.PLAYING_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, fileName=getFileName(selectedFilePath), percentage=percentage})
   end
 end
 
@@ -246,7 +256,7 @@ function writeTapeUnit(eventData)
   sourceFile.close()
   local percentage = math.floor((maxByte / fileSize) * 100)
   --Update screen with progress
-  sendMessageToClients({command=MusicConstants.TAPE_WRITE_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath), percentage=percentage})
+  sendMessageToClients({command=MusicConstants.TAPE_WRITE_PROGRESS_RESPONSE_TYPE, filePath=selectedFilePath, fileName=getFileName(selectedFilePath), percentage=percentage})
 
   --Stop if done, and actually play the tape, if not, put another event in the queue
   if maxByte == fileSize then
@@ -302,7 +312,7 @@ end
 function getMusicState(senderId, messageObj)
   local fileName = nil
   if selectedFilePath ~= nil then
-    fileName = fs.getName(selectedFilePath)
+    fileName = getFileName(selectedFilePath)
   end
   sendMessageToClient(senderId, {
     command=MusicConstants.GET_MUSIC_STATE_COMMAND,

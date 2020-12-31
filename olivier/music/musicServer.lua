@@ -198,7 +198,7 @@ function musicProgressTrack(eventData)
     if position > selectedMusicConfig.tapePositionEnd then
       position = selectedMusicConfig.tapePositionEnd
       seekTapeToPosition(position)
-      selectedTapeDrive.stop()
+      stopTape()
     else
       musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
     end

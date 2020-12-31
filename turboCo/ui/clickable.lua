@@ -46,6 +46,7 @@ local function create(args)
       x >= self.currentScreenPos.x and x <= maxClickablePosX and y == self.currentScreenPos.y --now we make sure it was this clickable which was clicked
     if wasClickedVal then
       logger.debug("clickable clicked: ", self.id, ", on posX: ", x, ", posY: ", y)
+      logger.debug("self.screenStartingPos.x: ", self.screenStartingPos.x, ", on self.screenBufferWidth: ", self.screenBufferWidth, ", self.screenBufferHeight: ", self.screenBufferHeight)
     end
     return wasClickedVal
   end

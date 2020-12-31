@@ -28,11 +28,12 @@ local function request_refuel(position)
         request["type"] = "refuel"
         request["position"] = position
 
+        logger.debug("Requesting refuel.")
         rednet.send(server, json.encode(request), protocol)
 
         local server_id, message = rednet.receive(protocol, 5)
         if server_id then
-
+            logger.debug("Received response:\n", message)
             local response = json.decode(message)
 
             if response["status"] == "success" then
@@ -53,11 +54,12 @@ local function done_refuel()
         local request = {}
         request["type"] = "refuel_done"
 
+        logger.debug("Telling server that refuelling is done.")
         rednet.send(server, json.encode(request), protocol)
 
         local server_id, message = rednet.receive(protocol, 5)
         if server_id then
-            logger.debug("Decoding JSON:\n", message)
+            logger.debug("Received response:\n", message)
             local response = json.decode(message)
             modem.closeModems()
             return

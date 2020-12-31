@@ -1,14 +1,16 @@
 local inventory = dofile("./gitlib/carlos/inventory.lua")
 local json = dofile("./gitlib/turboCo/json.lua")
+local Logger = dofile("./gitlib/turboCo/logger.lua")
 local modem = dofile("./gitlib/turboCo/modem.lua")
 local movement = dofile("./gitlib/turboCo/movement.lua")
 
 local protocol = "fuel_station"
+local logger = Logger.new()
 
 local function connect()
     local server = rednet.lookup(protocol, "fuel_station_host")
     while not server do
-        print("Can't connect to reful server, trying again")
+        logger.warn("Can't connect to refuel server, trying again")
         sleep(5)
         server = rednet.lookup(protocol)
     end
@@ -30,6 +32,7 @@ local function request_refuel(position)
 
         local server_id, message = rednet.receive(protocol, 5)
         if server_id then
+
             local response = json.decode(message)
 
             if response["status"] == "success" then
@@ -54,6 +57,7 @@ local function done_refuel()
 
         local server_id, message = rednet.receive(protocol, 5)
         if server_id then
+            logger.debug("Decoding JSON:\n", message)
             local response = json.decode(message)
             modem.closeModems()
             return

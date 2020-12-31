@@ -208,8 +208,10 @@ function musicProgressTrack(eventData)
   end
 end
 
+--Assuming validation for playing being valid has already been done
 function playTape()
   selectedTapeDrive.play()
+  musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
   sendMessageToClients({command=MusicConstants.PLAY_COMMAND, filePath=selectedFilePath, fileName=fs.getName(selectedFilePath)})
 end
 
@@ -222,7 +224,6 @@ end
 
 function playTapeFromConfig(config)
   setupTapeFromConfig(config)
-  musicProgressTimerId = os.startTimer(MUSIC_PROGRESS_TRACK_DELAY)
   playTape()
 end
 

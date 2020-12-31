@@ -679,4 +679,5 @@ return {
     gps_locate = gps_locate,
     distance = distance,
     navigate = navigate,
+    figure_out_facing = figure_out_facing,
 }

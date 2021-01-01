@@ -1,7 +1,9 @@
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local ScrollBar = dofile("./gitlib/turboCo/ui/scrollBar.lua")
+local logger = dofile('./gitlib/turboCo/logger.lua').new()
 
 local function createFromScreenBufferAndScrollBar(args)
+  logger.debug("args.scrollBar: ", args.scrollBar)
   local self = {
     eventHandler = args.eventHandler,
     screenBuffer=args.screenBuffer,
@@ -13,7 +15,7 @@ local function createFromScreenBufferAndScrollBar(args)
     local screenStartingPos = self.screenBuffer.getScreenStartingPos()
     local width,height = self.screenBuffer.getWidth(), self.screenBuffer.getHeight()
     local maxPosX, maxPosY = screenStartingPos.x + width - 1, screenStartingPos.y + height - 1
-    return x >= screenStartingPos.x and x <= maxPosX and y >= screenStartingPos.y and y <= maxPosX
+    return x >= screenStartingPos.x and x <= maxPosX and y >= screenStartingPos.y and y <= maxPosY
   end
   
   local mouseScrolled = function(eventData)

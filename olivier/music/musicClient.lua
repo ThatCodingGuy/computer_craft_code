@@ -367,7 +367,7 @@ Button.create{
   eventHandler=eventHandler,
   text=" Play ", 
   textColor=colors.white,
-  bgColor=colors.green,
+  bgColor=colors.lime,
   leftClickCallback=play
 }
 

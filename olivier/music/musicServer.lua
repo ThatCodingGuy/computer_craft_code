@@ -1,4 +1,4 @@
-local lua_helpers = require "turboCo.lua_helpers"
+local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
 local json = dofile("./gitlib/turboCo/json.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 local Util = dofile("./gitlib/turboCo/util.lua")

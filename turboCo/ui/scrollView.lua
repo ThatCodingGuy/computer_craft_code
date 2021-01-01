@@ -81,7 +81,7 @@ local function create(args)
     height = height
   }
 
-  return createFromScreenBufferAndScrollBar{screenBuffer=screenBuffer, scrollBar=scrollBar}
+  return createFromScreenBufferAndScrollBar{eventHandler=eventHandler, screenBuffer=screenBuffer, scrollBar=scrollBar}
 end
 
 local function createFromOverrides(args)
@@ -108,6 +108,7 @@ local function createFromOverrides(args)
     topOffset=topOffset,
     bottomOffset=bottomOffset
   }
+  logger.debug("scrollBar: ", scrollBar)
 
   return createFromScreenBufferAndScrollBar{eventHandler=eventHandler, screenBuffer=screenBuffer, scrollBar=scrollBar}
 end

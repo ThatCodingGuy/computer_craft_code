@@ -356,7 +356,7 @@ volumeScreenContent = ScreenContent.create{
 }
 controlScreenBuffer.render()
 
-musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=musicBgColor, color=musicTextColor}
+musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=musicBgColor, textColor=musicTextColor}
 musicViewScreenBuffer = musicView.getScreenBuffer()
 musicViewScreenBuffer.render()
 

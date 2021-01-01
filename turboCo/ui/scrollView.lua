@@ -27,9 +27,9 @@ local function createFromScreenBufferAndScrollBar(args)
 end
 
 local function create(args)
-  local screen, xStartingScreenPos, yStartingScreenPos, width, height, color, bgColor = 
+  local screen, xStartingScreenPos, yStartingScreenPos, width, height, textColor, bgColor = 
         args.screen, args.xStartingScreenPos, args.yStartingScreenPos,
-        args.width, args.height, args.color, args.bgColor
+        args.width, args.height, args.textColor, args.bgColor
 
   local screenBuffer = ScreenBuffer.create{
     screen = screen,
@@ -37,7 +37,7 @@ local function create(args)
     yStartingScreenPos = yStartingScreenPos,
     width = width - 1,
     height = height,
-    color = color,
+    textColor = textColor,
     bgColor = bgColor
   }
 
@@ -53,13 +53,13 @@ local function create(args)
 end
 
 local function createFromOverrides(args)
-  local screen, eventHandler, color, bgColor, leftOffset, rightOffset, topOffset, bottomOffset = args.screen,
-    args.eventHandler, args.color, args.bgColor, args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0,args.bottomOffset or 0
+  local screen, eventHandler, textColor, bgColor, leftOffset, rightOffset, topOffset, bottomOffset = args.screen,
+    args.eventHandler, args.textColor, args.bgColor, args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0,args.bottomOffset or 0
   local width,_ = screen.getSize()
 
   local screenBuffer = ScreenBuffer.createFromOverrides{
     screen=screen,
-    color=color,
+    textColor=textColor,
     bgColor=bgColor,
     leftOffset=leftOffset,
     rightOffset=rightOffset + 1,

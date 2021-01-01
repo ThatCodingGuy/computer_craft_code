@@ -29,6 +29,11 @@ if MUSIC_BG_COLOR then
   musicBgColor = MUSIC_BG_COLOR
 end
 
+local musicTextColor = colors.white
+if MUSIC_TEXT_COLOR then
+  musicTextColor = MUSIC_TEXT_COLOR
+end
+
 os.loadAPI('./gitlib/turboCo/modem.lua')
 modem.openModems()
 
@@ -351,7 +356,7 @@ volumeScreenContent = ScreenContent.create{
 }
 controlScreenBuffer.render()
 
-musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=musicBgColor, color=colors.white}
+musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=musicBgColor, color=musicTextColor}
 musicViewScreenBuffer = musicView.getScreenBuffer()
 musicViewScreenBuffer.render()
 
@@ -359,9 +364,9 @@ musicControlsBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=
 Button.create{
   screenBuffer=musicControlsBuffer,
   screenBufferWriteFunc=musicControlsBuffer.writeLeft,
-  eventHandler=eventHandler, 
+  eventHandler=eventHandler,
   text=" Play ", 
-  textColor=colors.white, 
+  textColor=colors.white,
   bgColor=colors.green,
   leftClickCallback=play
 }

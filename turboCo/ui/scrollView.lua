@@ -3,21 +3,50 @@ local ScrollBar = dofile("./gitlib/turboCo/ui/scrollBar.lua")
 
 local function createFromScreenBufferAndScrollBar(args)
   local self = {
+    eventHandler = args.eventHandler,
     screenBuffer=args.screenBuffer,
-    scrollBar=args.scrollBar
+    scrollBar=args.scrollBar,
+    mouseScrollHandleId = nil
   }
+
+  local wasScrolledOn = function(x, y)
+    local screenStartingPos = self.screenBuffer.getScreenStartingPos()
+    local width,height = self.screenBuffer.getWidth(), self.screenBuffer.getHeight()
+    local maxPosX, maxPosY = screenStartingPos.x + width - 1, screenStartingPos.y + height - 1
+    return x >= screenStartingPos.x and x <= maxPosX and y >= screenStartingPos.y and y <= maxPosX
+  end
+  
+  local mouseScrolled = function(eventData)
+    local scrollDirection, x, y = eventData[2], eventData[3], eventData[4]
+    if wasScrolledOn(x, y) then
+      if scrollDirection > 0 then
+        self.screenBuffer.scrollDown()
+      else
+        self.screenBuffer.scrollUp()
+      end
+    end
+  end
 
   local getScreenBuffer = function()
     return self.screenBuffer
   end
 
   local makeActive = function()
-    self.scrollBar.makeActive()
+    if not self.mouseScrollHandleId then
+      self.scrollBar.makeActive()
+      self.mouseScrollHandleId = self.eventHandler.addHandle("mouse_scroll", mouseScrolled)
+    end
   end
 
   local makeInactive = function()
     self.scrollBar.makeInactive()
+    if self.mouseScrollHandleId then
+      self.eventHandler.removeHandle(self.mouseScrollHandleId)
+      self.mouseScrollHandleId = nil
+    end
   end
+
+  makeActive()
 
   return {
     getScreenBuffer=getScreenBuffer,
@@ -27,8 +56,8 @@ local function createFromScreenBufferAndScrollBar(args)
 end
 
 local function create(args)
-  local screen, xStartingScreenPos, yStartingScreenPos, width, height, textColor, bgColor = 
-        args.screen, args.xStartingScreenPos, args.yStartingScreenPos,
+  local screen, eventHandler, xStartingScreenPos, yStartingScreenPos, width, height, textColor, bgColor = 
+        args.screen, args.eventHandler, args.xStartingScreenPos, args.yStartingScreenPos,
         args.width, args.height, args.textColor, args.bgColor
 
   local screenBuffer = ScreenBuffer.create{
@@ -43,6 +72,7 @@ local function create(args)
 
   local scrollBar = ScrollBar.create{
     screen = screen,
+    eventHandler = eventHandler,
     trackingScreenBuffer = screenBuffer,
     xStartingScreenPos = xStartingScreenPos + width - 1,
     yStartingScreenPos = yStartingScreenPos,
@@ -59,6 +89,7 @@ local function createFromOverrides(args)
 
   local screenBuffer = ScreenBuffer.createFromOverrides{
     screen=screen,
+    eventHandler=eventHandler,
     textColor=textColor,
     bgColor=bgColor,
     leftOffset=leftOffset,
@@ -76,7 +107,7 @@ local function createFromOverrides(args)
     bottomOffset=bottomOffset
   }
 
-  return createFromScreenBufferAndScrollBar{screenBuffer=screenBuffer, scrollBar=scrollBar}
+  return createFromScreenBufferAndScrollBar{eventHandler=eventHandler, screenBuffer=screenBuffer, scrollBar=scrollBar}
 end
 
 return {

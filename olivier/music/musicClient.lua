@@ -319,7 +319,7 @@ controlScreenBuffer.write{text=speedText}
 speedScreenContent = ScreenContent.create{
   screenBuffer=controlScreenBuffer,
   eventHandler=eventHandler,
-  text="   "
+  text="    "
 }
 
 --Adds padding

@@ -24,6 +24,11 @@ if CAN_EXIT then
   canExit = CAN_EXIT
 end
 
+local musicBgColor = colors.purple
+if MUSIC_BG_COLOR then
+  musicBgColor = load(MUSIC_BG_COLOR)
+end
+
 os.loadAPI('./gitlib/turboCo/modem.lua')
 modem.openModems()
 
@@ -346,7 +351,7 @@ volumeScreenContent = ScreenContent.create{
 }
 controlScreenBuffer.render()
 
-musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=colors.purple, color=colors.white}
+musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=musicBgColor, color=colors.white}
 musicViewScreenBuffer = musicView.getScreenBuffer()
 musicViewScreenBuffer.render()
 

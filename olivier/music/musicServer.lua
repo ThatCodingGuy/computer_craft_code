@@ -69,7 +69,7 @@ end
 
 local function getFileName(filePath)
   local name = fs.getName(filePath)
-  local parts = lua_helpers.split(name, ".")
+  local parts = lua_helpers.split(name, "%.")
   logger.debug("file_parts: ", lua_helpers.to_string(parts))
   if #parts == 2 then
     name = parts[1]

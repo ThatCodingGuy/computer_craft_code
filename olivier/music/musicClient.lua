@@ -26,7 +26,7 @@ end
 
 local musicBgColor = colors.purple
 if MUSIC_BG_COLOR then
-  musicBgColor = load(MUSIC_BG_COLOR)
+  musicBgColor = MUSIC_BG_COLOR
 end
 
 os.loadAPI('./gitlib/turboCo/modem.lua')

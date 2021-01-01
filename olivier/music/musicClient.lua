@@ -298,7 +298,7 @@ Button.create{
   eventHandler=eventHandler,
   text="+",
   textColor=colors.white,
-  bgColor=colors.green,
+  bgColor=colors.lime,
   leftClickCallback=increaseSpeed
 }
 Button.create{
@@ -331,7 +331,7 @@ Button.create{
   eventHandler=eventHandler,
   text="+",
   textColor=colors.white,
-  bgColor=colors.green,
+  bgColor=colors.lime,
   leftClickCallback=increaseVolume
 }
 Button.create{

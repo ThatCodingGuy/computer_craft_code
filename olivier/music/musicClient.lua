@@ -102,7 +102,11 @@ local function renderWriteTapeProgress(percentage)
 end
 
 local function renderPlayingProgress(percentage)
-  progressScreenContent.updateText{text=string.format("%s%%", percentage), render=true}
+  local renderText = string.format("%s%%", percentage)
+  if width > 40 then
+    renderText = string.format("Progress: %s", renderText)
+  end
+  progressScreenContent.updateText{text=renderText, render=true}
 end
 
 function speedIncreased(messageObj)

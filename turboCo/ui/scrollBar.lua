@@ -119,6 +119,12 @@ local function create(args)
   render()
   --self.eventHandler.addHandle("monitor_touch", )
 
+  return {
+    render=render,
+    makeActive=makeActive,
+    makeInactive=makeInactive
+  }
+
 end
 
 local function createFromOverrides(args)

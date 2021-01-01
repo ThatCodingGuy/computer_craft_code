@@ -20,8 +20,8 @@ Logger.print_to_output = Logger.log_to_file
 Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
 
 local canExit = true
-if CAN_EXIT then
-  canExit = CAN_EXIT
+if NOT_EXITABLE then
+  canExit = false
 end
 
 local musicBgColor = colors.purple

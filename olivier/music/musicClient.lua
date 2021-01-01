@@ -103,7 +103,7 @@ end
 
 local function renderPlayingProgress(percentage)
   local renderText = string.format("%s%%", percentage)
-  if width > 40 then
+  if width > 35 then
     renderText = string.format("Progress: %s", renderText)
   end
   progressScreenContent.updateText{text=renderText, render=true}

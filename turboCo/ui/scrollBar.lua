@@ -96,7 +96,7 @@ local function create(args)
     local button, x, y = eventData[2], eventData[3], eventData[4]
     local barStartingIndex, barEndingIndex = getScrollableBarIndexes()
     local barHeight = barEndingIndex - barStartingIndex + 1
-    local singleBarUnitHeight = math.floor(self.trackingScreenBufferDimensions.height / (getFullBarLength() - barHeight))
+    local singleBarUnitHeight = math.ceil(self.trackingScreenBufferDimensions.height / (getFullBarLength() - barHeight))
     if button == 1 and self.leftMouseDragScreenPos then
       local distanceY = self.leftMouseDragScreenPos.y - y
       local scrollTimes = singleBarUnitHeight * math.abs(distanceY)

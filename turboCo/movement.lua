@@ -1,3 +1,5 @@
+local Logger = dofile("./gitlib/turboCo/logger.lua")
+
 -- By convention, x/y/z can either be relative or global
 --
 -- Relative
@@ -27,8 +29,6 @@
 -- direction is the direction the block is in relative to the robot
 -- map is the known explored area so far
 
-
-
 EAST = "EAST"
 WEST = "WEST"
 NORTH = "NORTH"
@@ -43,6 +43,7 @@ local EMPTY = 2
 local BLOCK = 3
 
 local walkable_block = {}
+local logger = Logger.new()
 
 function filter(x, fun)
     local results = {}
@@ -191,6 +192,7 @@ function figure_out_facing()
                     turtle.turnRight()
                     direction = directions_right[direction]
                 end
+                logger.debug("Facing " .. direction)
                 return direction
             end
 
@@ -201,6 +203,7 @@ function figure_out_facing()
                     turtle.turnRight()
                     direction = directions_right[direction]
                 end
+                logger.debug("Facing " .. direction)
                 return direction
             end
 
@@ -211,6 +214,7 @@ function figure_out_facing()
                     turtle.turnRight()
                     direction = directions_right[direction]
                 end
+                logger.debug("Facing " .. direction)
                 return direction
             end
 
@@ -221,6 +225,7 @@ function figure_out_facing()
                     turtle.turnRight()
                     direction = directions_right[direction]
                 end
+                logger.debug("Facing " .. direction)
                 return direction
             end
         end

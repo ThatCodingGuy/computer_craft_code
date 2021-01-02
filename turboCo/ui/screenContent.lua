@@ -17,7 +17,9 @@ local function create(args)
     screenBufferWriteFunc=args.screenBufferWriteFunc,
     text=args.text,
     textColor=args.textColor,
-    bgColor=args.bgColor
+    textColors=args.textColors,
+    bgColor=args.bgColor,
+    bgColors=args.bgColors
   }
 
   local updateText = function(args)
@@ -31,9 +33,11 @@ local function create(args)
 
     self.text = args.text or self.text
     self.textColor = args.textColor or self.textColor
+    self.textColors = args.textColors or self.textColors
     self.bgColor = args.bgColor or self.bgColor
+    self.bgColors = args.bgColors or self.bgColors
 
-    local writeData = self.screenBufferWriteFunc{text=self.text, textColor=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
+    local writeData = self.screenBufferWriteFunc{text=self.text, textColor=self.textColor, textColors=self.textColors, bgColor=self.bgColor, bgColors=self.bgColors, bufferCursorPos=self.currentBufferPos}
     self.currentScreenPos = writeData.screenCursorPosBefore
     self.currentBufferPos = writeData.bufferCursorPosBefore
 
@@ -42,7 +46,8 @@ local function create(args)
     end
   end
 
-  local writeData = self.screenBufferWriteFunc{text=self.text, textColor=self.textColor, bgColor=self.bgColor}
+  --Only one of textColor/textColors and bgColor/bgColors should be used
+  local writeData = self.screenBufferWriteFunc{text=self.text, textColor=self.textColor, textColors=self.textColors, bgColor=self.bgColor, bgColors=self.bgColors}
   self.currentScreenPos = writeData.screenCursorPosBefore
   self.currentBufferPos = writeData.bufferCursorPosBefore
 

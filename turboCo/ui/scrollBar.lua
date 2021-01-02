@@ -1,33 +1,31 @@
+local lua_helpers = dofile('./gitlib/turboCo/lua_helpers.lua')
+local logger = dofile('./gitlib/turboCo/logger.lua').new()
+
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 
 local function create(args)
-  local screen, eventHandler, trackingScreenBuffer, xStartingScreenPos, yStartingScreenPos, height, emptyBarColor, barColor =
-        args.screen, args.eventHandler, args.trackingScreenBuffer, args.xStartingScreenPos, args.yStartingScreenPos,
-        args.height, args.barColor, args.trackerColor
-
-  local scrollBarScreenBuffer = ScreenBuffer.create{
-    screen = screen,
-    xStartingScreenPos = xStartingScreenPos,
-    yStartingScreenPos = yStartingScreenPos,
-    width = 1,
-    height = height,
-  }
 
   local self = {
-    screen = screen,
-    eventHandler = eventHandler,
-    trackingScreenBuffer = trackingScreenBuffer,
-    trackingScreenBufferDimensions = trackingScreenBuffer.getBufferDimensions(),
-    scrollBarScreenBuffer = scrollBarScreenBuffer,
+    screen = args.screen,
+    eventHandler = args.eventHandler,
+    trackingScreenBuffer = args.trackingScreenBuffer,
+    trackingScreenBufferDimensions = args.trackingScreenBuffer.getBufferDimensions(),
+    scrollBarScreenBuffer = ScreenBuffer.create{
+      screen = args.screen,
+      xStartingScreenPos = args.xStartingScreenPos,
+      yStartingScreenPos = args.yStartingScreenPos,
+      width = 1,
+      height = args.height,
+    },
     scrollUpButton = nil,
     scrollBarContent = nil,
     scrollDownButton = nil,
-    screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
-    height = height,
-    emptyBarColor = emptyBarColor or colors.lightBlue,
-    barColor = barColor or colors.white,
+    screenStartingPos = { x=args.xStartingScreenPos, y=args.yStartingScreenPos },
+    height = args.height,
+    emptyBarColor = args.emptyBarColor or colors.lightBlue,
+    barColor = args.barColor or colors.white,
     monitorTouchKeyHandlerId = nil,
     leftClickKeyHandlerId = nil
   }
@@ -141,6 +139,8 @@ local function create(args)
   local screenBufferCallback = function(callbackData)
     self.trackingScreenBufferDimensions = callbackData.dimensions
     local barText, bgColors = getBarBlits()
+    logger.debug("barText: ", barText)
+    logger.debug("bgColors: ", bgColors)
     self.scrollBarContent.updateText{text=barText, bgColors=bgColors}
   end
 

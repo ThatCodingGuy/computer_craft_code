@@ -243,7 +243,6 @@ local function create(args)
     elseif self.bgColor ~= nil then
       blitBgColorChar = blitMap[self.bgColor]
     end
-    logger.debug("getBlitTextChars.blitBgColorChar: ", blitBgColorChar)
     return blitTextChar, blitColorChar, blitBgColorChar
   end
 
@@ -279,7 +278,7 @@ local function create(args)
     end
     self.screen.setCursorPos(screenCursorPosX, screenCursorPosY)
     self.screen.blit(blitText, blitColor, blitBgColor)
-    logger.debug("blitBgColorRow: ", blitBgColor)
+    logger.debug("blitBgColor", blitBgColor)
   end
 
   local clearScreen = function()
@@ -383,6 +382,7 @@ local function create(args)
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
         local remainingLineTextColors = safeSubstring(remainingTextColors, 1, remainingX)
         local remainingLineBgColors = safeSubstring(remainingBgColors, 1, remainingX)
+        logger.debug("remainingLineBgColors", remainingLineBgColors)
         local tempWriteData = writeTextToBuffer{text=remainingLineText, textColors=remainingLineTextColors, bgColors=remainingLineBgColors, bufferCursorPos=bufferCursorPos}
         if writeData == nil then
           writeData = tempWriteData

@@ -277,6 +277,7 @@ local function create(args)
     end
     self.screen.setCursorPos(screenCursorPosX, screenCursorPosY)
     self.screen.blit(blitText, blitColor, blitBgColor)
+    logger.debug("blitBgColorRow: ", blitBgColor)
   end
 
   local clearScreen = function()

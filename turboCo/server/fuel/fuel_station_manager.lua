@@ -56,7 +56,7 @@ function fuel_done(sender_id, request)
                 .. "reserved a fuel station.")
         response["status"] = "failure"
     else
-        stations.release(sender_id)
+        stations.release(reservation_token)
         response["status"] = "success"
         clients_reserving_stations[sender_id] = nil
     end

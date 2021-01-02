@@ -17,7 +17,7 @@ local cut_tree = movement.dig_only_blocks(tree_blocks)
 
 local function drop_off_wood(facing, position, wood_dropoff_coordinates)
     local x, y, z = movement.split_coord(wood_dropoff_coordinates)
-    facing, position = movement.navigate(position, facing, movement.coord(x, y + 1, z))
+    facing, position = movement.navigate(position, facing, movement.coord(x, y, z))
 
     while inventory.countItemWithName("minecraft:birch_log") > 0 do
         inventory.selectItemWithName("minecraft:birch_log")
@@ -70,15 +70,15 @@ local function run()
     local argument_parser = common_argument_parsers.default_parser {
         number_def {
             short_name = "x",
-            description = "The X position of the wood drop-off station.",
+            description = "The X position of the robot above the wood drop-off station.",
         },
         number_def {
             short_name = "y",
-            description = "The Y position of the wood drop-off station.",
+            description = "The Y position of the robot above the wood drop-off station.",
         },
         number_def {
             short_name = "z",
-            description = "The Z position of the wood drop-off station.",
+            description = "The Z position of the robot above the wood drop-off station.",
         },
     }
     local parsed_arguments = argument_parser.parse(arg)

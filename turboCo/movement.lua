@@ -4,16 +4,16 @@ local Logger = dofile("./gitlib/turboCo/logger.lua")
 --
 -- Relative
 -- x to the right, -x to the left.
--- z is in front, -y is behind.
--- y is up, -z is down.
+-- z is in front, -z is behind.
+-- y is up, -y is down.
 --
 -- Global 
--- West is +x
--- East is -x
+-- East is +x
+-- West is -x
 -- Up is +y
 -- Down is -y
--- North is +z
--- South is -z
+-- South is +z
+-- North is -z
 --
 --
 -- Some function expect a block callback.
@@ -174,7 +174,7 @@ end
 function figure_out_facing()
     -- TODO: Handle case when covered in gravel/sand.
 
-    local start_position_x, start_position_y, start_position_z = gps.locate()
+    local start_position_x, _, start_position_z = gps.locate()
     if not start_position_x then
         error("GPS not connected.")
         return nil
@@ -182,10 +182,10 @@ function figure_out_facing()
 
     for i = 0, 4, 1 do
         local success = turtle.forward()
-        local new_position_x, new_position_y, new_position_z = gps.locate()
 
         if success then
-            if new_position_x > start_position_x then
+            local new_position_x, _, new_position_z = gps.locate()
+            if new_position_x < start_position_x then
                 turtle.back()
                 direction = WEST
                 for j = 1, i, 1 do
@@ -196,7 +196,7 @@ function figure_out_facing()
                 return direction
             end
 
-            if new_position_x < start_position_x then
+            if new_position_x > start_position_x then
                 turtle.back()
                 direction = EAST
                 for j = 1, i, 1 do
@@ -207,7 +207,7 @@ function figure_out_facing()
                 return direction
             end
 
-            if new_position_z > start_position_z then
+            if new_position_z < start_position_z then
                 turtle.back()
                 direction = NORTH
                 for j = 1, i, 1 do
@@ -218,7 +218,7 @@ function figure_out_facing()
                 return direction
             end
 
-            if new_position_z < start_position_z then
+            if new_position_z > start_position_z then
                 turtle.back()
                 direction = SOUTH
                 for j = 1, i, 1 do

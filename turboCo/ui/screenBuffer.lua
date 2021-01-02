@@ -219,6 +219,9 @@ local function create(args)
       local char = safeSubstring(text, i, i)
       local textColor = safeSubstring(textColors, i, i)
       local bgColor = safeSubstring(bgColors, i, i)
+      logger.debug("char: ", char)
+      logger.debug("textColor: ", textColor)
+      logger.debug("bgColor: ", bgColor)
       row[bufferCursorPos.x] = { textColor=textColor, bgColor=bgColor, char=char}
       bufferCursorPos.x = bufferCursorPos.x + 1
     end

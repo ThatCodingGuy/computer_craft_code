@@ -140,8 +140,6 @@ local function create(args)
   local screenBufferCallback = function(callbackData)
     self.trackingScreenBufferDimensions = callbackData.dimensions
     local barText, bgColors = getBarBlits()
-    logger.debug("#barText: ", #barText)
-    logger.debug("bgColors: ", bgColors)
     self.scrollBarContent.updateText{text=barText, bgColors=bgColors, render=true}
     render()
   end

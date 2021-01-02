@@ -102,9 +102,21 @@ local function run()
         return
     end
 
+    local tree_x = start_x
+    local tree_y = start_y
+    local tree_z = start_z
+    if facing == "NORTH" then
+        tree_z = tree_z - 1
+    elseif facing == "SOUTH" then
+        tree_z = tree_z + 1
+    elseif facing == "EAST" then
+        tree_x = tree_x + 1
+    elseif facing == "WEST" then
+        tree_x = tree_x - 1
+    end
+
     local current = movement.coord(start_x, start_y, start_z)
-    local tree_spot = movement.coord(start_x + 1, start_y, start_z)
-    local turtle_x, turtle_y, turtle_z = movement.split_coord(tree_spot)
+    local tree_spot = movement.coord(tree_x, tree_y, tree_z)
 
     while true do
         facing, current = movement.visit_adjacent(

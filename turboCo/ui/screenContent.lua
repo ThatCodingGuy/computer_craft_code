@@ -29,7 +29,7 @@ local function create(args)
     for i=1,oldTextLen do
       clearingText = clearingText .. " "
     end
-    self.screenBuffer.write{text=clearingText, textColor=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
+    self.screenBuffer.write{text=clearingText, textColor=self.textColor, textColors=self.textColors, bgColor=self.bgColor, bgColors=self.bgColors, bufferCursorPos=self.currentBufferPos}
 
     self.text = args.text or self.text
     self.textColor = args.textColor or self.textColor

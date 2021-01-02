@@ -49,7 +49,7 @@ local function join(tab, sep)
     sep = tostring(sep)
     local str = ""
     local first = true
-    for _, value in pairs(tab) do
+    for _, value in ipairs(tab) do
       if first then
         first = false
       else

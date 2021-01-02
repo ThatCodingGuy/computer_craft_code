@@ -89,12 +89,12 @@ local function create(args)
       end
       if args.bgColor then
         args.bgColors = createColorString(args.text, args.bgColor)
-      else
+      elseif not args.bgColors then
         args.bgColors = createColorString(args.text, self.bgColor or colors.black)
       end
       if args.textColor then
         args.textColors = createColorString(args.text, args.textColor)
-      else
+      elseif not args.textColors then
         args.textColors = createColorString(args.text, self.textColor or colors.white)
       end
       if #args.bgColors ~= #args.text then
@@ -278,7 +278,7 @@ local function create(args)
     end
     self.screen.setCursorPos(screenCursorPosX, screenCursorPosY)
     self.screen.blit(blitText, blitColor, blitBgColor)
-    logger.debug("blitBgColor", blitBgColor)
+    logger.debug("blitBgColor: ", blitBgColor)
   end
 
   local clearScreen = function()
@@ -382,7 +382,7 @@ local function create(args)
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
         local remainingLineTextColors = safeSubstring(remainingTextColors, 1, remainingX)
         local remainingLineBgColors = safeSubstring(remainingBgColors, 1, remainingX)
-        logger.debug("remainingLineBgColors", remainingLineBgColors)
+        logger.debug("remainingLineBgColors: ", remainingLineBgColors)
         local tempWriteData = writeTextToBuffer{text=remainingLineText, textColors=remainingLineTextColors, bgColors=remainingLineBgColors, bufferCursorPos=bufferCursorPos}
         if writeData == nil then
           writeData = tempWriteData
@@ -401,6 +401,7 @@ local function create(args)
   --Write so that the text wraps to the next line
   local writeWrap = function(args)
     cleanArgs(args)
+    logger.debug("args.bgColors: ", )
     local writeData = writeWrapImpl(args)
     sendCallbackData(createCallbackData())
     return writeData

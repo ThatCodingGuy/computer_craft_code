@@ -1,3 +1,6 @@
+local lua_helpers = dofile('./gitlib/turboCo/lua_helpers.lua')
+local logger = dofile('./gitlib/turboCo/logger.lua').new()
+
 --[[
   Creates content on your screen that is tracked at a certain screen buffer location, and
   can be updated with the updateText() function. An optional screen buffer write function
@@ -36,6 +39,9 @@ local function create(args)
     self.textColors = args.textColors or self.textColors
     self.bgColor = args.bgColor or self.bgColor
     self.bgColors = args.bgColors or self.bgColors
+
+    logger.debug("screenContent.bgColor: ", self.bgColor)
+    logger.debug("screenContent.bgColors: ", self.bgColors)
 
     local writeData = self.screenBufferWriteFunc{text=self.text, textColor=self.textColor, textColors=self.textColors, bgColor=self.bgColor, bgColors=self.bgColors, bufferCursorPos=self.currentBufferPos}
     self.currentScreenPos = writeData.screenCursorPosBefore

@@ -39,11 +39,11 @@ local function create(args)
   local getScrollableBarIndexes = function()
     local fullBarLength = getFullBarLength()
     local scrollableHeightRatio =  self.height / self.trackingScreenBufferDimensions.height
-    if bufferHeightRatio > 1 then
+    if scrollableHeightRatio > 1 then
       --if > 1, then screenBuffer doesn't cover full screen yet
-      bufferHeightRatio = 1
+      scrollableHeightRatio = 1
     end
-    local barHeight = math.floor(fullBarLength * bufferHeightRatio)
+    local barHeight = math.floor(fullBarLength * scrollableHeightRatio)
     if barHeight == 0 then
       barHeight = 1
     end

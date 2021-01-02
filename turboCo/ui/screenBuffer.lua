@@ -401,7 +401,6 @@ local function create(args)
   --Write so that the text wraps to the next line
   local writeWrap = function(args)
     cleanArgs(args)
-    logger.debug("args.bgColors: ", )
     local writeData = writeWrapImpl(args)
     sendCallbackData(createCallbackData())
     return writeData

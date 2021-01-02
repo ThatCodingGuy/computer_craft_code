@@ -13,7 +13,7 @@ local log_level_filter = LoggingLevel.WARNING
 --Set print_to_output to this to log to a file instead
 local log_to_file = function(...)
     local f = fs.open(log_file_path, 'a')
-    f.writeLine(lua_helpers.join(arg))
+    f.write(lua_helpers.join(arg) .. '\n')
     f.close()
 end
 

@@ -84,7 +84,8 @@ local function create(args)
     screenBuffer = self.scrollBarScreenBuffer,
     screenBufferWriteFunc = self.scrollBarScreenBuffer.writeWrap,
     text = barText,
-    bgColors = bgColors
+    bgColors = bgColors,
+    render=true
   }
 
   self.scrollDownButton = Button.create{
@@ -141,7 +142,7 @@ local function create(args)
     local barText, bgColors = getBarBlits()
     logger.debug("barText: ", barText)
     logger.debug("bgColors: ", bgColors)
-    self.scrollBarContent.updateText{text=barText, bgColors=bgColors}
+    self.scrollBarContent.updateText{text=barText, bgColors=bgColors, render=true}
   end
 
   self.trackingScreenBuffer.registerCallback(screenBufferCallback)

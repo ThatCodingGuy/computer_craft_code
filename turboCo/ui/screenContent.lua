@@ -51,6 +51,10 @@ local function create(args)
   self.currentScreenPos = writeData.screenCursorPosBefore
   self.currentBufferPos = writeData.bufferCursorPosBefore
 
+  if args.render then
+    self.screenBuffer.render()
+  end
+
   return {
     updateText=updateText
   }

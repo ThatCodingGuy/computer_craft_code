@@ -394,21 +394,21 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
         direction = UP
     else
         if current_x - adjacent_x == 1 then
-            turn_to_face(facing, EAST)
-            facing = EAST
-        end
-        if current_x - adjacent_x == -1 then
             turn_to_face(facing, WEST)
             facing = WEST
         end
+        if current_x - adjacent_x == -1 then
+            turn_to_face(facing, EAST)
+            facing = EAST
+        end
 
         if current_z - adjacent_z == 1 then
-            turn_to_face(facing, SOUTH)
-            facing = SOUTH
-        end
-        if current_z - adjacent_z == -1 then
             turn_to_face(facing, NORTH)
             facing = NORTH
+        end
+        if current_z - adjacent_z == -1 then
+            turn_to_face(facing, SOUTH)
+            facing = SOUTH
         end
         found, block_data = turtle.inspect()
         direction = FORWARD

@@ -278,7 +278,6 @@ local function create(args)
     end
     self.screen.setCursorPos(screenCursorPosX, screenCursorPosY)
     self.screen.blit(blitText, blitColor, blitBgColor)
-    logger.debug("blitBgColor: ", blitBgColor)
   end
 
   local clearScreen = function()
@@ -382,7 +381,6 @@ local function create(args)
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
         local remainingLineTextColors = safeSubstring(remainingTextColors, 1, remainingX)
         local remainingLineBgColors = safeSubstring(remainingBgColors, 1, remainingX)
-        logger.debug("remainingLineBgColors: ", remainingLineBgColors)
         local tempWriteData = writeTextToBuffer{text=remainingLineText, textColors=remainingLineTextColors, bgColors=remainingLineBgColors, bufferCursorPos=bufferCursorPos}
         if writeData == nil then
           writeData = tempWriteData

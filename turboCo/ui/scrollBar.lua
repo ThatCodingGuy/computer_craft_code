@@ -143,6 +143,7 @@ local function create(args)
     logger.debug("#barText: ", #barText)
     logger.debug("bgColors: ", bgColors)
     self.scrollBarContent.updateText{text=barText, bgColors=bgColors, render=true}
+    render()
   end
 
   self.trackingScreenBuffer.registerCallback(screenBufferCallback)

@@ -48,8 +48,12 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
         refuel.refuel(position, facing)
     end
 
-    logger.info("Currently looking at a '" .. block_data.name .. "' block.")
-    if not block_data.name then
+    local block_in_front = "empty block"
+    if block_data ~= nil then
+        block_in_front = block_data.name
+    end
+    logger.info("Currently looking at " .. block_in_front .. ".")
+    if block_data == nil then
         logger.info("No block in front. Placing a sapling.")
         inventory.selectItemMatching(is_sapling)
         turtle.place()

@@ -316,7 +316,7 @@ end
 
 function dig_only_blocks_matching(matches)
     local function digfunc(current, adjacent, facing, direction, block_data, map)
-        if not matches(block_data) then
+        if block_data == nil or not matches(block_data) then
             return facing, current
         end
 
@@ -420,6 +420,9 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
         direction = FORWARD
     end
 
+    if type(block_data) ~= "table" then
+        block_data = nil
+    end
     facing, position = block_callback(position, adjacent, facing, direction, block_data, map)
     return facing, position
 end

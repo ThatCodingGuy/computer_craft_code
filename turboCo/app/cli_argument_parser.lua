@@ -1,10 +1,7 @@
 local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
 
 local class = lua_helpers.class
-
-local function starts_with(s, start)
-    return s:sub(1, #start) == start
-end
+local starts_with = lua_helpers.starts_with
 
 --- A parser of program arguments provided on the command line.
 -- The constructor accepts a table of definitions helping the parser find and organize the command

@@ -3,6 +3,8 @@ local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
 local class = lua_helpers.class
 local enum = lua_helpers.enum
 local split = lua_helpers.split
+local starts_with = lua_helpers.starts_with
+local ends_with = lua_helpers.ends_with
 
 describe("Lua helpers", function()
     describe("class", function()
@@ -99,18 +101,19 @@ describe("Lua helpers", function()
                     split("some text has been split", ","))
         end)
 
-        it("should return empty strings when delimiter is preceeded or followed by nothing", function()
-            assert.are.same({
-                "",
-                " but rest of text",
-            },
-                    split("a but rest of text", "a"))
-            assert.are.same({
-                "rest of text but",
-                "",
-            },
-                    split("rest of text buta", "a"))
-        end)
+        it("should return empty strings when delimiter is preceeded or followed by nothing",
+                function()
+                    assert.are.same({
+                        "",
+                        " but rest of text",
+                    },
+                            split("a but rest of text", "a"))
+                    assert.are.same({
+                        "rest of text but",
+                        "",
+                    },
+                            split("rest of text buta", "a"))
+                end)
 
         it("should support multiple characters as delimiter", function()
             assert.are.same({
@@ -118,7 +121,8 @@ describe("Lua helpers", function()
                 " but rest ",
                 " and of text",
             },
-                    split("some text and a big delimiter but rest big delimiter and of text", "big delimiter"))
+                    split("some text and a big delimiter but rest big delimiter and of text",
+                            "big delimiter"))
             assert.are.same({
                 "",
                 " but rest of text",
@@ -129,6 +133,39 @@ describe("Lua helpers", function()
                 "",
             },
                     split("rest of text but big delimiter", "big delimiter"))
+        end)
+    end)
+
+    describe("starts with", function()
+        it("should return true when prefix is contained within string at the beginning", function()
+            assert.is_true(starts_with("some stuff", "so"))
+            assert.is_true(starts_with("some stuff", "some "))
+            assert.is_true(starts_with("some stuff", "some stuff"))
+            assert.is_true(starts_with("some stuff", ""))
+        end)
+
+        it("should return false when prefix is not contained within string at the beginning",
+                function()
+                    assert.is_false(starts_with("some stuff", "b"))
+                    assert.is_false(starts_with("some stuff", "son"))
+                    assert.is_false(starts_with("some stuff", "somestuff"))
+                    assert.is_false(starts_with("some stuff", "some stuff "))
+                end)
+    end)
+
+    describe("ends with", function()
+        it("should return true when suffix is contained within string at the end", function()
+            assert.is_true(ends_with("some stuff", "ff"))
+            assert.is_true(ends_with("some stuff", " stuff"))
+            assert.is_true(ends_with("some stuff", "some stuff"))
+            assert.is_true(ends_with("some stuff", ""))
+        end)
+
+        it("should return false when suffix is not contained within string at the end", function()
+            assert.is_false(ends_with("some stuff", "x"))
+            assert.is_false(ends_with("some stuff", "ctuff"))
+            assert.is_false(ends_with("some stuff", "somestuff"))
+            assert.is_false(ends_with("some stuff", " some stuff"))
         end)
     end)
 end)

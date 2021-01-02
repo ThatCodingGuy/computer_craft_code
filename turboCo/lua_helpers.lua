@@ -44,22 +44,22 @@ end
 --- Fixes the stupid table.concat implementation which doesn't like non-strings and non-numbers
 local function join(tab, sep)
     if sep == nil then
-      sep = ""
+        sep = ""
     end
     sep = tostring(sep)
     local str = ""
     local first = true
     for _, value in ipairs(tab) do
-      if first then
-        first = false
-      else
-        str = str .. sep
-      end
-      str = str .. tostring(value)
+        if first then
+            first = false
+        else
+            str = str .. sep
+        end
+        str = str .. tostring(value)
     end
     return str
-  end
-  
+end
+
 --- a contains function for tables. nuff said.
 -- @return Does the table have the given value
 local function contains(tab, val)
@@ -76,39 +76,47 @@ local function table_print (tt, indent, done)
     done = done or {}
     indent = indent or 0
     if type(tt) == "table" then
-      local sb = {}
-      for key, value in pairs (tt) do
-        table.insert(sb, string.rep (" ", indent)) -- indent it
-        if type (value) == "table" and not done [value] then
-          done [value] = true
-          table.insert(sb, key .. " = {\n");
-          table.insert(sb, table_print (value, indent + 2, done))
-          table.insert(sb, string.rep (" ", indent)) -- indent it
-          table.insert(sb, "}\n");
-        elseif "number" == type(key) then
-          table.insert(sb, string.format("\"%s\"\n", tostring(value)))
-        else
-          table.insert(sb, string.format(
-              "%s = \"%s\"\n", tostring (key), tostring(value)))
-         end
-      end
-      return table.concat(sb)
+        local sb = {}
+        for key, value in pairs(tt) do
+            table.insert(sb, string.rep(" ", indent)) -- indent it
+            if type(value) == "table" and not done[value] then
+                done[value] = true
+                table.insert(sb, key .. " = {\n");
+                table.insert(sb, table_print(value, indent + 2, done))
+                table.insert(sb, string.rep(" ", indent)) -- indent it
+                table.insert(sb, "}\n");
+            elseif "number" == type(key) then
+                table.insert(sb, string.format("\"%s\"\n", tostring(value)))
+            else
+                table.insert(sb, string.format(
+                        "%s = \"%s\"\n", tostring(key), tostring(value)))
+            end
+        end
+        return table.concat(sb)
     else
-      return tt .. "\n"
+        return tt .. "\n"
     end
-  end
-  
+end
+
 --Universal tostring, prints tables well
-local function to_string( tbl )
-    if  "nil"       == type( tbl ) then
+local function to_string(tbl)
+    if "nil" == type(tbl) then
         return tostring(nil)
-    elseif  "table" == type( tbl ) then
+    elseif "table" == type(tbl) then
         return table_print(tbl)
-    elseif  "string" == type( tbl ) then
+    elseif "string" == type(tbl) then
         return tbl
     else
         return tostring(tbl)
     end
+end
+
+local function starts_with(s, prefix)
+    return s:sub(1, #prefix) == prefix
+end
+
+local function ends_with(s, suffix)
+    return s:sub(#s - #suffix + 1, #s) == suffix
 end
 
 return {
@@ -117,5 +125,7 @@ return {
     split = split,
     join = join,
     contains = contains,
-    to_string = to_string
+    to_string = to_string,
+    starts_with = starts_with,
+    ends_with = ends_with,
 }

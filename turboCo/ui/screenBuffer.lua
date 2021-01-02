@@ -395,8 +395,8 @@ local function create(args)
         setCursorToNextLine(args)
       end
       remainingText = safeSubstring(remainingText, remainingX + 1, -1)
-      reaminingTextColors = safeSubstring(reaminingTextColors, remainingX + 1, -1)
-      reaminingBgColors = safeSubstring(reaminingBgColors, remainingX + 1, -1)
+      remainingTextColors = safeSubstring(remainingTextColors, remainingX + 1, -1)
+      remainingBgColors = safeSubstring(remainingBgColors, remainingX + 1, -1)
     end
     return writeData
   end

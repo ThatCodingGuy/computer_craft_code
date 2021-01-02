@@ -372,16 +372,17 @@ local function create(args)
       bufferCursorPos = self.screenState.cursorPos
     end
     local remainingText = text
-    local reaminingTextColors = textColors
-    local reaminingBgColors = bgColors
+    local remainingTextColors = textColors
+    local remainingBgColors = bgColors
     local writeData = nil
     while string.len(remainingText) > 0 do
       local remainingX = self.width - bufferCursorPos.x + 1
       if remainingX > 0 then
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
-        local reaminingLineTextColors = safeSubstring(reaminingTextColors, 1, remainingX)
-        local reaminingLineBgColors = safeSubstring(reaminingBgColors, 1, remainingX)
-        local tempWriteData = writeTextToBuffer{text=remainingLineText, textColors=reaminingLineTextColors, bgColors=reaminingLineBgColors, bufferCursorPos=bufferCursorPos}
+        local remainingLineTextColors = safeSubstring(remainingTextColors, 1, remainingX)
+        local remainingLineBgColors = safeSubstring(remainingBgColors, 1, remainingX)
+        logger.debug("remainingLineText: ", remainingLineText, "reaminingLineTextColors: ", remainingLineTextColors, "reaminingLineBgColors: ", remainingLineBgColors)
+        local tempWriteData = writeTextToBuffer{text=remainingLineText, textColors=remainingLineTextColors, bgColors=remainingLineBgColors, bufferCursorPos=bufferCursorPos}
         if writeData == nil then
           writeData = tempWriteData
         end

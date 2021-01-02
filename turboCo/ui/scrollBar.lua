@@ -79,12 +79,12 @@ local function create(args)
   }
   self.scrollUpButton.makeActive()
 
-  local barText, bgColors = getBarBlits()
+  local bText, bColors = getBarBlits()
   self.scrollBarContent = ScreenContent.create{
     screenBuffer = self.scrollBarScreenBuffer,
     screenBufferWriteFunc = self.scrollBarScreenBuffer.writeWrap,
-    text = barText,
-    bgColors = bgColors,
+    text = bText,
+    bgColors = bColors,
     render=true
   }
 

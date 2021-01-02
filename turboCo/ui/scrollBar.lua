@@ -84,8 +84,7 @@ local function create(args)
     screenBuffer = self.scrollBarScreenBuffer,
     screenBufferWriteFunc = self.scrollBarScreenBuffer.writeWrap,
     text = bText,
-    bgColors = bColors,
-    render=true
+    bgColors = bColors
   }
 
   self.scrollDownButton = Button.create{

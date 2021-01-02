@@ -3,7 +3,6 @@ local ScrollBar = dofile("./gitlib/turboCo/ui/scrollBar.lua")
 local logger = dofile('./gitlib/turboCo/logger.lua').new()
 
 local function createFromScreenBufferAndScrollBar(args)
-  logger.debug("args.scrollBar: ", args.scrollBar)
   local self = {
     eventHandler = args.eventHandler,
     screenBuffer=args.screenBuffer,
@@ -108,7 +107,6 @@ local function createFromOverrides(args)
     topOffset=topOffset,
     bottomOffset=bottomOffset
   }
-  logger.debug("scrollBar: ", scrollBar)
 
   return createFromScreenBufferAndScrollBar{eventHandler=eventHandler, screenBuffer=screenBuffer, scrollBar=scrollBar}
 end

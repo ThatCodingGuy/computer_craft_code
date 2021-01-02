@@ -10,19 +10,19 @@ local logger = dofile('./gitlib/turboCo/logger.lua').new()
 ]]
 
 
-local function create(args)
-  if args.screenBufferWriteFunc == nil then
-    args.screenBufferWriteFunc = args.screenBuffer.write
+local function create(createArgs)
+  if createArgs.screenBufferWriteFunc == nil then
+    createArgs.screenBufferWriteFunc = createArgs.screenBuffer.write
   end
 
   local self = {
-    screenBuffer=args.screenBuffer,
-    screenBufferWriteFunc=args.screenBufferWriteFunc,
-    text=args.text,
-    textColor=args.textColor,
-    textColors=args.textColors,
-    bgColor=args.bgColor,
-    bgColors=args.bgColors
+    screenBuffer=createArgs.screenBuffer,
+    screenBufferWriteFunc=createArgs.screenBufferWriteFunc,
+    text=createArgs.text,
+    textColor=createArgs.textColor,
+    textColors=createArgs.textColors,
+    bgColor=createArgs.bgColor,
+    bgColors=createArgs.bgColors
   }
 
   local updateText = function(args)
@@ -61,7 +61,7 @@ local function create(args)
   self.currentScreenPos = writeData.screenCursorPosBefore
   self.currentBufferPos = writeData.bufferCursorPosBefore
 
-  if args.render then
+  if createArgs.render then
     self.screenBuffer.render()
   end
 

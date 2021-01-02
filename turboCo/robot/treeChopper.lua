@@ -3,7 +3,8 @@ local movement = dofile("./gitlib/turboCo/movement.lua")
 local inventory = dofile("/gitlib/carlos/inventory.lua")
 local common_argument_parsers = dofile("./gitlib/turboCo/app/common_argument_parsers.lua")
 local common_argument_definitions = dofile("./gitlib/turboCo/app/common_argument_definitions.lua")
-local refuel = dofile("/gitlib/turboCo/client/refuel.lua")
+local refuel = dofile("./gitlib/turboCo/client/refuel.lua")
+local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 
 local number_def = common_argument_definitions.number_def
 
@@ -34,13 +35,17 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
         refuel.refuel(position, facing)
     end
 
+    logger.info("Currently looking at a '" .. block_data.name .. "' block.")
     if not block_data.name then
+        logger.info("No block in front. Placing a sapling.")
         inventory.selectItemWithName("minecraft:birch_sapling")
         turtle.place()
     elseif block_data.name == "minecraft:birch_sapling" then
+        logger.info("Sapling in front. Will place bone meal if any is present.")
         inventory.selectItemWithName("minecraft:bone_meal")
         turtle.place()
     elseif block_data.name == "minecraft:birch_log" then
+        logger.info("Birch tree sprouted. Clearing the tree blocks.")
         -- Trees grow up to 7 high, with a width of 5
         -- Tree is in adjacent
 
@@ -59,9 +64,6 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
         facing, position = movement.navigate(position, facing, start_position)
         facing = movement.turn_to_face(facing, start_facing)
     end
-
-    logger.info("wait")
-    sleep(1)
 
     return facing, position
 end
@@ -118,14 +120,16 @@ local function run()
     local current = movement.coord(start_x, start_y, start_z)
     local tree_spot = movement.coord(tree_x, tree_y, tree_z)
 
-    while true do
+    local event_handler = EventHandler.create()
+    event_handler.scheduleRecurring(function()
         facing, current = movement.visit_adjacent(
                 current,
                 tree_spot,
                 facing,
                 treeChop,
                 { wood_dropoff_coordinates = wood_dropoff_coordinates })
-    end
+    end, 10)
+    event_handler.pullEvents()
 end
 
 run()

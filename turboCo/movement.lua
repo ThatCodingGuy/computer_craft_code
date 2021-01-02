@@ -386,6 +386,8 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
     local current_x, current_y, current_z = split_coord(position)
     local adjacent_x, adjacent_y, adjacent_z = split_coord(adjacent)
 
+    local found, block_data
+    local direction
     if current_y - adjacent_y == 1 then
         found, block_data = turtle.inspectDown()
         direction = DOWN

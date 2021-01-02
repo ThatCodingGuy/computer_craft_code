@@ -1,3 +1,5 @@
+local lua_helpers = dofile('./gitlib/turboCo/lua_helpers.lua')
+local logger = dofile('./gitlib/turboCo/logger.lua').new()
 --[[
   This file is intended to provide extensions to the terminal (term) API of computercraft
   Basically you create a screen buffer that is meant to track a certain part of the screen (or all of it)
@@ -229,15 +231,15 @@ local function create(args)
     if bufferCharData ~= nil and bufferCharData.char ~= nil then
       blitTextChar = bufferCharData.char
     end
-    local blitColorChar = " "
+    local blitColorChar = blitMap[colors.white]
     if bufferCharData ~= nil and bufferCharData.textColor ~= nil then
-      blitColorChar = blitMap[bufferCharData.textColor]
+      blitColorChar = bufferCharData.textColor
     elseif self.textColor ~= nil then
       blitColorChar = blitMap[self.textColor]
     end
     local blitBgColorChar = blitMap[colors.black]
     if bufferCharData ~= nil and bufferCharData.bgColor ~= nil then
-      blitBgColorChar = blitMap[bufferCharData.bgColor]
+      blitBgColorChar = bufferCharData.bgColor
     elseif self.bgColor ~= nil then
       blitBgColorChar = blitMap[self.bgColor]
     end

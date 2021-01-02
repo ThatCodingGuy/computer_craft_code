@@ -219,6 +219,7 @@ local function create(args)
       local char = safeSubstring(text, i, i)
       local textColor = safeSubstring(textColors, i, i)
       local bgColor = safeSubstring(bgColors, i, i)
+      logger.debug(bgColor)
       row[bufferCursorPos.x] = { textColor=textColor, bgColor=bgColor, char=char}
       bufferCursorPos.x = bufferCursorPos.x + 1
     end
@@ -242,6 +243,7 @@ local function create(args)
     elseif self.bgColor ~= nil then
       blitBgColorChar = blitMap[self.bgColor]
     end
+    logger.debug("getBlitTextChars.blitBgColorChar: ", blitBgColorChar)
     return blitTextChar, blitColorChar, blitBgColorChar
   end
 

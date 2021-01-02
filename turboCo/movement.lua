@@ -314,23 +314,27 @@ function force_dig(current, adjacent, facing, direction, block_data, map)
     end
 end
 
-function dig_only_blocks(block_types)
+function dig_only_blocks_matching(matches)
     local function digfunc(current, adjacent, facing, direction, block_data, map)
-
-        local found = false;
-        for i = 1, #block_types, 1 do
-            if block_types[i] == block_data.name then
-                found = true
-            end
-        end
-
-        if not found then
+        if not matches(block_data) then
             return facing, current
         end
 
         return force_dig(current, adjacent, facing, direction, block_data, map)
     end
     return digfunc
+end
+
+function dig_only_blocks(block_types)
+    return dig_only_blocks_matching(function(block_data)
+        for i = 1, #block_types, 1 do
+            if block_types[i] == block_data.name then
+                return true
+            end
+        end
+
+        return false
+    end)
 end
 
 function no_dig(current, adjacent, facing, direction, block_data, map)
@@ -688,6 +692,7 @@ return {
     navigate = navigate,
     figure_out_facing = figure_out_facing,
     turn_to_face = turn_to_face,
+    dig_only_blocks_matching = dig_only_blocks_matching,
     dig_only_blocks = dig_only_blocks,
     split_coord = split_coord,
     explore_area = explore_area,

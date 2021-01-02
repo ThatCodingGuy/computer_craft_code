@@ -11,13 +11,11 @@ local number_def = common_argument_definitions.number_def
 local starts_with = lua_helpers.starts_with
 local ends_with = lua_helpers.ends_with
 
-local tree_blocks = {
-    "minecraft:birch_log",
-    "minecraft:birch_leaves"
-}
 local logger = Logger.new()
 
-local cut_tree = movement.dig_only_blocks(tree_blocks)
+local function is_tree_leaves(item_details)
+    return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "leaves")
+end
 
 local function is_tree_log(item_details)
     return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "log")
@@ -26,6 +24,10 @@ end
 local function is_sapling(item_details)
     return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "sapling")
 end
+
+local cut_tree = movement.dig_only_blocks_matching(function(item_details)
+    return is_tree_log(item_details) or is_tree_leaves(item_details)
+end)
 
 local function drop_off_wood(facing, position, wood_dropoff_coordinates)
     local x, y, z = movement.split_coord(wood_dropoff_coordinates)
@@ -51,11 +53,11 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
         logger.info("No block in front. Placing a sapling.")
         inventory.selectItemMatching(is_sapling)
         turtle.place()
-    elseif block_data.name == "minecraft:birch_sapling" then
+    elseif is_sapling(block_data) then
         logger.info("Sapling in front. Will place bone meal if any is present.")
         inventory.selectItemWithName("minecraft:bone_meal")
         turtle.place()
-    elseif block_data.name == "minecraft:birch_log" then
+    elseif is_tree_log(block_data) then
         logger.info("Birch tree sprouted. Clearing the tree blocks.")
         -- Trees grow up to 7 high, with a width of 5
         -- Tree is in adjacent

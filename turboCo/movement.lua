@@ -684,5 +684,5 @@ return {
     dig_only_blocks = dig_only_blocks,
     split_coord = split_coord,
     explore_area = explore_area,
-    visit_adjacent, visit_adjacent,
+    visit_adjacent = visit_adjacent,
 }

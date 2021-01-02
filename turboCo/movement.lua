@@ -453,7 +453,7 @@ end
 
 function follow_path(position, path, facing, block_callback, walkable_map)
     for i = 1, #path, 1 do
-        facing, position = visit_adjacent(position, path[i], facing, force_dig, walkable_map)
+        facing, position = visit_adjacent(position, path[i], facing, block_callback, walkable_map)
     end
     return facing, position
 end

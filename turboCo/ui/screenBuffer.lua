@@ -215,7 +215,9 @@ local function create(args)
       row = {}
       buffer[bufferCursorPos.y] = row
     end
-
+    logger.debug('#text: ', #text)
+    logger.debug('textColors: ', textColors)
+    logger.debug('bgColors: ', bgColors)
     for i=1,#text do
       local char = safeSubstring(text, i, i)
       local textColor = safeSubstring(textColors, i, i)
@@ -383,7 +385,7 @@ local function create(args)
         local remainingLineTextColors = safeSubstring(remainingTextColors, 1, remainingX)
         logger.debug("remainingLineTextColors: ", remainingLineTextColors)
         local remainingLineBgColors = safeSubstring(remainingBgColors, 1, remainingX)
-        logger.debug("remainingLineTextColors: ", remainingLineBgColors)
+        logger.debug("remainingLineBgColors: ", remainingLineBgColors)
         local tempWriteData = writeTextToBuffer{text=remainingLineText, textColors=remainingLineTextColors, bgColors=remainingLineBgColors, bufferCursorPos=bufferCursorPos}
         if writeData == nil then
           writeData = tempWriteData

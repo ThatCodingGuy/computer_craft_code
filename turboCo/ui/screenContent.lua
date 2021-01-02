@@ -40,6 +40,7 @@ local function create(args)
     self.bgColor = args.bgColor or self.bgColor
     self.bgColors = args.bgColors or self.bgColors
 
+    logger.debug("screenContent.text: ", self.text)
     logger.debug("screenContent.textColor: ", self.textColor)
     logger.debug("screenContent.textColors: ", self.textColors)
     logger.debug("screenContent.bgColor: ", self.bgColor)

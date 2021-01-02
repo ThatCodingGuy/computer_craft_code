@@ -1,4 +1,5 @@
 local Logger = dofile("./gitlib/turboCo/logger.lua")
+local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
 local movement = dofile("./gitlib/turboCo/movement.lua")
 local inventory = dofile("/gitlib/carlos/inventory.lua")
 local common_argument_parsers = dofile("./gitlib/turboCo/app/common_argument_parsers.lua")
@@ -7,6 +8,8 @@ local refuel = dofile("./gitlib/turboCo/client/refuel.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 
 local number_def = common_argument_definitions.number_def
+local starts_with = lua_helpers.starts_with
+local ends_with = lua_helpers.ends_with
 
 local tree_blocks = {
     "minecraft:birch_log",
@@ -16,12 +19,20 @@ local logger = Logger.new()
 
 local cut_tree = movement.dig_only_blocks(tree_blocks)
 
+local function is_tree_log(item_details)
+    return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "log")
+end
+
+local function is_sapling(item_details)
+    return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "sapling")
+end
+
 local function drop_off_wood(facing, position, wood_dropoff_coordinates)
     local x, y, z = movement.split_coord(wood_dropoff_coordinates)
     facing, position = movement.navigate(position, facing, movement.coord(x, y, z))
 
-    while inventory.countItemWithName("minecraft:birch_log") > 0 do
-        inventory.selectItemWithName("minecraft:birch_log")
+    while inventory.countItemMatching(is_tree_log) > 0 do
+        inventory.selectItemMatching(is_tree_log)
         turtle.placeDown()
     end
     return facing, position
@@ -38,7 +49,7 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
     logger.info("Currently looking at a '" .. block_data.name .. "' block.")
     if not block_data.name then
         logger.info("No block in front. Placing a sapling.")
-        inventory.selectItemWithName("minecraft:birch_sapling")
+        inventory.selectItemMatching(is_sapling)
         turtle.place()
     elseif block_data.name == "minecraft:birch_sapling" then
         logger.info("Sapling in front. Will place bone meal if any is present.")

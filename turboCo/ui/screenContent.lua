@@ -40,8 +40,11 @@ local function create(args)
     self.bgColor = args.bgColor or self.bgColor
     self.bgColors = args.bgColors or self.bgColors
 
+    logger.debug("screenContent.textColor: ", self.textColor)
+    logger.debug("screenContent.textColors: ", self.textColors)
     logger.debug("screenContent.bgColor: ", self.bgColor)
     logger.debug("screenContent.bgColors: ", self.bgColors)
+    logger.debug()
 
     local writeData = self.screenBufferWriteFunc{text=self.text, textColor=self.textColor, textColors=self.textColors, bgColor=self.bgColor, bgColors=self.bgColors, bufferCursorPos=self.currentBufferPos}
     self.currentScreenPos = writeData.screenCursorPosBefore

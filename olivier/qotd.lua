@@ -38,10 +38,10 @@ function displayQuote(quote)
     screenBuffer.clear()
     screenBuffer.writeCenterLn{text="TurboCo Motivational Billboard"}
     screenBuffer.ln()
-    screenBuffer.writeCenterLn{text=quote['title'], color=color}
+    screenBuffer.writeCenterLn{text=quote['title'], textColor=color}
     screenBuffer.writeCenterLn{text="Date: " .. quote['date']}
     screenBuffer.ln()
-    screenBuffer.writeWrapLn{text=quote['content'], color=color}
+    screenBuffer.writeWrapLn{text=quote['content'], textColor=color}
     screenBuffer.ln()
     screenBuffer.writeLeftLn{text="Author: " .. quote['author']}
     screenBuffer.ln()

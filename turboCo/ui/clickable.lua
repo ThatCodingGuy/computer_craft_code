@@ -181,13 +181,13 @@ local function create(args)
     self.textColor = args.textColor or self.textColor
     self.bgColor = args.bgColor or self.bgColor
 
-    self.screenBuffer.write{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.bufferCursorPos}
+    self.screenBuffer.write{text=self.text, textColor=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.bufferCursorPos}
     if isActive() then
       self.screenBuffer.render()
     end
   end
 
-  local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}
+  local writeData = self.screenBufferWriteFunc{text=self.text, textColor=self.textColor, bgColor=self.bgColor}
   self.currentScreenPos = writeData.screenCursorPosBefore
   self.bufferCursorPos = writeData.bufferCursorPosBefore
 

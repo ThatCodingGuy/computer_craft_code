@@ -3,20 +3,47 @@
   Basically you create a screen buffer that is meant to track a certain part of the screen (or all of it)
   Operations such as writing and wrapping around are provided, as well as the ability to scroll through text
   Always call render() when you actually want it displayed
+
+  For all write functions, arguments are as follows:
+  -text: the string to write to the buffer. mandatroy
+  -textColor: the text color to write for the entire text
+  -textColors: the string of text colors to write per character of text. length to text must match.
+  -bgColor: the background color to write for the entire text
+  -bgColors: the string of background colors to write per character of text. length to text must match.
+  -bufferCursorPos: if provided, is the override of buffer positions to write to.
+    If not provided, the current tracked latest buffer positions will be used.
+  -
 ]]
 local screenBuffer = {}
 
+local blitMap = {
+  [1]="0",
+  [2]="1",
+  [4]="2",
+  [8]="3",
+  [16]="4",
+  [32]="5",
+  [64]="6",
+  [128]="7",
+  [256]="8",
+  [512]="9",
+  [1024]="a",
+  [2048]="b",
+  [4096]="c",
+  [8192]="d",
+  [16384]="e",
+  [32768]="f",
+}
+
 local function create(args)
-  local screen, xStartingScreenPos, yStartingScreenPos, width, height, textColor, bgColor = 
-        args.screen, args.xStartingScreenPos, args.yStartingScreenPos, 
-        args.width, args.height, args.textColor, args.bgColor
+
   local self = {
-    screen = screen,
-    screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
-    width = width,
-    height = height,
-    textColor = textColor,
-    bgColor = bgColor,
+    screen = args.screen,
+    screenStartingPos = { x=args.xStartingScreenPos, y=args.yStartingScreenPos },
+    width = args.width,
+    height = args.height,
+    textColor = args.textColor,
+    bgColor = args.bgColor,
     screenState = {
       buffer={},
       renderPos={ x=1, y=1 },
@@ -32,13 +59,47 @@ local function create(args)
     }
   end
 
-  local cloneArgs = function(args)
+  local createColorString = function(text, color)
+    local colorStr = ""
+    local blitColor = blitMap[color]
+    for i=1,#text do
+      colorStr = colorStr .. blitColor
+    end
+    return colorStr
+  end
+
+  local cleanArgs = function(args)
     if args ~= nil then
       if args.bufferCursorPos ~= nil then
         args.bufferCursorPos = {
           x = args.bufferCursorPos.x,
           y = args.bufferCursorPos.y
         }
+      end
+      if not args.text then
+        error('must specify "text" parameter when writing to screen buffer.')
+      end
+      if args.bgColors and args.bgColor then
+        error('cant specify both bgColor and bgColors at the same time.')
+      end
+      if args.textColors and args.textColor then
+        error('cant specify both textColor and textColors at the same time.')
+      end
+      if args.bgColor then
+        args.bgColors = createColorString(args.text, args.bgColor)
+      else
+        args.bgColors = createColorString(args.text, self.bgColor or colors.black)
+      end
+      if args.textColor then
+        args.textColors = createColorString(args.text, args.textColor)
+      else
+        args.textColors = createColorString(args.text, self.textColor or colors.white)
+      end
+      if #args.bgColors ~= #args.text then
+        error('length of text must match length of bgColors')
+      end
+      if #args.textColors ~= #args.text then
+        error('length of text must match length of textColors')
       end
     end
   end
@@ -134,7 +195,7 @@ local function create(args)
   -- This function assumes that there does not need to be text wrapping
   -- Text wrapping should be handled by writeWrap() function
   local writeTextToBuffer = function(args)
-    local text, color, bgColor, bufferCursorPos = args.text, args.color, args.bgColor, args.bufferCursorPos
+    local text, textColors, bgColors, bufferCursorPos = args.text, args.textColors, args.bgColors, args.bufferCursorPos
     --If no override is passed, then we want to update the screen's actual cursor position
     if bufferCursorPos == nil then
       bufferCursorPos = self.screenState.cursorPos
@@ -155,30 +216,13 @@ local function create(args)
 
     for i=1,#text do
       local char = safeSubstring(text, i, i)
-      row[bufferCursorPos.x] = { color=color, bgColor=bgColor, char=char}
+      local textColor = safeSubstring(textColors, i, i)
+      local bgColor = safeSubstring(bgColors, i, i)
+      row[bufferCursorPos.x] = { textColor=textColor, bgColor=bgColor, char=char}
       bufferCursorPos.x = bufferCursorPos.x + 1
     end
     return screenCursor
   end
-
-  local blitMap = {
-    [1]="0",
-    [2]="1",
-    [4]="2",
-    [8]="3",
-    [16]="4",
-    [32]="5",
-    [64]="6",
-    [128]="7",
-    [256]="8",
-    [512]="9",
-    [1024]="a",
-    [2048]="b",
-    [4096]="c",
-    [8192]="d",
-    [16384]="e",
-    [32768]="f",
-  }
 
   local getBlitTextChars = function(bufferCharData)
     local blitTextChar = " "
@@ -186,8 +230,8 @@ local function create(args)
       blitTextChar = bufferCharData.char
     end
     local blitColorChar = " "
-    if bufferCharData ~= nil and bufferCharData.color ~= nil then
-      blitColorChar = blitMap[bufferCharData.color]
+    if bufferCharData ~= nil and bufferCharData.textColor ~= nil then
+      blitColorChar = blitMap[bufferCharData.textColor]
     elseif self.textColor ~= nil then
       blitColorChar = blitMap[self.textColor]
     end
@@ -274,7 +318,7 @@ local function create(args)
   end
 
   local write = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local writeData = writeTextToBuffer(args)
     sendCallbackData(createCallbackData())
     return writeData
@@ -282,7 +326,7 @@ local function create(args)
 
   --Sets cursor to the beggining of the next line after writing
   local writeLn = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     --print(args.text)
     local writeData = writeTextToBuffer(args)
     setCursorToNextLine(args)
@@ -292,11 +336,17 @@ local function create(args)
 
   --writes line from left to right of a single char
   local writeFullLineLn = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local char = safeSubstring(args.text, 1, 1)
+    local textColor = safeSubstring(args.textColors, 1, 1)
+    local bgColor = safeSubstring(args.bgColors, 1, 1)
     args.text = ""
+    args.textColors = ""
+    args.bgColors = ""
     for i=self.screenState.cursorPos.x,self.width do
       args.text = args.text .. char
+      args.textColors = args.textColors .. textColor
+      args.bgColors = args.bgColors .. bgColor
     end
     local writeData = writeLn(args)
     sendCallbackData(createCallbackData())
@@ -305,7 +355,7 @@ local function create(args)
 
   --writes line from left to right of a single char, then set cursor to where it was
   local writeFullLineThenResetCursor = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local origX,origY = self.screenState.cursorPos.x,self.screenState.cursorPos.y
     local writeData = writeFullLineLn(args)
     self.screenState.cursorPos.x = origX
@@ -315,17 +365,21 @@ local function create(args)
   end
 
   local writeWrapImpl = function(args)
-    local text, color, bgColor, bufferCursorPos = args.text, args.color, args.bgColor, args.bufferCursorPos
+    local text, textColors, bgColors, bufferCursorPos = args.text, args.textColors, args.bgColors, args.bufferCursorPos
     if bufferCursorPos == nil then
       bufferCursorPos = self.screenState.cursorPos
     end
     local remainingText = text
+    local reaminingTextColors = textColors
+    local reaminingBgColors = bgColors
     local writeData = nil
     while string.len(remainingText) > 0 do
       local remainingX = self.width - bufferCursorPos.x + 1
       if remainingX > 0 then
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
-        local tempWriteData = writeTextToBuffer{text=remainingLineText, color=color, bgColor=bgColor, bufferCursorPos=bufferCursorPos}
+        local reaminingLineTextColors = safeSubstring(reaminingTextColors, 1, remainingX)
+        local reaminingLineBgColors = safeSubstring(reaminingBgColors, 1, remainingX)
+        local tempWriteData = writeTextToBuffer{text=remainingLineText, textColors=reaminingLineTextColors, bgColors=reaminingLineBgColors, bufferCursorPos=bufferCursorPos}
         if writeData == nil then
           writeData = tempWriteData
         end
@@ -334,13 +388,15 @@ local function create(args)
         setCursorToNextLine(args)
       end
       remainingText = safeSubstring(remainingText, remainingX + 1, -1)
+      reaminingTextColors = safeSubstring(reaminingTextColors, remainingX + 1, -1)
+      reaminingBgColors = safeSubstring(reaminingBgColors, remainingX + 1, -1)
     end
     return writeData
   end
 
   --Write so that the text wraps to the next line
   local writeWrap = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local writeData = writeWrapImpl(args)
     sendCallbackData(createCallbackData())
     return writeData
@@ -348,7 +404,7 @@ local function create(args)
 
   --Sets cursor to the beggining of the next line after writing
   local writeWrapLn = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local writeData = writeWrapImpl(args)
     setCursorToNextLine()
     sendCallbackData(createCallbackData())
@@ -357,7 +413,7 @@ local function create(args)
 
   --Writes centered text for a monitor of any size
   local writeCenter = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local textSize = string.len(args.text)
     local emptySpace = self.width - textSize
     if emptySpace > 1 then
@@ -374,7 +430,7 @@ local function create(args)
 
     --Writes centered text for a monitor of any size, then enter a new line
   local writeCenterLn = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local writeData = writeCenter(args)
     setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
@@ -383,7 +439,7 @@ local function create(args)
 
   --Writes text to the left for a monitor of any size
   local writeLeft = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     if args.bufferCursorPos ~= nil then
       args.bufferCursorPos.x = 1
     else
@@ -395,7 +451,7 @@ local function create(args)
 
   --Writes text to the left for a monitor of any size, then enter a new line
   local writeLeftLn = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local writeData = writeLeft(args)
     setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
@@ -404,7 +460,7 @@ local function create(args)
 
   --Writes text to the right for a monitor of any size
   local writeRight = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local text = args.text
     local textLen = string.len(text)
     if textLen <= self.width then
@@ -421,7 +477,7 @@ local function create(args)
 
   --Writes text to the right for a monitor of any size, then enter a new line
   local writeRightLn = function(args)
-    cloneArgs(args)
+    cleanArgs(args)
     local writeData = writeRight(args)
     setCursorToNextLine(args)
     return writeData
@@ -496,7 +552,10 @@ local function create(args)
   end
 
   return {
-    getScreenStartingPos = function() return {x = self.screenStartingPos.x, y=self.screenStartingPos.y} end,
+    blitMap=blitMap,
+    getScreenStartingPos = function() return { x = self.screenStartingPos.x, y=self.screenStartingPos.y } end,
+    getScreenCursorPos=getScreenCursorPos,
+    getRenderPos = function() return { x = self.screenState.renderPos.x, y = self.screenState.renderPos.y } end,
     getWidth = function() return self.width end,
     getHeight = function() return self.height end,
     render=render,
@@ -522,7 +581,6 @@ local function create(args)
     pageDown=pageDown,
     pageLeft=pageLeft,
     pageRight=pageRight,
-    getScreenCursorPos=getScreenCursorPos,
     registerCallback=registerCallback
   }
 end
@@ -545,6 +603,7 @@ local function createFromOverrides(args)
   }
 end
 
+screenBuffer.blitMap = blitMap
 screenBuffer.create = create
 screenBuffer.createFromOverrides = createFromOverrides
 

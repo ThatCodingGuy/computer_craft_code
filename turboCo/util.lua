@@ -1,4 +1,3 @@
-
 --[[
   Convenience function that returns all peripheral with the side
   and return both the peripheral and the side

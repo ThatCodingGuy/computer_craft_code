@@ -27,13 +27,13 @@ local function create(args)
     for i=1,oldTextLen do
       clearingText = clearingText .. " "
     end
-    self.screenBuffer.write{text=clearingText, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
+    self.screenBuffer.write{text=clearingText, textColor=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
 
     self.text = args.text or self.text
     self.textColor = args.textColor or self.textColor
     self.bgColor = args.bgColor or self.bgColor
 
-    local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
+    local writeData = self.screenBufferWriteFunc{text=self.text, textColor=self.textColor, bgColor=self.bgColor, bufferCursorPos=self.currentBufferPos}
     self.currentScreenPos = writeData.screenCursorPosBefore
     self.currentBufferPos = writeData.bufferCursorPosBefore
 
@@ -42,7 +42,7 @@ local function create(args)
     end
   end
 
-  local writeData = self.screenBufferWriteFunc{text=self.text, color=self.textColor, bgColor=self.bgColor}
+  local writeData = self.screenBufferWriteFunc{text=self.text, textColor=self.textColor, bgColor=self.bgColor}
   self.currentScreenPos = writeData.screenCursorPosBefore
   self.currentBufferPos = writeData.bufferCursorPosBefore
 

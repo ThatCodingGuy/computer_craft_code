@@ -74,10 +74,10 @@ end
 function writeQuote(screenBuffer, quote)
   if quote then
     local color = categoryToColorMap[quote['category']]
-    screenBuffer.writeCenterLn{text=quote['title'], color=color}
+    screenBuffer.writeCenterLn{text=quote['title'], textColor=color}
     screenBuffer.writeCenterLn{text="Date: " .. quote['date']}
     screenBuffer.ln()
-    screenBuffer.writeWrapLn{text=quote['content'], color=color}
+    screenBuffer.writeWrapLn{text=quote['content'], textColor=color}
     screenBuffer.ln()
     screenBuffer.writeLeftLn{text="Author: " .. quote['author']}
     screenBuffer.ln()
@@ -137,8 +137,8 @@ function getNextQuotes()
 end
 
 screenTopBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=2, color=colors.lightBlue, bgColor=colors.gray}
-screenTopBuffer.writeCenterLn{text="Quotes of the Day", color=colors.lightBlue, bgColor=colors.gray}
-screenTopBuffer.writeFullLineLn{text="-", color=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer.writeCenterLn{text="Quotes of the Day", textColor=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer.writeFullLineLn{text="-", textColor=colors.lightBlue, bgColor=colors.gray}
 screenTopBuffer.render()
 
 screenBottomBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1, topOffset=height-1, color=colors.lightBlue, bgColor=colors.gray}

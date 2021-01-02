@@ -3,7 +3,7 @@ local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 
 local function create(args)
-  local screen, eventHandler, trackingScreenBuffer, xStartingScreenPos, yStartingScreenPos, height, barColor, trackerColor =
+  local screen, eventHandler, trackingScreenBuffer, xStartingScreenPos, yStartingScreenPos, height, emptyBarColor, barColor =
         args.screen, args.eventHandler, args.trackingScreenBuffer, args.xStartingScreenPos, args.yStartingScreenPos,
         args.height, args.barColor, args.trackerColor
 
@@ -19,29 +19,55 @@ local function create(args)
     screen = screen,
     eventHandler = eventHandler,
     trackingScreenBuffer = trackingScreenBuffer,
-    trackingScreenBufferDimensions = { width = 0, height = 0 },
+    trackingScreenBufferDimensions = trackingScreenBuffer.getBufferDimensions(),
     scrollBarScreenBuffer = scrollBarScreenBuffer,
     scrollUpButton = nil,
     scrollBarContent = nil,
     scrollDownButton = nil,
     screenStartingPos = { x=xStartingScreenPos, y=yStartingScreenPos },
     height = height,
-    barColor = barColor or colors.gray,
-    trackerColor = trackerColor or colors.white,
+    emptyBarColor = emptyBarColor or colors.lightBlue,
+    barColor = barColor or colors.white,
     monitorTouchKeyHandlerId = nil,
     leftClickKeyHandlerId = nil
   }
 
-  local getBarLength = function()
+  local getFullBarLength = function()
     return self.height - 2
   end
 
-  local getBarText = function()
-    local barText = ""
-    for i=1,getBarLength() do
-      barText = barText .. " "
+  local getScrollableBarIndexes = function()
+    local fullBarLength = getFullBarLength()
+    local scrollableHeightRatio =  self.height / self.trackingScreenBufferDimensions.height
+    if bufferHeightRatio > 1 then
+      --if > 1, then screenBuffer doesn't cover full screen yet
+      bufferHeightRatio = 1
     end
-    return barText
+    local barHeight = math.floor(fullBarLength * bufferHeightRatio)
+    if barHeight == 0 then
+      barHeight = 1
+    end
+    local screenRenderPos = self.screenBuffer.getRenderPos()
+    local renderPosRatio = screenRenderPos.y / self.trackingScreenBufferDimensions.height
+    local barMovableHeight = fullBarLength - barHeight
+    local barStartingPosIndex = math.floor(barMovableHeight * renderPosRatio) + 1
+    return barStartingPosIndex, barStartingPosIndex + barHeight - 1
+  end
+
+
+  local getBarBlits = function()
+    local barText = ""
+    local bgColors = ""
+    local barStartingIndex, barLastIndex = getScrollableBarIndexes()
+    for i=1,getFullBarLength() do
+      barText = barText .. " "
+      if i >= barStartingIndex and i <= barLastIndex then
+        bgColors = bgColors .. self.screenBuffer.blitMap[self.barColor]
+      else
+        bgColors = bgColors .. self.screenBuffer.blitMap[self.emptyBarColor]
+      end
+    end
+    return barText, bgColors
   end
 
   self.scrollUpButton = Button.create{
@@ -55,11 +81,12 @@ local function create(args)
   }
   self.scrollUpButton.makeActive()
 
+  local barText, bgColors = getBarBlits()
   self.scrollBarContent = ScreenContent.create{
     screenBuffer = self.scrollBarScreenBuffer,
     screenBufferWriteFunc = self.scrollBarScreenBuffer.writeWrap,
-    text = getBarText(),
-    bgColor = colors.lightBlue
+    text = barText,
+    bgColors = bgColors
   }
 
   self.scrollDownButton = Button.create{
@@ -112,7 +139,9 @@ local function create(args)
   end
 
   local screenBufferCallback = function(callbackData)
-    self.screenBufferDimensions = callbackData.dimensions
+    self.trackingScreenBufferDimensions = callbackData.dimensions
+    local barText, bgColors = getBarBlits()
+    self.scrollBarContent.updateText{text=barText, bgColors=bgColors}
   end
 
   self.trackingScreenBuffer.registerCallback(screenBufferCallback)

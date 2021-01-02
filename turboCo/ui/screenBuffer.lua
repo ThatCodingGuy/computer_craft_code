@@ -379,9 +379,11 @@ local function create(args)
       local remainingX = self.width - bufferCursorPos.x + 1
       if remainingX > 0 then
         local remainingLineText = safeSubstring(remainingText, 1, remainingX)
+        logger.debug("remainingLineText: ", remainingLineText)
         local remainingLineTextColors = safeSubstring(remainingTextColors, 1, remainingX)
+        logger.debug("remainingLineTextColors: ", remainingLineTextColors)
         local remainingLineBgColors = safeSubstring(remainingBgColors, 1, remainingX)
-        logger.debug("remainingLineText: ", remainingLineText, "reaminingLineTextColors: ", remainingLineTextColors, "reaminingLineBgColors: ", remainingLineBgColors)
+        logger.debug("remainingLineTextColors: ", remainingLineBgColors)
         local tempWriteData = writeTextToBuffer{text=remainingLineText, textColors=remainingLineTextColors, bgColors=remainingLineBgColors, bufferCursorPos=bufferCursorPos}
         if writeData == nil then
           writeData = tempWriteData

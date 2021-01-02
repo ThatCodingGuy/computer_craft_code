@@ -47,7 +47,7 @@ local function create(args)
     if barHeight == 0 then
       barHeight = 1
     end
-    local screenRenderPos = self.screenBuffer.getRenderPos()
+    local screenRenderPos = self.trackingScreenBuffer.getRenderPos()
     local renderPosRatio = screenRenderPos.y / self.trackingScreenBufferDimensions.height
     local barMovableHeight = fullBarLength - barHeight
     local barStartingPosIndex = math.floor(barMovableHeight * renderPosRatio) + 1

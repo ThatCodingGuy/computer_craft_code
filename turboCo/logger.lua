@@ -18,6 +18,7 @@ local log_to_file = function(...)
     print(logStr)
     table.remove(arg, #arg) --Removes the extra argument added by lua
     logStr = lua_helpers.join(arg)
+    print(logStr)
     f.writeLine(logStr)
     f.close()
 end

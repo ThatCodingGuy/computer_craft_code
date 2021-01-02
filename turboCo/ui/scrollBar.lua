@@ -62,9 +62,9 @@ local function create(args)
     for i=1,getFullBarLength() do
       barText = barText .. " "
       if i >= barStartingIndex and i <= barLastIndex then
-        bgColors = bgColors .. self.screenBuffer.blitMap[self.barColor]
+        bgColors = bgColors .. self.trackingScreenBuffer.blitMap[self.barColor]
       else
-        bgColors = bgColors .. self.screenBuffer.blitMap[self.emptyBarColor]
+        bgColors = bgColors .. self.trackingScreenBuffer.blitMap[self.emptyBarColor]
       end
     end
     return barText, bgColors

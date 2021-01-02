@@ -560,6 +560,7 @@ local function create(args)
     getRenderPos = function() return { x = self.screenState.renderPos.x, y = self.screenState.renderPos.y } end,
     getWidth = function() return self.width end,
     getHeight = function() return self.height end,
+    getBufferDimensions=getBufferDimensions,
     render=render,
     clear=clear,
     ln=ln,

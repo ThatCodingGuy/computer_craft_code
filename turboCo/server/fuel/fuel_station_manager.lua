@@ -27,6 +27,7 @@ local stations = FuelStationGroup.new(
         80 * 64 --[[Assumes that a stack of coal/charcoal is being used to refuel.]],
         observable_station_coords)
 local logger = Logger.new()
+local clients_reserving_stations = {}
 
 function fuel_request(sender_id, request)
     local nearest = stations.find_nearest(request["position"])
@@ -36,7 +37,8 @@ function fuel_request(sender_id, request)
         local response = {}
         response["status"] = "success"
         response["position"] = nearest
-        stations.reserve(nearest, sender_id)
+        local reservation_token = stations.reserve(nearest, sender_id)
+        clients_reserving_stations[sender_id] = reservation_token
         return response
     end
 
@@ -47,9 +49,17 @@ function fuel_request(sender_id, request)
 end
 
 function fuel_done(sender_id, request)
-    stations.release(sender_id)
     local response = {}
-    response["status"] = "success"
+    local reservation_token = clients_reserving_stations[sender_id]
+    if reservation_token == nil then
+        logger.warn("Client " .. sender_id .. "declared being done refueling, but client never "
+                .. "reserved a fuel station.")
+        response["status"] = "failure"
+    else
+        stations.release(sender_id)
+        response["status"] = "success"
+        clients_reserving_stations[sender_id] = nil
+    end
     return response
 end
 

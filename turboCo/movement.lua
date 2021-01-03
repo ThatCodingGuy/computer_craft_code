@@ -449,7 +449,6 @@ function visit(position, target, facing, block_callback, walkable_map)
         -- Call the callback for any blocks encountered, and force dig if they're
         -- Still there after. 
         local path = pathfind_with_map(position, target, walkable_map)
-        logger.debug("Pathfinding using following path:\n", to_string(path))
         facing, position = follow_path(position, path, facing, block_callback, walkable_map)
     end
 

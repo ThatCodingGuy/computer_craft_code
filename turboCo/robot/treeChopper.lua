@@ -11,7 +11,6 @@ local number_def = common_argument_definitions.number_def
 local boolean_def = common_argument_definitions.boolean_def
 local starts_with = lua_helpers.starts_with
 local ends_with = lua_helpers.ends_with
-local to_string = lua_helpers.to_string
 
 local logger = Logger.new()
 
@@ -29,6 +28,14 @@ end
 
 local function is_tree_block(item_details)
     return is_tree_leaves(item_details) or is_tree_log(item_details)
+end
+
+local function is_bone_meal(item_details)
+    return starts_with(item_details.name, "minecraft:")
+            and ((
+            ends_with(item_details.name, "dye")
+                    and item_details.damage == 15)
+            or ends_with("bone_meal"))
 end
 
 local dig_tree_blocks = movement.dig_only_blocks_matching(is_tree_block)
@@ -122,12 +129,14 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
     logger.info("Currently looking at " .. block_in_front .. ".")
     if block_data == nil then
         logger.info("No block in front. Placing a sapling.")
-        inventory.selectItemMatching(is_sapling)
-        turtle.place()
+        if inventory.selectItemMatching(is_sapling) then
+            turtle.place()
+        end
     elseif is_sapling(block_data) then
         logger.info("Sapling in front. Will place bone meal if any is present.")
-        inventory.selectItemWithName("minecraft:bone_meal")
-        turtle.place()
+        if inventory.selectItemMatching(is_bone_meal) then
+            turtle.place()
+        end
     elseif is_tree_log(block_data) then
         logger.info("Tree sprouted. Clearing the tree blocks.")
 

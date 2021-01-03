@@ -11,7 +11,6 @@ local function create(args)
     rightButton = args.rightButton,
     rightButtonOrigCallback = nil,
     postPageChangeCallback = args.postPageChangeCallback,
-    scrollHandler = args.scrollHandler
   }
 
   local getPage = function()
@@ -39,9 +38,6 @@ local function create(args)
     local page = self.pages[self.currPage]
     page.makeActive()
 
-    if self.scrollHandler ~= nil then
-      self.scrollHandler.changeScreenBuffer(page.getScreenBuffer())
-    end
     if self.postPageChangeCallback ~= nil then
       self.postPageChangeCallback()
     end

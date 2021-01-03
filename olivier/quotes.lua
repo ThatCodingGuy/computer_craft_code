@@ -1,13 +1,22 @@
 --Get historical quotes of the day
 
-local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
+local eventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua").create()
 local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
-local ScrollHandler = dofile("./gitlib/turboCo/ui/scrollHandler.lua")
+local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local Page = dofile("./gitlib/turboCo/ui/page.lua")
 local PageViewManager = dofile("./gitlib/turboCo/ui/pageViewManager.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
+local httpManager = dofile("./gitlib/turboCo/httpManager.lua").create{eventHandler=eventHandler}
+local Logger = dofile("./gitlib/turboCo/logger.lua")
+local logger = Logger.new()
+local loggingLevel = "ERROR"
+if LOGGING_LEVEL then
+  loggingLevel = LOGGING_LEVEL
+end
+Logger.print_to_output = Logger.log_to_file
+Logger.log_level_filter = Logger.LoggingLevel[loggingLevel]
 
 local json = dofile("./gitlib/turboCo/json.lua")
 
@@ -19,15 +28,13 @@ local categoryToColorMap = {
   art = colors.blue
 }
 
-local numResults = 4
+local numResults = 10
 local numPages = nil
 
-local scrollHandler = nil
 local pageViewManager = nil
 local pageCounterContent = nil
 local screenTopBuffer = nil
 local screenBottomBuffer = nil
-local eventHandler = EventHandler.create()
 
 local tArgs = { ... }
 local screen = nil
@@ -49,28 +56,6 @@ end
 screen.clear()
 local width,height = screen.getSize()
 
-function getQuotes(pageNumber)
-  local worked, quoteResponse, responseStr, responseObject = false, nil, nil, nil
-  local url = string.format("https://interactive-cv-api.herokuapp.com/quotes?page_number=%s&num_results=%s", pageNumber, numResults)
-  worked, quoteResponse = pcall(function() return http.get(url, {["Content-Type"] = "application/json"}) end)
-  if not worked then
-    print(quoteResponse)
-    return
-  end
-  worked, responseStr = pcall(quoteResponse.readAll)
-  if not worked then
-    print(responseStr)
-    return
-  end
-  worked, responseObject = pcall(json.decode, responseStr)
-  if not worked then
-    print(responseObject)
-    return
-  end
-  numPages = responseObject['num_pages']
-  return responseObject
-end
-
 function writeQuote(screenBuffer, quote)
   if quote then
     local color = categoryToColorMap[quote['category']]
@@ -84,8 +69,20 @@ function writeQuote(screenBuffer, quote)
   end
 end
 
-function getAndWriteQuotes(screenBuffer, pageNumber)
-  quotesResponse = getQuotes(pageNumber)
+function handleQuotesResponse(handle, extraArgs)
+  local worked, responseStr, quotesResponse
+  local screenBuffer = extraArgs.screenBuffer
+  worked, responseStr = pcall(handle.readAll)
+  if not worked then
+    print(responseStr)
+    return
+  end
+  worked, quotesResponse = pcall(json.decode, responseStr)
+  if not worked then
+    print(quotesResponse)
+    return
+  end
+  numPages = quotesResponse['num_pages']
   if quotesResponse ~= nil then
     quotes = quotesResponse['quotes']
     screenBuffer.ln()
@@ -93,6 +90,18 @@ function getAndWriteQuotes(screenBuffer, pageNumber)
       writeQuote(screenBuffer, quote)
     end
   end
+  screenBuffer.render()
+end
+
+function getAndWriteQuotes(screenBuffer, pageNumber, successCallback)
+  local url = string.format("https://interactive-cv-api.herokuapp.com/quotes?page_number=%s&num_results=%s", pageNumber, numResults)
+  local fullSuccessCallback = function(handle, args)
+    handleQuotesResponse(handle, args)
+    if successCallback then
+      successCallback()
+    end
+  end
+  httpManager.get({url=url, headers={["Content-Type"] = "application/json"}, successCallback=fullSuccessCallback, extraArgs={screenBuffer=screenBuffer} })
 end
 
 function createPageTrackerString()
@@ -110,15 +119,14 @@ function updatePageTracker()
   screenBottomBuffer.render()
 end
 
-function createNewQuotePage()
-  local newPageScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=2, bottomOffset=1}
-  local newPage = Page.create{screenBuffer=newPageScreenBuffer}
+function createNewQuotePage(successCallback)
+  local newPageScrollView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=1, bgColor=colors.black}
+  local newPage = Page.create{view=newPageScrollView}
   pageViewManager.addPage(newPage)
-  getAndWriteQuotes(newPageScreenBuffer, pageViewManager.getPageIndex() + 1)
+  getAndWriteQuotes(newPageScrollView.getScreenBuffer(), pageViewManager.getPageIndex() + 1, successCallback)
 end
 
-function getFirstQuotes()
-  createNewQuotePage()
+function createFirstPage()
   pageCounterContent = ScreenContent.create{
     screenBuffer=screenBottomBuffer,
     screenBufferWriteFunc=screenBottomBuffer.writeCenter,
@@ -130,41 +138,41 @@ function getFirstQuotes()
   screenBottomBuffer.render()
 end
 
+function getFirstQuotes()
+  createNewQuotePage(createFirstPage)
+end
+
 function getNextQuotes()
   if pageViewManager.getPageIndex() < numPages and not pageViewManager.hasNextPage() then
     createNewQuotePage()
   end
 end
 
-screenTopBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=2, color=colors.lightBlue, bgColor=colors.gray}
+screenTopBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=2, textColor=colors.lightBlue, bgColor=colors.gray}
 screenTopBuffer.writeCenterLn{text="Quotes of the Day", textColor=colors.lightBlue, bgColor=colors.gray}
 screenTopBuffer.writeFullLineLn{text="-", textColor=colors.lightBlue, bgColor=colors.gray}
 screenTopBuffer.render()
 
-screenBottomBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=1, topOffset=height-1, color=colors.lightBlue, bgColor=colors.gray}
+screenBottomBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, textColor=colors.lightBlue, bgColor=colors.gray}
 screenBottomBuffer.writeFullLineThenResetCursor{text=" ", }
-
-scrollHandler = ScrollHandler.create{eventHandler=eventHandler}
-scrollHandler.makeActive()
 
 pageViewManager = PageViewManager.create{
   eventHandler = eventHandler,
   leftButton = Button.create{
     screenBuffer=screenBottomBuffer,
-    eventHandler=eventHandler, 
-    text=" <-Prev ", 
-    textColor=colors.gray, 
+    eventHandler=eventHandler,
+    text=" <-Prev ",
+    textColor=colors.gray,
     bgColor=colors.lightBlue
   },
   rightButton = Button.create{screenBuffer=screenBottomBuffer,
     screenBufferWriteFunc=screenBottomBuffer.writeRight,
-    eventHandler=eventHandler, 
-    text=" Next-> ", 
-    textColor=colors.gray, 
-    bgColor=colors.lightBlue, 
+    eventHandler=eventHandler,
+    text=" Next-> ",
+    textColor=colors.gray,
+    bgColor=colors.lightBlue,
     leftClickCallback=getNextQuotes
   },
-  scrollHandler = scrollHandler,
   postPageChangeCallback = updatePageTracker
 }
 screenBottomBuffer.render()

@@ -37,6 +37,7 @@ local function createFromScreenBufferAndScrollBar(args)
       self.scrollBar.makeActive()
       self.mouseScrollHandleId = self.eventHandler.addHandle("mouse_scroll", mouseScrolled)
     end
+    self.screenBuffer.render()
   end
 
   local makeInactive = function()

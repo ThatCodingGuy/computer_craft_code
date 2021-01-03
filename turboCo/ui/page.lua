@@ -1,11 +1,11 @@
 local function create(args)
   local self = {
-    screenBuffer=args.screenBuffer,
+    view=args.view,
     clickables = args.clickables or {}
   }
 
   local getScreenBuffer = function()
-    return self.screenBuffer
+    return self.view.getScreenBuffer()
   end
 
   local addClickable = function(clickable)
@@ -16,13 +16,14 @@ local function create(args)
     for _, clickable in pairs(self.clickables) do
       clickable.makeInactive()
     end
+    self.view.makeInactive()
   end
 
   local makeActive = function()
     for _, clickable in pairs(self.clickables) do
       clickable.makeActive()
     end
-    self.screenBuffer.render()
+    self.view.makeActive()
   end
 
   return {

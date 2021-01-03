@@ -147,27 +147,29 @@ local function create(args)
   self.scrollDownButton.makeActive()
 
   local render = function()
-    self.scrollBarScreenBuffer.render()
+    
   end
 
   local makeActive = function()
     if not self.leftMouseDownHandlerId then
-      self.monitorTouchHandlerId = self.eventHandler.addHandle("mouse_click", mouseDownHandler)
+      self.monitorTouchHandlerId = self.eventHandler.addHandle("monitor_touch", monitorTouchHandler)
       self.leftMouseDownHandlerId = self.eventHandler.addHandle("mouse_click", mouseDownHandler)
       self.leftMouseUpHandlerId = self.eventHandler.addHandle("mouse_up", mouseUpHandler)
       self.leftMouseDragHandlerId = self.eventHandler.addHandle("mouse_drag", mouseDragHandler)
     end
     self.scrollUpButton.makeActive()
     self.scrollDownButton.makeActive()
-    render()
+    self.scrollBarScreenBuffer.render()
   end
 
   local makeInactive = function()
     if self.leftMouseDownHandlerId ~= nil then
+      self.eventHandler.removeHandle(self.monitorTouchHandlerId)
       self.eventHandler.removeHandle(self.leftMouseDownHandlerId)
       self.eventHandler.removeHandle(self.leftMouseUpHandlerId)
       self.eventHandler.removeHandle(self.leftMouseDragHandlerId)
 
+      self.monitorTouchHandlerId = nil
       self.leftMouseDownHandlerId = nil
       self.leftMouseUpHandlerId = nil
       self.leftMouseDragHandlerId = nil

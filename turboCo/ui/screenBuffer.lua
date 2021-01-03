@@ -350,14 +350,14 @@ local function create(args)
       args.textColors = args.textColors .. textColor
       args.bgColors = args.bgColors .. bgColor
     end
-    local writeData = writeLn(args)
+    local writeData = writeTextToBuffer(args)
+    setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
     return writeData
   end
 
   --writes line from left to right of a single char, then set cursor to where it was
   local writeFullLineThenResetCursor = function(args)
-    cleanArgs(args)
     local origX,origY = self.screenState.cursorPos.x,self.screenState.cursorPos.y
     local writeData = writeFullLineLn(args)
     self.screenState.cursorPos.x = origX
@@ -432,7 +432,6 @@ local function create(args)
 
     --Writes centered text for a monitor of any size, then enter a new line
   local writeCenterLn = function(args)
-    cleanArgs(args)
     local writeData = writeCenter(args)
     setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
@@ -453,7 +452,6 @@ local function create(args)
 
   --Writes text to the left for a monitor of any size, then enter a new line
   local writeLeftLn = function(args)
-    cleanArgs(args)
     local writeData = writeLeft(args)
     setCursorToNextLine(args)
     sendCallbackData(createCallbackData())
@@ -479,7 +477,6 @@ local function create(args)
 
   --Writes text to the right for a monitor of any size, then enter a new line
   local writeRightLn = function(args)
-    cleanArgs(args)
     local writeData = writeRight(args)
     setCursorToNextLine(args)
     return writeData

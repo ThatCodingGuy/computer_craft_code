@@ -143,7 +143,7 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
 
         -- If there's a torch in the turtle's inventory, then we want to place it back next to the\
         -- tree
-        if inventory.countItemWithName("minecraft:torch") > 1 then
+        if inventory.countItemWithName("minecraft:torch") > 0 then
             turtle.forward()
             inventory.selectItemWithName("minecraft:torch")
             turtle.place()

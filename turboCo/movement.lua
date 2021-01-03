@@ -1,7 +1,4 @@
 local Logger = dofile("./gitlib/turboCo/logger.lua")
-local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
-
-local to_string = lua_helpers.to_string
 
 -- By convention, x/y/z can either be relative or global
 --

@@ -26,8 +26,11 @@ local function create(args)
     height = args.height,
     emptyBarColor = args.emptyBarColor or colors.lightBlue,
     barColor = args.barColor or colors.white,
-    monitorTouchKeyHandlerId = nil,
-    leftClickKeyHandlerId = nil
+    monitorTouchHandlerId = nil,
+    leftMouseDownHandlerId = nil,
+    leftMouseUpHandlerId = nil,
+    leftMouseDragHandlerId = nil,
+    leftMouseClickScreenPos = nil
   }
 
   local getFullBarLength = function()
@@ -68,6 +71,51 @@ local function create(args)
     return barText, bgColors
   end
 
+  local wasBarClicked = function(x, y)
+    local barStartingIndex, barLastIndex = getScrollableBarIndexes()
+    local barStartingY = self.screenStartingPos.y + barStartingIndex - 1
+    local barEndingY = self.screenStartingPos.y + barLastIndex - 1
+    return y >= barStartingY and y <= barEndingY and x == self.screenStartingPos.x
+  end
+
+  local mouseDownHandler = function(eventData)
+    local button, x, y = eventData[2], eventData[3], eventData[4]
+    if button == 1 and wasBarClicked(x, y) then
+      self.leftMouseDragScreenPos = {x = x, y = y}
+    end
+  end
+
+  local mouseUpHandler = function(eventData)
+    local button, x, y = eventData[2], eventData[3], eventData[4]
+    if button == 1 then
+      self.leftMouseDragScreenPos = nil
+    end
+  end
+
+  local mouseDragHandler = function(eventData)
+    local button, x, y = eventData[2], eventData[3], eventData[4]
+    local barStartingIndex, barEndingIndex = getScrollableBarIndexes()
+    local barHeight = barEndingIndex - barStartingIndex + 1
+    local singleBarUnitHeight = math.ceil(self.trackingScreenBufferDimensions.height / (getFullBarLength() - barHeight))
+    if button == 1 and self.leftMouseDragScreenPos then
+      local distanceY = self.leftMouseDragScreenPos.y - y
+      local scrollTimes = singleBarUnitHeight * math.abs(distanceY)
+      for i=1,scrollTimes do
+        if distanceY < 0 then
+          self.trackingScreenBuffer.scrollDown()
+        else
+          self.trackingScreenBuffer.scrollUp()
+        end
+      end
+      self.leftMouseDragScreenPos = {x = x, y = y}
+    end
+  end
+
+  local monitorTouchHandler = function(eventData)
+    --TODO
+  end
+
+
   self.scrollUpButton = Button.create{
     screenBuffer=self.scrollBarScreenBuffer,
     screenBufferWriteFunc=self.scrollBarScreenBuffer.writeLn,
@@ -98,40 +146,33 @@ local function create(args)
   }
   self.scrollDownButton.makeActive()
 
-  --[[
-  local monitorTouchHandler = function(eventData)
-    local x, y = eventData[3], eventData[4]
-    if wasClicked(x, y) then
-      leftClick()
-    end
-  end
-
-  local mouseClickHandler = function(eventData)
-    local button, x, y = eventData[2], eventData[3], eventData[4]
-    if wasClicked(x, y) then
-      if button == 1 then
-        leftClick()
-      end
-    end
-  end
-
-  local wasBarClicked = function(x, y)
-    local maxPosY = self.currentScreenPos.y + getBarLength() - 1
-    return y >= self.currentScreenPos.y and y <= maxPosY and x == self.currentScreenPos.x
-  end
-  ]]
-
   local render = function()
-    self.trackingScreenBuffer.render()
     self.scrollBarScreenBuffer.render()
   end
 
   local makeActive = function()
+    if not self.leftMouseDownHandlerId then
+      self.monitorTouchHandlerId = self.eventHandler.addHandle("mouse_click", mouseDownHandler)
+      self.leftMouseDownHandlerId = self.eventHandler.addHandle("mouse_click", mouseDownHandler)
+      self.leftMouseUpHandlerId = self.eventHandler.addHandle("mouse_up", mouseUpHandler)
+      self.leftMouseDragHandlerId = self.eventHandler.addHandle("mouse_drag", mouseDragHandler)
+    end
     self.scrollUpButton.makeActive()
     self.scrollDownButton.makeActive()
+    render()
   end
 
   local makeInactive = function()
+    if self.leftMouseDownHandlerId ~= nil then
+      self.eventHandler.removeHandle(self.leftMouseDownHandlerId)
+      self.eventHandler.removeHandle(self.leftMouseUpHandlerId)
+      self.eventHandler.removeHandle(self.leftMouseDragHandlerId)
+
+      self.leftMouseDownHandlerId = nil
+      self.leftMouseUpHandlerId = nil
+      self.leftMouseDragHandlerId = nil
+    end
+    
     self.scrollUpButton.makeInactive()
     self.scrollDownButton.makeInactive()
   end
@@ -140,12 +181,11 @@ local function create(args)
     self.trackingScreenBufferDimensions = callbackData.dimensions
     local barText, bgColors = getBarBlits()
     self.scrollBarContent.updateText{text=barText, bgColors=bgColors, render=true}
-    render()
   end
 
   self.trackingScreenBuffer.registerCallback(screenBufferCallback)
-  render()
-  --self.eventHandler.addHandle("monitor_touch", )
+  makeActive()
+  
 
   return {
     render=render,

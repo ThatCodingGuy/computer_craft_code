@@ -319,7 +319,7 @@ end
 
 function dig_only_blocks_matching(matches)
     local function digfunc(current, adjacent, facing, direction, block_data, map)
-        if block_data == nil or not matches(block_data) then
+        if block_data ~= nil and not matches(block_data) then
             return facing, current
         end
 

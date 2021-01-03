@@ -11,6 +11,7 @@ local number_def = common_argument_definitions.number_def
 local boolean_def = common_argument_definitions.boolean_def
 local starts_with = lua_helpers.starts_with
 local ends_with = lua_helpers.ends_with
+local to_string = lua_helpers.to_string
 
 local logger = Logger.new()
 
@@ -39,7 +40,10 @@ local function drop_off_wood(facing, position, wood_dropoff_coordinates)
     while inventory.countItemMatching(is_tree_log) > 0 do
         local success = inventory.selectItemMatching(is_tree_log)
         local placed = turtle.placeDown()
-        logger.debug("Log selection succeeded: " .. success .. "; Placed: " .. placed)
+        logger.debug("Log selection succeeded: "
+                .. to_string(success)
+                .. "; Placed: "
+                .. to_string(placed))
     end
     return facing, position
 end

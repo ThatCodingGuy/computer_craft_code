@@ -40,6 +40,50 @@ local function drop_off_wood(facing, position, wood_dropoff_coordinates)
     return facing, position
 end
 
+local function remove_tree()
+    -- Birch trees grow up to 7 high, with a width of 5.
+    -- TODO: Define per-tree areas to be chopped down rather than assuming birch tree dimensions.
+
+    -- Move the turtle to the corner of the tree area.
+    turtle.turnLeft()
+    turtle.turnLeft()
+    turtle.forward()
+    turtle.turnLeft()
+    turtle.forward()
+    turtle.forward()
+    turtle.turnLeft()
+
+    -- Move through and chop down the tree blocks.
+    for y = 1, 7 do
+        for z = 1, 4 do
+            for x = 1, 4 do
+                turtle.dig()
+                turtle.forward()
+            end
+            local turn
+            if z % 2 == 0 then
+                turn = turtle.turnRight
+            else
+                turn = turtle.turnLeft
+            end
+            turn()
+            turtle.dig()
+            turtle.forward()
+            turn()
+        end
+        turtle.up()
+        turtle.turnLeft()
+        turtle.turnLeft()
+    end
+
+    -- As the algorithm is currently written, the robot will always finish facing the opposite
+    -- direction that it started facing. We'll undo the last rotation here so that the robot returns
+    -- to facing the same direction as it started, therefore preventing any need to calculate the
+    -- new direction the robot is facing.
+    turtle.turnLeft()
+    turtle.turnLeft()
+end
+
 local function treeChop(position, adjacent, facing, direction, block_data, map)
     local start_position = position
     local start_facing = facing
@@ -63,20 +107,10 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
         turtle.place()
     elseif is_tree_log(block_data) then
         logger.info("Tree sprouted. Clearing the tree blocks.")
-        -- Trees grow up to 7 high, with a width of 5
-        -- Tree is in adjacent
 
-        local tree_x, tree_y, tree_z = movement.split_coord(adjacent)
-        local tree_area = {}
-        for x = tree_x - 2, tree_x + 2, 1 do
-            for z = tree_z - 2, tree_z + 2, 1 do
-                for y = tree_y, tree_y + 7, 1 do
-                    tree_area[movement.coord(x, y, z)] = 1
-                end
-            end
-        end
-
-        facing, position = movement.explore_area(tree_area, position, facing, cut_tree)
+        remove_tree()
+        -- We calculate the new position of the turtle after it cuts down the tree.
+        position = movement.gps_locate()
         facing, position = drop_off_wood(facing, position, map.wood_dropoff_coordinates)
         facing, position = movement.navigate(position, facing, start_position)
         facing = movement.turn_to_face(facing, start_facing)

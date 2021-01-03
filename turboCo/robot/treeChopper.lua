@@ -8,10 +8,15 @@ local refuel = dofile("./gitlib/turboCo/client/refuel.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
 
 local number_def = common_argument_definitions.number_def
+local boolean_def = common_argument_definitions.boolean_def
 local starts_with = lua_helpers.starts_with
 local ends_with = lua_helpers.ends_with
 
 local logger = Logger.new()
+
+local function is_tree_leaves(item_details)
+    return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "leaves")
+end
 
 local function is_tree_log(item_details)
     return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "log")
@@ -20,6 +25,12 @@ end
 local function is_sapling(item_details)
     return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "sapling")
 end
+
+local function is_tree_block(item_details)
+    return is_tree_leaves(item_details) or is_tree_log(item_details)
+end
+
+local dig_tree_blocks = movement.dig_only_blocks_matching(is_tree_block)
 
 local function drop_off_wood(facing, position, wood_dropoff_coordinates)
     local x, y, z = movement.split_coord(wood_dropoff_coordinates)
@@ -81,6 +92,20 @@ local function remove_tree()
     turtle.turnLeft()
 end
 
+local function generic_remove_tree(facing, position, adjacent)
+    local tree_x, tree_y, tree_z = movement.split_coord(adjacent)
+    local tree_area = {}
+    for x = tree_x - 2, tree_x + 2 do
+        for y = tree_y, tree_y + 7 do
+            for z = tree_z - 2, tree_z + 2 do
+                tree_area[movement.coord(x, y, z)] = 1
+            end
+        end
+    end
+
+    return movement.explore_area(tree_area, position, facing, dig_tree_blocks)
+end
+
 local function treeChop(position, adjacent, facing, direction, block_data, map)
     local start_position = position
     local start_facing = facing
@@ -105,9 +130,13 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
     elseif is_tree_log(block_data) then
         logger.info("Tree sprouted. Clearing the tree blocks.")
 
-        remove_tree()
-        -- We calculate the new position of the turtle after it cuts down the tree.
-        position = movement.gps_locate()
+        if map.use_specialized_algorithm then
+            remove_tree()
+            -- We calculate the new position of the turtle after it cuts down the tree.
+            position = movement.gps_locate()
+        else
+            facing, position = generic_remove_tree(facing, position, adjacent)
+        end
         facing, position = drop_off_wood(facing, position, map.wood_dropoff_coordinates)
         facing, position = movement.navigate(position, facing, start_position)
         facing = movement.turn_to_face(facing, start_facing)
@@ -139,6 +168,14 @@ local function run()
             short_name = "z",
             description = "The Z position of the robot above the wood drop-off station.",
         },
+        boolean_def {
+            long_name = "use_specialized_algorithm",
+            short_name = "a",
+            description = "A boolean specifying whether to use a tree-chopper-specific algorithm "
+                    .. "for digging the tree blocks or not. True by default, otherwise uses the "
+                    .. "generic exploration algorithm in movement.lua.",
+            default = true
+        },
     }
     local parsed_arguments = argument_parser.parse(arg)
     if parsed_arguments.x == nil or parsed_arguments.y == nil or parsed_arguments.z == nil then
@@ -148,6 +185,7 @@ local function run()
     end
     local wood_dropoff_coordinates = movement.coord(
             parsed_arguments.x, parsed_arguments.y, parsed_arguments.z)
+    local use_specialized_algorithm = parsed_arguments.use_specialized_algorithm
 
     local facing = movement.figure_out_facing()
     if not facing then
@@ -184,7 +222,10 @@ local function run()
                 tree_spot,
                 facing,
                 treeChop,
-                { wood_dropoff_coordinates = wood_dropoff_coordinates })
+                {
+                    wood_dropoff_coordinates = wood_dropoff_coordinates,
+                    use_specialized_algorithm = use_specialized_algorithm,
+                })
     end, 10)
     event_handler.pullEvents()
 end

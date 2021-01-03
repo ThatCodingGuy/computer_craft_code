@@ -45,15 +45,19 @@ local function remove_tree()
     turtle.forward()
     turtle.turnLeft()
 
+    local function dig_through_column()
+        for _ = 1, 4 do
+            turtle.dig()
+            turtle.forward()
+        end
+    end
+
     -- Move through and chop down the tree blocks.
-    for y = 1, 7 do
-        for z = 1, 4 do
-            for x = 1, 4 do
-                turtle.dig()
-                turtle.forward()
-            end
+    for _ = 1, 7 do
+        for row = 1, 4 do
+            dig_through_column()
             local turn
-            if z % 2 == 0 then
+            if row % 2 == 0 then
                 turn = turtle.turnRight
             else
                 turn = turtle.turnLeft
@@ -63,6 +67,7 @@ local function remove_tree()
             turtle.forward()
             turn()
         end
+        dig_through_column()
         turtle.up()
         turtle.turnLeft()
         turtle.turnLeft()

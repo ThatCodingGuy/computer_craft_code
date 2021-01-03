@@ -47,7 +47,7 @@ local function countItemWithName(name)
 end
 
 return {
-    selectItemWithNameMatching = selectItemMatching,
+    selectItemMatching = selectItemMatching,
     selectItemWithName = selectItemWithName,
     countItemMatching = countItemMatching,
     countItemWithName = countItemWithName,

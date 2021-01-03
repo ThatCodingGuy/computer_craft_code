@@ -35,7 +35,7 @@ local function is_bone_meal(item_details)
             and ((
             ends_with(item_details.name, "dye")
                     and item_details.damage == 15)
-            or ends_with("bone_meal"))
+            or ends_with(item_details.name, "bone_meal"))
 end
 
 local dig_tree_blocks = movement.dig_only_blocks_matching(is_tree_block)

@@ -73,8 +73,8 @@ local function create(args)
 
   local wasBarClicked = function(x, y)
     local barStartingIndex, barLastIndex = getScrollableBarIndexes()
-    local barStartingY = self.screenStartingPos.y + barStartingIndex - 1
-    local barEndingY = self.screenStartingPos.y + barLastIndex - 1
+    local barStartingY = self.screenStartingPos.y + barStartingIndex --We add the index because the starting positio is the scrollUp button
+    local barEndingY = self.screenStartingPos.y + barLastIndex
     return y >= barStartingY and y <= barEndingY and x == self.screenStartingPos.x
   end
 

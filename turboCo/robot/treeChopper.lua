@@ -38,12 +38,8 @@ local function drop_off_wood(facing, position, wood_dropoff_coordinates)
     facing, position = movement.navigate(position, facing, movement.coord(x, y, z))
 
     while inventory.countItemMatching(is_tree_log) > 0 do
-        local success = inventory.selectItemMatching(is_tree_log)
-        local placed = turtle.placeDown()
-        logger.debug("Log selection succeeded: "
-                .. to_string(success)
-                .. "; Placed: "
-                .. to_string(placed))
+        inventory.selectItemMatching(is_tree_log)
+        turtle.dropDown()
     end
     return facing, position
 end

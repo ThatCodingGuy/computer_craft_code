@@ -13,10 +13,6 @@ local ends_with = lua_helpers.ends_with
 
 local logger = Logger.new()
 
-local function is_tree_leaves(item_details)
-    return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "leaves")
-end
-
 local function is_tree_log(item_details)
     return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "log")
 end
@@ -24,10 +20,6 @@ end
 local function is_sapling(item_details)
     return starts_with(item_details.name, "minecraft:") and ends_with(item_details.name, "sapling")
 end
-
-local cut_tree = movement.dig_only_blocks_matching(function(item_details)
-    return is_tree_log(item_details) or is_tree_leaves(item_details)
-end)
 
 local function drop_off_wood(facing, position, wood_dropoff_coordinates)
     local x, y, z = movement.split_coord(wood_dropoff_coordinates)
@@ -114,6 +106,15 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
         facing, position = drop_off_wood(facing, position, map.wood_dropoff_coordinates)
         facing, position = movement.navigate(position, facing, start_position)
         facing = movement.turn_to_face(facing, start_facing)
+
+        -- If there's a torch in the turtle's inventory, then we want to place it back next to the\
+        -- tree
+        if inventory.countItemWithName("minecraft:torch") > 1 then
+            turtle.forward()
+            inventory.selectItemWithName("minecraft:torch")
+            turtle.place()
+            turtle.back()
+        end
     end
 
     return facing, position

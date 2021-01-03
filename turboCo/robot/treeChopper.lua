@@ -87,6 +87,7 @@ local function remove_tree()
             turn()
         end
         dig_through_column()
+        turtle.digUp()
         turtle.up()
         turtle.turnLeft()
         turtle.turnLeft()

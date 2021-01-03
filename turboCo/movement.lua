@@ -107,7 +107,7 @@ end
 function gps_locate()
     local x, y, z = gps.locate()
     while x == nil do
-        print("Lossy gps signal, trying again")
+        logger.warn("Lossy gps signal, trying again")
         x, y, z = gps.locate()
     end
     return coord(x, y, z)
@@ -385,8 +385,7 @@ function visit_adjacent(position, adjacent, facing, block_callback, map)
     end
 
     if distance(position, adjacent) > 1 then
-        print("Caller: " .. debug.getinfo(2).name)
-        print(position .. "/" .. adjacent)
+        logger.error("Caller: " .. debug.getinfo(2).name .. "\n", position .. "/" .. adjacent)
         error("not adjacent")
     end
 
@@ -535,7 +534,7 @@ end
 function navigate(current, facing, destination)
     -- FIXME: A path needs to exist, or the robot will forever explore
 
-    print("Navigating to " .. destination)
+    logger.info("Navigating to " .. destination)
 
     local visited = {}
     visited[current] = EMPTY
@@ -662,7 +661,7 @@ function scan_area(width, depth, height, block_callback)
     local final_x = start_x + x_total
     local final_z = start_z + z_total
     local final_y = start_y + height
-    print("Scanning from " .. start_x .. "," .. start_z .. " to " .. final_x .. "," .. final_z)
+    logger.info("Scanning from " .. start_x .. "," .. start_z .. " to " .. final_x .. "," .. final_z)
 
     x_offset = 1
     z_offset = 1

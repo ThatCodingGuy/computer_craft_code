@@ -62,7 +62,7 @@ local function treeChop(position, adjacent, facing, direction, block_data, map)
         inventory.selectItemWithName("minecraft:bone_meal")
         turtle.place()
     elseif is_tree_log(block_data) then
-        logger.info("Birch tree sprouted. Clearing the tree blocks.")
+        logger.info("Tree sprouted. Clearing the tree blocks.")
         -- Trees grow up to 7 high, with a width of 5
         -- Tree is in adjacent
 

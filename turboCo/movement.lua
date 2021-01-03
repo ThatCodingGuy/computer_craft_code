@@ -1,4 +1,7 @@
 local Logger = dofile("./gitlib/turboCo/logger.lua")
+local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
+
+local to_string = lua_helpers.to_string
 
 -- By convention, x/y/z can either be relative or global
 --
@@ -446,6 +449,7 @@ function visit(position, target, facing, block_callback, walkable_map)
         -- Call the callback for any blocks encountered, and force dig if they're
         -- Still there after. 
         local path = pathfind_with_map(position, target, walkable_map)
+        logger.debug("Pathfinding using following path:\n", to_string(path))
         facing, position = follow_path(position, path, facing, block_callback, walkable_map)
     end
 

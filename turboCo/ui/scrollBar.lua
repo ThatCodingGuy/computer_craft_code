@@ -11,7 +11,6 @@ local function create(args)
     screen = args.screen,
     eventHandler = args.eventHandler,
     trackingScreenBuffer = args.trackingScreenBuffer,
-    trackingScreenBufferDimensions = args.trackingScreenBuffer.getBufferDimensions(),
     scrollBarScreenBuffer = ScreenBuffer.create{
       screen = args.screen,
       xStartingScreenPos = args.xStartingScreenPos,
@@ -30,39 +29,55 @@ local function create(args)
     leftMouseDownHandlerId = nil,
     leftMouseUpHandlerId = nil,
     leftMouseDragHandlerId = nil,
-    leftMouseClickScreenPos = nil
+    leftMouseClickScreenPos = nil,
+    draggingRoundingError = 0
   }
 
   local getFullBarLength = function()
     return self.height - 2
   end
 
-  local getScrollableBarIndexes = function()
+  local getScrollableBarData = function()
     local fullBarLength = getFullBarLength()
-    local scrollableHeightRatio =  self.height / self.trackingScreenBufferDimensions.height
-    if scrollableHeightRatio > 1 then
-      --if > 1, then screenBuffer doesn't cover full screen yet
-      scrollableHeightRatio = 1
+    local dimensions = self.trackingScreenBuffer.getBufferDimensions()
+    local screenRenderPos = self.trackingScreenBuffer.getRenderPos()
+    local maxRenderPos = self.trackingScreenBuffer.getMaxRenderPos()
+    local scrollableHeightRatio =  self.height / dimensions.height
+    if scrollableHeightRatio >= 1 then
+      -- if >= 1, then screenBuffer doesn't have content past the screen,
+      -- si no need for scrolling
+      return {
+        startIndex=0,
+        endIndex=0,
+        heightReal=0,
+        height=0,
+      }
     end
-    local barHeight = math.floor(fullBarLength * scrollableHeightRatio)
+    local barHeightReal = fullBarLength * scrollableHeightRatio
+    local barHeight = math.floor(barHeightReal)
     if barHeight == 0 then
       barHeight = 1
     end
-    local screenRenderPos = self.trackingScreenBuffer.getRenderPos()
-    local renderPosRatio = screenRenderPos.y / self.trackingScreenBufferDimensions.height
+    local renderPosRatio = screenRenderPos.y / maxRenderPos.y
     local barMovableHeight = fullBarLength - barHeight
     local barStartingPosIndex = math.floor(barMovableHeight * renderPosRatio) + 1
-    return barStartingPosIndex, barStartingPosIndex + barHeight - 1
+    return {
+      startIndex=barStartingPosIndex,
+      endIndex=barStartingPosIndex + barHeight - 1,
+      heightReal=barHeightReal,
+      height=barHeight,
+      barMovableHeight=barMovableHeight
+    }
   end
 
 
   local getBarBlits = function()
     local barText = ""
     local bgColors = ""
-    local barStartingIndex, barLastIndex = getScrollableBarIndexes()
+    local scrollBarData = getScrollableBarData()
     for i=1,getFullBarLength() do
       barText = barText .. " "
-      if i >= barStartingIndex and i <= barLastIndex then
+      if i >= scrollBarData.startIndex and i <= scrollBarData.endIndex then
         bgColors = bgColors .. self.trackingScreenBuffer.blitMap[self.barColor]
       else
         bgColors = bgColors .. self.trackingScreenBuffer.blitMap[self.emptyBarColor]
@@ -72,9 +87,12 @@ local function create(args)
   end
 
   local wasBarClicked = function(x, y)
-    local barStartingIndex, barLastIndex = getScrollableBarIndexes()
-    local barStartingY = self.screenStartingPos.y + barStartingIndex --We add the index because the starting positio is the scrollUp button
-    local barEndingY = self.screenStartingPos.y + barLastIndex
+    local scrollBarData = getScrollableBarData()
+    if scrollBarData.startIndex == 0 then
+      return false
+    end
+    local barStartingY = self.screenStartingPos.y + scrollBarData.startIndex --We add the index because the starting position is the scrollUp button
+    local barEndingY = self.screenStartingPos.y + scrollBarData.endIndex
     return y >= barStartingY and y <= barEndingY and x == self.screenStartingPos.x
   end
 
@@ -94,20 +112,19 @@ local function create(args)
 
   local mouseDragHandler = function(eventData)
     local button, x, y = eventData[2], eventData[3], eventData[4]
-    local barStartingIndex, barEndingIndex = getScrollableBarIndexes()
-    local barHeight = barEndingIndex - barStartingIndex + 1
-    local singleBarUnitHeight = math.ceil(self.trackingScreenBufferDimensions.height / (getFullBarLength() - barHeight))
     if button == 1 and self.leftMouseDragScreenPos then
-      local distanceY = self.leftMouseDragScreenPos.y - y
-      local scrollTimes = singleBarUnitHeight * math.abs(distanceY)
-      for i=1,scrollTimes do
-        if distanceY < 0 then
-          self.trackingScreenBuffer.scrollDown()
-        else
-          self.trackingScreenBuffer.scrollUp()
-        end
-      end
+
+      local distanceY = y - self.leftMouseDragScreenPos.y
       self.leftMouseDragScreenPos = {x = x, y = y}
+      if distanceY == 0 then
+        return
+      end
+      local maxRenderPos = self.trackingScreenBuffer.getMaxRenderPos()
+      local renderPos = self.trackingScreenBuffer.getRenderPos()
+      local scrollBarData = getScrollableBarData()
+      local renderPosRatio = (scrollBarData.startIndex - 1 + distanceY) / scrollBarData.barMovableHeight
+      local scrollToPosY = math.floor(renderPosRatio * maxRenderPos.y) + 1
+      self.trackingScreenBuffer.scrollTo(scrollToPosY)
     end
   end
 
@@ -180,7 +197,6 @@ local function create(args)
   end
 
   local screenBufferCallback = function(callbackData)
-    self.trackingScreenBufferDimensions = callbackData.dimensions
     local barText, bgColors = getBarBlits()
     self.scrollBarContent.updateText{text=barText, bgColors=bgColors, render=true}
   end

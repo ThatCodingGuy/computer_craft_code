@@ -86,6 +86,12 @@ local function create(args)
     return barText, bgColors
   end
 
+  local wasFullBarClicked = function(x, y)
+    local barStartingY = self.screenStartingPos.y + 1
+    local barEndingY = self.screenStartingPos.y + getFullBarLength()
+    return y >= barStartingY and y <= barEndingY and x == self.screenStartingPos.x
+  end
+
   local wasBarClicked = function(x, y)
     local scrollBarData = getScrollableBarData()
     if scrollBarData.startIndex == 0 then
@@ -120,7 +126,6 @@ local function create(args)
         return
       end
       local maxRenderPos = self.trackingScreenBuffer.getMaxRenderPos()
-      local renderPos = self.trackingScreenBuffer.getRenderPos()
       local scrollBarData = getScrollableBarData()
       local renderPosRatio = (scrollBarData.startIndex - 1 + distanceY) / scrollBarData.barMovableHeight
       local scrollToPosY = math.floor(renderPosRatio * maxRenderPos.y) + 1
@@ -128,8 +133,18 @@ local function create(args)
     end
   end
 
+  --Let's render to the middle of the bar when clicked
   local monitorTouchHandler = function(eventData)
-    --TODO
+    local side, x, y = eventData[2], eventData[3], eventData[4]
+    if wasFullBarClicked(x, y) then
+      local maxRenderPos = self.trackingScreenBuffer.getMaxRenderPos()
+      local scrollBarData = getScrollableBarData()
+      local barOffset = y - self.screenStartingPos.y - 1
+      local startIndexToGoto = barOffset - math.floor(scrollBarData.height / 2)
+      local renderPosRatio = startIndexToGoto / scrollBarData.barMovableHeight
+      local scrollToPosY = math.floor(renderPosRatio * maxRenderPos.y) + 1
+      self.trackingScreenBuffer.scrollTo(scrollToPosY)
+    end
   end
 
 

@@ -3,7 +3,7 @@
 
 local function create(args)
   local self = {
-    view = {},
+    pages = {},
     currPage = 0,
     eventHandler = args.eventHandler,
     leftButton = args.leftButton,
@@ -12,10 +12,6 @@ local function create(args)
     rightButtonOrigCallback = nil,
     postPageChangeCallback = args.postPageChangeCallback,
   }
-
-  local render = function()
-
-  end
 
   local getPage = function()
     return self.pages[self.currPage]
@@ -33,19 +29,45 @@ local function create(args)
     return self.currPage < #self.pages
   end
 
-  local switchToPage = function(index)
-    if self.currPage > 0 then
-      local page = self.pages[self.currPage]
+  local render = function()
+    local page = getPage()
+    if page then
+      page.render()
+    end
+  end
+
+  local addClickable = function(clickable)
+    local page = getPage()
+    if page then
+      page.addClickable(clickable)
+    end
+  end
+
+  local makeActive = function()
+    local page = getPage()
+    if page then
+      page.makeActive()
+    end
+  end
+
+  local makeInactive = function()
+    local page = getPage()
+    if page then
       page.makeInactive()
     end
+  end
+
+  local switchToPage = function(index)
+    if self.currPage > 0 then
+      makeInactive()
+    end
     self.currPage = index
-    local page = self.pages[self.currPage]
-    page.makeActive()
+    makeActive()
 
     if self.postPageChangeCallback ~= nil then
       self.postPageChangeCallback()
     end
-    return page
+    return getPage()
   end
 
   local switchToPreviousPage = function()
@@ -78,11 +100,14 @@ local function create(args)
   end
 
   return {
-    render=render,
     getPage=getPage,
     getPageIndex=getPageIndex,
     hasPreviousPage=hasPreviousPage,
     hasNextPage=hasNextPage,
+    render=render,
+    addClickable=addClickable,
+    makeActive=makeActive,
+    makeInactive=makeInactive,
     switchToPage=switchToPage,
     switchToPreviousPage=switchToPreviousPage,
     switchToNextPage=switchToNextPage,

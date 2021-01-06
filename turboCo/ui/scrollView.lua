@@ -1,18 +1,18 @@
-local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
+local View = dofile("./gitlib/turboCo/ui/view.lua")
 local ScrollBar = dofile("./gitlib/turboCo/ui/scrollBar.lua")
 local logger = dofile('./gitlib/turboCo/logger.lua').new()
 
 local function createFromScreenBufferAndScrollBar(args)
   local self = {
     eventHandler = args.eventHandler,
-    screenBuffer=args.screenBuffer,
+    view=args.view,
     scrollBar=args.scrollBar,
     mouseScrollHandleId = nil
   }
 
   local wasScrolledOn = function(x, y)
-    local screenStartingPos = self.screenBuffer.getScreenStartingPos()
-    local width,height = self.screenBuffer.getWidth(), self.screenBuffer.getHeight()
+    local screenStartingPos = self.view.screenBuffer.getScreenStartingPos()
+    local width,height = self.view.screenBuffer.getWidth(), self.view.screenBuffer.getHeight()
     local maxPosX, maxPosY = screenStartingPos.x + width - 1, screenStartingPos.y + height - 1
     return x >= screenStartingPos.x and x <= maxPosX and y >= screenStartingPos.y and y <= maxPosY
   end
@@ -21,15 +21,11 @@ local function createFromScreenBufferAndScrollBar(args)
     local scrollDirection, x, y = eventData[2], eventData[3], eventData[4]
     if wasScrolledOn(x, y) then
       if scrollDirection > 0 then
-        self.screenBuffer.scrollDown()
+        self.view.screenBuffer.scrollDown()
       else
-        self.screenBuffer.scrollUp()
+        self.view.screenBuffer.scrollUp()
       end
     end
-  end
-
-  local getScreenBuffer = function()
-    return self.screenBuffer
   end
 
   local makeActive = function()
@@ -37,11 +33,12 @@ local function createFromScreenBufferAndScrollBar(args)
       self.scrollBar.makeActive()
       self.mouseScrollHandleId = self.eventHandler.addHandle("mouse_scroll", mouseScrolled)
     end
-    self.screenBuffer.render()
+    self.view.makeActive()
   end
 
   local makeInactive = function()
     self.scrollBar.makeInactive()
+    self.view.makeInactive()
     if self.mouseScrollHandleId then
       self.eventHandler.removeHandle(self.mouseScrollHandleId)
       self.mouseScrollHandleId = nil
@@ -51,7 +48,8 @@ local function createFromScreenBufferAndScrollBar(args)
   makeActive()
 
   return {
-    getScreenBuffer=getScreenBuffer,
+    screenBuffer=self.view.screenBuffer,
+    addClickable=self.view.addClickable,
     makeActive=makeActive,
     makeInactive=makeInactive
   }
@@ -62,7 +60,7 @@ local function create(args)
         args.screen, args.eventHandler, args.xStartingScreenPos, args.yStartingScreenPos,
         args.width, args.height, args.textColor, args.bgColor
 
-  local screenBuffer = ScreenBuffer.create{
+  local view = View.create{
     screen = screen,
     xStartingScreenPos = xStartingScreenPos,
     yStartingScreenPos = yStartingScreenPos,
@@ -75,13 +73,13 @@ local function create(args)
   local scrollBar = ScrollBar.create{
     screen = screen,
     eventHandler = eventHandler,
-    trackingScreenBuffer = screenBuffer,
+    trackingScreenBuffer = view.screenBuffer,
     xStartingScreenPos = xStartingScreenPos + width - 1,
     yStartingScreenPos = yStartingScreenPos,
     height = height
   }
 
-  return createFromScreenBufferAndScrollBar{eventHandler=eventHandler, screenBuffer=screenBuffer, scrollBar=scrollBar}
+  return createFromScreenBufferAndScrollBar{eventHandler=eventHandler, view=view, scrollBar=scrollBar}
 end
 
 local function createFromOverrides(args)
@@ -89,7 +87,7 @@ local function createFromOverrides(args)
     args.eventHandler, args.textColor, args.bgColor, args.leftOffset or 0, args.rightOffset or 0, args.topOffset or 0,args.bottomOffset or 0
   local width,_ = screen.getSize()
 
-  local screenBuffer = ScreenBuffer.createFromOverrides{
+  local view = View.createFromOverrides{
     screen=screen,
     eventHandler=eventHandler,
     textColor=textColor,
@@ -103,13 +101,13 @@ local function createFromOverrides(args)
   local scrollBar = ScrollBar.createFromOverrides{
     screen=screen,
     eventHandler=eventHandler,
-    trackingScreenBuffer=screenBuffer,
+    trackingScreenBuffer=view.screenBuffer,
     leftOffset=width - 1 - rightOffset,
     topOffset=topOffset,
     bottomOffset=bottomOffset
   }
 
-  return createFromScreenBufferAndScrollBar{eventHandler=eventHandler, screenBuffer=screenBuffer, scrollBar=scrollBar}
+  return createFromScreenBufferAndScrollBar{eventHandler=eventHandler, view=view, scrollBar=scrollBar}
 end
 
 return {

@@ -16,7 +16,7 @@ modem.openModems()
 
 local TAPE_WRITE_EVENT_TYPE = "tape_write_unit"
 local MUSIC_FOLDER_PATH = "/songs/"
-local MUSIC_CONFIG_PATH = "musicConfig.json"
+local MUSIC_CONFIG_PATH = "/musicConfig.json"
 local MUSIC_PROGRESS_TRACK_DELAY = 0.5
 local BYTE_WRITE_UNIT = 10 * 1024 --10 KB
 

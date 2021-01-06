@@ -1,7 +1,7 @@
 local json = dofile("./gitlib/turboCo/json.lua")
 local lua_helpers = dofile("./gitlib/turboCo/lua_helpers.lua")
 local EventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua")
-local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
+local View = dofile("./gitlib/turboCo/ui/view.lua")
 local RadioGroup = dofile("./gitlib/turboCo/ui/radioGroup.lua")
 local RadioInput = dofile("./gitlib/turboCo/ui/radioInput.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
@@ -57,15 +57,14 @@ screen.clear()
 local width,height = screen.getSize()
 
 --UI Components
-local screenTitleBuffer = nil
+local screenTitleView = nil
 local progressScreenContent = nil
 local speedScreenContent = nil
 local volumeScreenContent = nil
-local controlScreenBuffer = nil
+local controlView = nil
 local musicView = nil
-local musicViewScreenBuffer = nil
-local musicControlsBuffer = nil
-local nowPlayingBuffer = nil
+local musicControlsView = nil
+local nowPlayingView = nil
 local nowPlayingScreenContent = nil
 
 --Client State
@@ -275,59 +274,59 @@ function rednetMessageReceived(eventData)
   responseFunc(messageObj)
 end
 
-screenTitleBuffer = ScreenBuffer.createFromOverrides{screen=screen, bottomOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
-screenTitleBuffer.writeCenter{text="-- Music Player --"}
+screenTitleView = View.createFromOverrides{screen=screen, bottomOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
+screenTitleView.screenBuffer.writeCenter{text="-- Music Player --"}
 if canExit then
-  Button.create{
-    screenBuffer=screenTitleBuffer,
-    screenBufferWriteFunc=screenTitleBuffer.writeRight,
+  screenTitleView.addClickable(Button.create{
+    screenBuffer=screenTitleView.screenBuffer,
+    screenBufferWriteFunc=screenTitleView.screenBuffer.writeRight,
     eventHandler=eventHandler,
     text=" x",
     textColor=colors.white,
     bgColor=colors.red,
     leftClickCallback=exitHandler.exit
-  }
+  })
 end
-screenTitleBuffer.render()
+screenTitleView.screenBuffer.render()
 
-controlScreenBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=1, bottomOffset=height-2, bgColor=colors.blue, textColor=colors.white}
+controlView = View.createFromOverrides{screen=screen, topOffset=1, bottomOffset=height-2, bgColor=colors.blue, textColor=colors.white}
 --Adds Padding
 --controlScreenBuffer.write{text="  "}
-Button.create{
-  screenBuffer=controlScreenBuffer,
+controlView.addClickable(Button.create{
+  screenBuffer=controlView.screenBuffer,
   eventHandler=eventHandler,
   text="+",
   textColor=colors.white,
   bgColor=colors.lime,
   leftClickCallback=increaseSpeed
-}
-Button.create{
-  screenBuffer=controlScreenBuffer,
+})
+controlView.addClickable(Button.create{
+  screenBuffer=controlView.screenBuffer,
   eventHandler=eventHandler,
   text="-",
   textColor=colors.white,
   bgColor=colors.red,
   leftClickCallback=decreaseSpeed
-}
+})
 
 local speedText = " Speed: "
 if width < 30 then
   speedText = " Spd: "
 end
-controlScreenBuffer.write{text=speedText}
+controlView.screenBuffer.write{text=speedText}
 
 speedScreenContent = ScreenContent.create{
-  screenBuffer=controlScreenBuffer,
+  screenBuffer=controlView.screenBuffer,
   eventHandler=eventHandler,
   text="    "
 }
 
 --Adds padding
 --controlScreenBuffer.write{text="        "}
-controlScreenBuffer.write{text=" "}
+controlView.screenBuffer.write{text=" "}
 
 Button.create{
-  screenBuffer=controlScreenBuffer,
+  screenBuffer=controlView.screenBuffer,
   eventHandler=eventHandler,
   text="+",
   textColor=colors.white,
@@ -335,7 +334,7 @@ Button.create{
   leftClickCallback=increaseVolume
 }
 Button.create{
-  screenBuffer=controlScreenBuffer,
+  screenBuffer=controlView.screenBuffer,
   eventHandler=eventHandler,
   text="-",
   textColor=colors.white,
@@ -347,54 +346,53 @@ local volumeText = " Volume: "
 if width < 30 then
   volumeText = " Vol: "
 end
-controlScreenBuffer.write{text=volumeText}
+controlView.screenBuffer.write{text=volumeText}
 
 volumeScreenContent = ScreenContent.create{
-  screenBuffer=controlScreenBuffer,
+  screenBuffer=controlView.screenBuffer,
   eventHandler=eventHandler,
   text="    "
 }
-controlScreenBuffer.render()
+controlView.screenBuffer.render()
 
 musicView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=2, bgColor=musicBgColor, textColor=musicTextColor}
-musicViewScreenBuffer = musicView.getScreenBuffer()
-musicViewScreenBuffer.render()
+musicView.screenBuffer.render()
 
-musicControlsBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-2, bottomOffset=1, bgColor=colors.blue, textColor=colors.white}
-Button.create{
-  screenBuffer=musicControlsBuffer,
-  screenBufferWriteFunc=musicControlsBuffer.writeLeft,
+musicView = View.createFromOverrides{screen=screen, topOffset=height-2, bottomOffset=1, bgColor=colors.blue, textColor=colors.white}
+musicView.addClickable(Button.create{
+  screenBuffer=musicView.screenBuffer,
+  screenBufferWriteFunc=musicView.screenBuffer.writeLeft,
   eventHandler=eventHandler,
   text=" Play ", 
   textColor=colors.white,
   bgColor=colors.lime,
   leftClickCallback=play
-}
+})
 
-Button.create{
-  screenBuffer=musicControlsBuffer,
-  screenBufferWriteFunc=musicControlsBuffer.writeRight,
+musicView.addClickable(Button.create{
+  screenBuffer=musicView.screenBuffer,
+  screenBufferWriteFunc=musicView.screenBuffer.writeRight,
   eventHandler=eventHandler, 
   text=" Stop ",
   textColor=colors.white,
   bgColor=colors.red,
   leftClickCallback=stop
-}
+})
 
 progressScreenContent = ScreenContent.create{
-  screenBuffer=musicControlsBuffer,
-  screenBufferWriteFunc=musicControlsBuffer.writeCenter,
+  screenBuffer=musicView.screenBuffer,
+  screenBufferWriteFunc=musicView.screenBuffer.writeCenter,
   text="",
 }
-musicControlsBuffer.render()
+musicView.screenBuffer.render()
 
-nowPlayingBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
+nowPlayingView = View.createFromOverrides{screen=screen, topOffset=height-1, bgColor=colors.yellow, textColor=colors.gray}
 nowPlayingScreenContent = ScreenContent.create{
-  screenBuffer=nowPlayingBuffer,
-  screenBufferWriteFunc=nowPlayingBuffer.writeCenter,
+  screenBuffer=nowPlayingView.screenBuffer,
+  screenBufferWriteFunc=nowPlayingView.screenBuffer.writeCenter,
   text="",
 }
-nowPlayingBuffer.render()
+nowPlayingView.screenBuffer.render()
 
 eventHandler.addHandle("rednet_message", rednetMessageReceived)
 getMusicState()

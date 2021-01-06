@@ -1,11 +1,10 @@
 --Get historical quotes of the day
 
 local eventHandler = dofile("./gitlib/turboCo/event/eventHandler.lua").create()
-local ScreenBuffer = dofile("./gitlib/turboCo/ui/screenBuffer.lua")
 local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
-local Page = dofile("./gitlib/turboCo/ui/page.lua")
-local PageViewManager = dofile("./gitlib/turboCo/ui/pageViewManager.lua")
+local View = dofile("./gitlib/turboCo/ui/view.lua")
+local PageManagerView = dofile("./gitlib/turboCo/ui/pageManagerView.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 local httpManager = dofile("./gitlib/turboCo/httpManager.lua").create{eventHandler=eventHandler}
@@ -31,10 +30,10 @@ local categoryToColorMap = {
 local numResults = 10
 local numPages = nil
 
-local pageViewManager = nil
+local pageManagerView = nil
 local pageCounterContent = nil
-local screenTopBuffer = nil
-local screenBottomBuffer = nil
+local screenTopView = nil
+local screenBottomView = nil
 
 local tArgs = { ... }
 local screen = nil
@@ -106,7 +105,7 @@ function getAndWriteQuotes(screenBuffer, pageNumber, successCallback)
 end
 
 function createPageTrackerString()
-  local pageNumber = pageViewManager.getPageIndex()
+  local pageNumber = pageManagerView.getPageIndex()
   local numCharsMissing = #tostring(numPages) - #tostring(pageNumber)
   local pageNumberStr = tostring(pageNumber)
   for i=1,numCharsMissing do
@@ -117,26 +116,25 @@ end
 
 function updatePageTracker()
   pageCounterContent.updateText{text=createPageTrackerString()}
-  screenBottomBuffer.render()
+  screenBottomView.screenBuffer.render()
 end
 
 function createNewQuotePage(successCallback)
   local newPageScrollView = ScrollView.createFromOverrides{screen=screen, eventHandler=eventHandler, topOffset=2, bottomOffset=1, bgColor=colors.black}
-  local newPage = Page.create{view=newPageScrollView}
-  pageViewManager.addPage(newPage)
-  getAndWriteQuotes(newPageScrollView.getScreenBuffer(), pageViewManager.getPageIndex() + 1, successCallback)
+  pageManagerView.addPage(newPageScrollView)
+  getAndWriteQuotes(newPageScrollView.screenBuffer, pageManagerView.getPageIndex() + 1, successCallback)
 end
 
 function createFirstPage()
   pageCounterContent = ScreenContent.create{
-    screenBuffer=screenBottomBuffer,
-    screenBufferWriteFunc=screenBottomBuffer.writeCenter,
+    screenBuffer=screenBottomView.screenBuffer,
+    screenBufferWriteFunc=screenBottomView.screenBuffer.writeCenter,
     text=createPageTrackerString(),
     textColor=colors.gray,
     bgColor=colors.lightBlue
   }
-  pageViewManager.switchToNextPage()
-  screenBottomBuffer.render()
+  pageManagerView.switchToNextPage()
+  screenBottomView.screenBuffer.render()
 end
 
 function getFirstQuotes()
@@ -144,30 +142,30 @@ function getFirstQuotes()
 end
 
 function getNextQuotes()
-  if pageViewManager.getPageIndex() < numPages and not pageViewManager.hasNextPage() then
+  if pageManagerView.getPageIndex() < numPages and not pageManagerView.hasNextPage() then
     createNewQuotePage()
   end
 end
 
-screenTopBuffer = ScreenBuffer.createFromOverrides{screen=screen, height=2, textColor=colors.lightBlue, bgColor=colors.gray}
-screenTopBuffer.writeCenterLn{text="Quotes of the Day", textColor=colors.lightBlue, bgColor=colors.gray}
-screenTopBuffer.writeFullLineLn{text="-", textColor=colors.lightBlue, bgColor=colors.gray}
-screenTopBuffer.render()
+screenTopView = View.createFromOverrides{screen=screen, height=2, textColor=colors.lightBlue, bgColor=colors.gray}
+screenTopView.screenBuffer.writeCenterLn{text="Quotes of the Day", textColor=colors.lightBlue, bgColor=colors.gray}
+screenTopView.screenBuffer.writeFullLineLn{text="-", textColor=colors.lightBlue, bgColor=colors.gray}
+screenTopView.screenBuffer.render()
 
-screenBottomBuffer = ScreenBuffer.createFromOverrides{screen=screen, topOffset=height-1, textColor=colors.lightBlue, bgColor=colors.gray}
-screenBottomBuffer.writeFullLineThenResetCursor{text=" ", }
+screenBottomView = View.createFromOverrides{screen=screen, topOffset=height-1, textColor=colors.lightBlue, bgColor=colors.gray}
+screenBottomView.screenBuffer.writeFullLineThenResetCursor{text=" ", }
 
-pageViewManager = PageViewManager.create{
+pageManagerView = PageManagerView.create{
   eventHandler = eventHandler,
   leftButton = Button.create{
-    screenBuffer=screenBottomBuffer,
+    screenBuffer=screenBottomView.screenBuffer,
     eventHandler=eventHandler,
     text=" <-Prev ",
     textColor=colors.gray,
     bgColor=colors.lightBlue
   },
-  rightButton = Button.create{screenBuffer=screenBottomBuffer,
-    screenBufferWriteFunc=screenBottomBuffer.writeRight,
+  rightButton = Button.create{screenBuffer=screenBottomView.screenBuffer,
+    screenBufferWriteFunc=screenBottomView.screenBuffer.writeRight,
     eventHandler=eventHandler,
     text=" Next-> ",
     textColor=colors.gray,
@@ -176,19 +174,12 @@ pageViewManager = PageViewManager.create{
   },
   postPageChangeCallback = updatePageTracker
 }
-screenBottomBuffer.render()
+screenBottomView.screenBuffer.render()
 
 --Get the initial quote
 getFirstQuotes()
 
 local exitHandler = ExitHandler.createFromScreens({term.current(), screen}, eventHandler)
-
-if screen ~= term.current() then
-  print("Press UP to scroll up, and DOWN to scroll down")
-  print("Press LEFT to scroll left, and RIGHT to scroll right")
-  print("Press PAGE_UP to page up, and PAGE_DOWN to page down")
-  print("Press END to exit cleanly")
-end
 
 --Loops until exit handle quits it
 eventHandler.pullEvents()

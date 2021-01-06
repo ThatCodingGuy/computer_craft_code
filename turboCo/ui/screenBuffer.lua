@@ -106,14 +106,6 @@ local function create(args)
     end
   end
 
-  local getBufferLength = function()
-    local lastIndex = 0
-    for index,_ in pairs(self.screenState.buffer) do
-      lastIndex = index
-    end
-    return lastIndex
-  end
-
   local getBufferDimensions = function()
     local width = 0
     local height = 0
@@ -127,7 +119,24 @@ local function create(args)
         end
       end
     end
+    if self.screenState.cursorPos.y > height then
+      height = self.screenState.cursorPos.y
+    end
     return {width=width, height=height}
+  end
+
+  local getMaxRenderPos = function()
+    local dimensions = getBufferDimensions()
+
+    local maxRenderPosX = dimensions.width - self.width + 1
+    if maxRenderPosX < 1 then
+      maxRenderPosX = 1
+    end
+    local maxRenderPosY = dimensions.height - self.height + 1
+    if maxRenderPosY < 1 then
+      maxRenderPosY = 1
+    end
+    return {x=maxRenderPosX, y=maxRenderPosY}
   end
 
   local createCallbackData = function()
@@ -151,6 +160,31 @@ local function create(args)
     }
   end
 
+  local shiftScreenCoordsBy = function(callbackData, diffY)
+    local maxRenderPos = getMaxRenderPos()
+    if diffY + self.screenState.renderPos.y > maxRenderPos.y then
+      --Don't go past the buffer
+      diffY = maxRenderPos.y - self.screenState.renderPos.y
+    elseif diffY + self.screenState.renderPos.y < 1 then
+      --Don't go before the buffer
+      diffY = 1 - self.screenState.renderPos.y
+    end
+    self.screenState.renderPos.y = self.screenState.renderPos.y + diffY
+    callbackData.movementOffset.y = callbackData.movementOffset.y + diffY
+  end
+
+  local shiftScreenCoordsTo = function(callbackData, renderPosY)
+    local maxRenderPos = getMaxRenderPos()
+    if renderPosY > maxRenderPos.y then
+      renderPosY = maxRenderPos.y
+    elseif renderPosY < 1 then
+      renderPosY = 1
+    end
+    local diffY = renderPosY - self.screenState.renderPos.y
+    self.screenState.renderPos.y = self.screenState.renderPos.y + diffY
+    callbackData.movementOffset.y = callbackData.movementOffset.y + diffY
+  end
+
   local shiftScreenCoordsLeft = function(callbackData)
     if self.screenState.renderPos.x > 1 then
       self.screenState.renderPos.x = self.screenState.renderPos.x - 1
@@ -160,9 +194,13 @@ local function create(args)
   end
 
   local shiftScreenCoordsRight = function(callbackData)
-    self.screenState.renderPos.x = self.screenState.renderPos.x + 1
-    callbackData.movementOffset.x = callbackData.movementOffset.x + 1
-    return true
+    local maxRenderPos = getMaxRenderPos()
+    if self.screenState.renderPos.x < maxRenderPos.x then
+      self.screenState.renderPos.x = self.screenState.renderPos.x + 1
+      callbackData.movementOffset.x = callbackData.movementOffset.x + 1
+      return true
+    end
+    return false
   end
 
   local shiftScreenCoordsUp = function(callbackData)
@@ -175,7 +213,8 @@ local function create(args)
   end
 
   local shiftScreenCoordsDown = function(callbackData)
-    if self.screenState.renderPos.y < getBufferLength() then
+    local maxRenderPos = getMaxRenderPos()
+    if self.screenState.renderPos.y < maxRenderPos.y then
       self.screenState.renderPos.y = self.screenState.renderPos.y + 1
       callbackData.movementOffset.y = callbackData.movementOffset.y + 1
       return true
@@ -219,7 +258,6 @@ local function create(args)
       local char = safeSubstring(text, i, i)
       local textColor = safeSubstring(textColors, i, i)
       local bgColor = safeSubstring(bgColors, i, i)
-      logger.debug(bgColor)
       row[bufferCursorPos.x] = { textColor=textColor, bgColor=bgColor, char=char}
       bufferCursorPos.x = bufferCursorPos.x + 1
     end
@@ -482,6 +520,20 @@ local function create(args)
     return writeData
   end
 
+  local scrollTo = function(renderPosY)
+    local callbackData = createCallbackData()
+    shiftScreenCoordsTo(callbackData, renderPosY)
+    render()
+    sendCallbackData(callbackData)
+  end
+
+  local scrollBy = function(diffY)
+    local callbackData = createCallbackData()
+    shiftScreenCoordsBy(callbackData, diffY)
+    render()
+    sendCallbackData(callbackData)
+  end
+
   local scrollUp = function()
     local callbackData = createCallbackData()
     shiftScreenCoordsUp(callbackData)
@@ -558,6 +610,7 @@ local function create(args)
     getWidth = function() return self.width end,
     getHeight = function() return self.height end,
     getBufferDimensions=getBufferDimensions,
+    getMaxRenderPos=getMaxRenderPos,
     render=render,
     clear=clear,
     ln=ln,
@@ -573,6 +626,8 @@ local function create(args)
     writeLeftLn=writeLeftLn,
     writeRight=writeRight,
     writeRightLn=writeRightLn,
+    scrollTo=scrollTo,
+    scrollBy=scrollBy,
     scrollUp=scrollUp,
     scrollDown=scrollDown,
     scrollLeft=scrollLeft,

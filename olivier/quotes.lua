@@ -66,6 +66,7 @@ function writeQuote(screenBuffer, quote)
     screenBuffer.ln()
     screenBuffer.writeLeftLn{text="Author: " .. quote['author']}
     screenBuffer.ln()
+    screenBuffer.ln()
   end
 end
 

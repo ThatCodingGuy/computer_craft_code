@@ -3,7 +3,7 @@
 
 local function create(args)
   local self = {
-    pages = {},
+    view = {},
     currPage = 0,
     eventHandler = args.eventHandler,
     leftButton = args.leftButton,
@@ -12,6 +12,10 @@ local function create(args)
     rightButtonOrigCallback = nil,
     postPageChangeCallback = args.postPageChangeCallback,
   }
+
+  local render = function()
+
+  end
 
   local getPage = function()
     return self.pages[self.currPage]
@@ -74,6 +78,7 @@ local function create(args)
   end
 
   return {
+    render=render,
     getPage=getPage,
     getPageIndex=getPageIndex,
     hasPreviousPage=hasPreviousPage,

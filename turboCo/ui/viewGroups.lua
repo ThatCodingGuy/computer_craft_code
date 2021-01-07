@@ -48,8 +48,6 @@ local function create(args)
     makeGroupActive(group)
   end
 
-  
-
   return {
     addView=addView,
     moveGroupToTop=moveGroupToTop

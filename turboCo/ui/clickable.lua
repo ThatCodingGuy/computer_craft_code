@@ -23,9 +23,10 @@ local function create(args)
     monitorTouchCallbacks={},
     leftMouseDownCallbacks={},
     leftMouseUpCallbacks={},
+    leftMouseDragCallbacks={},
     rightMouseDownCallbacks={},
     rightMouseUpCallbacks={},
-    screenStartingPos = args.screenBuffer.getScreenStartingPos(),
+    rightMouseDragCallbacks={},
     screenBufferWidth = args.screenBuffer.getWidth(),
     screenBufferHeight = args.screenBuffer.getHeight(),
     currentScreenPos= { x=0, y=0 },
@@ -33,16 +34,18 @@ local function create(args)
     monitorTouchHandlerId = nil,
     mouseClickHanderId = nil,
     mouseUpHandlerId = nil,
-    isLeftMouseHeldDown = false,
-    isRightMouseHeldDown = false,
+    mouseDragHandlerId = nil,
+    leftMouseDragScreenPos = nil,
+    rightMouseDragScreenPos = nil,
   }
 
   local wasClicked = function(x, y)
+    local screenStartingPos = self.screenBuffer.getScreenStartingPos()
     local maxClickablePosX = self.currentScreenPos.x + #self.text - 1
-    local maxScreenPosX = self.screenStartingPos.x + self.screenBufferWidth - 1
-    local maxScreenPosY = self.screenStartingPos.y + self.screenBufferHeight - 1
-    local wasClickedVal = x >= self.screenStartingPos.x and x <= maxScreenPosX and --make sure that we are clicking within the screen buffer render view on X
-      y >= self.screenStartingPos.y and y <= maxScreenPosY and --make sure that we are clicking within the screen buffer render view on Y
+    local maxScreenPosX = screenStartingPos.x + self.screenBufferWidth - 1
+    local maxScreenPosY = screenStartingPos.y + self.screenBufferHeight - 1
+    local wasClickedVal = x >= screenStartingPos.x and x <= maxScreenPosX and --make sure that we are clicking within the screen buffer render view on X
+      y >= screenStartingPos.y and y <= maxScreenPosY and --make sure that we are clicking within the screen buffer render view on Y
       x >= self.currentScreenPos.x and x <= maxClickablePosX and y == self.currentScreenPos.y --now we make sure it was this clickable which was clicked
     if wasClickedVal then
       logger.debug("clickable clicked: ", self.id, ", on posX: ", x, ", posY: ", y)
@@ -68,6 +71,13 @@ local function create(args)
     end
   end
 
+  local executeLeftMouseDragCallbacks = function(args)
+    args.id = self.id
+    for _,callback in pairs(self.monitorTouchCallbacks) do
+      callback(args)
+    end
+  end
+
   local executeRightMouseDownCallbacks = function()
     for _,callback in pairs(self.rightMouseDownCallbacks) do
       callback(self.id)
@@ -88,16 +98,29 @@ local function create(args)
     end
   end
 
+  local mouseDragHandler = function(eventData)
+    local button, x, y = eventData[2], eventData[3], eventData[4]
+    if button == 1 and self.leftMouseDragScreenPos then
+      local oldScreenPos = {x = self.leftMouseDragScreenPos.x, y = self.leftMouseDragScreenPos.y}
+      local distanceY = y - self.leftMouseDragScreenPos.y
+      self.leftMouseDragScreenPos = {x = x, y = y}
+      if distanceY == 0 then
+        return
+      end
+      executeLeftMouseDragCallbacks({oldScreenPos=oldScreenPos, newScreenPos={x = x, y = y}})
+    end
+  end
+
   local mouseDownHandler = function(eventData)
     local button, x, y = eventData[2], eventData[3], eventData[4]
     if wasClicked(x, y) then
       if button == 1 then
         logger.debug("left-mouse down for clickable: ", self.text, ", on posX: ", x, ", posY: ", y)
-        self.isLeftMouseHeldDown = true
+        self.leftMouseDragScreenPos = {x = x, y = y}
         executeLeftMouseDownCallbacks()
       elseif button == 2 then
         logger.debug("right-mouse down for clickable: ", self.text, ", on posX: ", x, ", posY: ", y)
-        self.isRightMouseHeldDown = true
+        self.rightMouseDragScreenPos = {x = x, y = y}
         executeRightMouseDownCallbacks()
       end
     end
@@ -105,13 +128,13 @@ local function create(args)
 
   local mouseUpHandler = function(eventData)
     local button, x, y = eventData[2], eventData[3], eventData[4]
-    if button == 1 and self.isLeftMouseHeldDown then
+    if button == 1 and self.leftMouseDragScreenPos then
       logger.debug("left-mouse up for clickable: ", self.text, ", on posX: ", x, ", posY: ", y)
-      self.isLeftMouseHeldDown = false
+      self.leftMouseDragScreenPos = nil
       executeLeftMouseUpCallbacks()
-    elseif button == 2 and self.isRightMouseHeldDown then
+    elseif button == 2 and self.rightMouseDragScreenPos then
       logger.debug("right-mouse up for clickable: ", self.text, ", on posX: ", x, ", posY: ", y)
-      self.isRightMouseHeldDown = false
+      self.rightMouseDragScreenPos = nil
       executeRightMouseUpCallbacks()
     end
   end
@@ -128,6 +151,7 @@ local function create(args)
   local makeActive = function()
     --Can assume both input method IDs to be in same state
     if not isActive() then
+      self.mouseDragHandlerId = self.eventHandler.addHandle("mouse_drag", mouseDragHandler)
       self.monitorTouchHandlerId = self.eventHandler.addHandle("monitor_touch", monitorTouchHandler)
       self.mouseClickHanderId = self.eventHandler.addHandle("mouse_click", mouseDownHandler)
       self.mouseUpHandlerId = self.eventHandler.addHandle("mouse_up", mouseUpHandler)
@@ -137,9 +161,11 @@ local function create(args)
   local makeInactive = function()
     --Can assume both input method IDs to be in same state
     if isActive() then
+      self.eventHandler.removeHandle(self.mouseDragHandlerId)
       self.eventHandler.removeHandle(self.monitorTouchHandlerId)
       self.eventHandler.removeHandle(self.mouseClickHanderId)
       self.eventHandler.removeHandle(self.mouseUpHandlerId)
+      self.mouseDragHandlerId = nil
       self.monitorTouchHandlerId = nil
       self.mouseClickHanderId = nil
       self.mouseUpHandlerId = nil

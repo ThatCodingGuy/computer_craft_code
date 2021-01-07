@@ -141,7 +141,8 @@ local function create(args)
 
   local createCallbackData = function()
     return {
-      movementOffset = {x=0, y=0},
+      movementOffset = {x=0, y=0}, --scrolling movement
+      screenMovementOffset = {x=0, y=0}, --screen starting position movement
       dimensions = getBufferDimensions()
     }
   end
@@ -598,6 +599,16 @@ local function create(args)
     sendCallbackData(callbackData)
   end
 
+  local moveBy = function(x, y)
+    local callbackData = createCallbackData()
+    self.screenStartingPos.x = self.screenStartingPos.x + x
+    self.screenStartingPos.y = self.screenStartingPos.x + y
+    callbackData.screenMovementOffset.x = callbackData.screenMovementOffset.x + x
+    callbackData.screenMovementOffset.y = callbackData.screenMovementOffset.x + y
+    render()
+    sendCallbackData()
+  end
+
   local registerCallback = function(callback)
     table.insert(self.callbacks, callback)
   end
@@ -636,6 +647,7 @@ local function create(args)
     pageDown=pageDown,
     pageLeft=pageLeft,
     pageRight=pageRight,
+    moveBy=moveBy,
     registerCallback=registerCallback
   }
 end

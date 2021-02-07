@@ -73,7 +73,7 @@ local function create(args)
 
   local executeLeftMouseDragCallbacks = function(args)
     args.id = self.id
-    for _,callback in pairs(self.monitorTouchCallbacks) do
+    for _,callback in pairs(self.leftMouseDragCallbacks) do
       callback(args)
     end
   end
@@ -87,6 +87,13 @@ local function create(args)
   local executeRightMouseUpCallbacks = function()
     for _,callback in pairs(self.rightMouseUpCallbacks) do
       callback(self.id)
+    end
+  end
+
+  local executeRightMouseDragCallbacks = function(args)
+    args.id = self.id
+    for _,callback in pairs(self.rightMouseDragCallbacks) do
+      callback(args)
     end
   end
 
@@ -108,6 +115,14 @@ local function create(args)
         return
       end
       executeLeftMouseDragCallbacks({oldScreenPos=oldScreenPos, newScreenPos={x = x, y = y}})
+    elseif button == 2 and self.rightMouseDragScreenPos then
+      local oldScreenPos = {x = self.rightMouseDragScreenPos.x, y = self.rightMouseDragScreenPos.y}
+      local distanceY = y - self.rightMouseDragScreenPos.y
+      self.rightMouseDragScreenPos = {x = x, y = y}
+      if distanceY == 0 then
+        return
+      end
+      executeRightMouseDragCallbacks({oldScreenPos=oldScreenPos, newScreenPos={x = x, y = y}})
     end
   end
 
@@ -140,8 +155,9 @@ local function create(args)
   end
   
   local screenBufferCallback = function(callbackData)
-    self.currentScreenPos.x = self.currentScreenPos.x - callbackData.movementOffset.x
-    self.currentScreenPos.y = self.currentScreenPos.y - callbackData.movementOffset.y
+    --either we scrolled the screenBuffer or we moved the screenBuffer
+    self.currentScreenPos.x = self.currentScreenPos.x - callbackData.movementOffset.x + callbackData.screenMovementOffset.x
+    self.currentScreenPos.y = self.currentScreenPos.y - callbackData.movementOffset.y + callbackData.screenMovementOffset.y
   end
 
   local isActive = function()
@@ -190,6 +206,12 @@ local function create(args)
     end
   end
 
+  local addLeftMouseDragCallback = function(callbackFunc)
+    if callbackFunc ~= nil then
+      table.insert(self.leftMouseDragCallbacks, callbackFunc)
+    end
+  end
+
   local addRightMouseDownCallback = function(callbackFunc)
     if callbackFunc ~= nil then
       table.insert(self.rightMouseDownCallbacks, callbackFunc)
@@ -199,6 +221,12 @@ local function create(args)
   local addRightMouseUpCallback = function(callbackFunc)
     if callbackFunc ~= nil then
       table.insert(self.rightMouseUpCallbacks, callbackFunc)
+    end
+  end
+
+  local addRightMouseDragCallback = function(callbackFunc)
+    if callbackFunc ~= nil then
+      table.insert(self.rightMouseDragCallbacks, callbackFunc)
     end
   end
 
@@ -229,12 +257,20 @@ local function create(args)
     addLeftMouseUpCallback(args.leftMouseUpCallback)
   end
 
+  if args.leftMouseDragCallback ~= nil then
+    addLeftMouseDragCallback(args.leftMouseDragCallback)
+  end
+
   if args.rightMouseDownCallback ~= nil then
     addRightMouseDownCallback(args.rightMouseDownCallback)
   end
 
   if args.rightMouseUpCallback ~= nil then
     addRightMouseUpCallback(args.rightMouseUpCallback)
+  end
+
+  if args.rightMouseDragCallback ~= nil then
+    addRightMouseDragCallback(args.rightMouseDragCallback)
   end
 
   self.screenBuffer.registerCallback(screenBufferCallback)
@@ -244,8 +280,10 @@ local function create(args)
     addMonitorTouchCallback=addMonitorTouchCallback,
     addLeftMouseDownCallback=addLeftMouseDownCallback,
     addLeftMouseUpCallback=addLeftMouseUpCallback,
+    addLeftMouseDragCallback=addLeftMouseDragCallback,
     addRightMouseDownCallback=addRightMouseDownCallback,
     addRightMouseUpCallback=addRightMouseUpCallback,
+    addRightMouseDragCallback=addRightMouseDragCallback,
     makeActive=makeActive,
     makeInactive=makeInactive,
     updateText=updateText

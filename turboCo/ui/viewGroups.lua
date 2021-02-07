@@ -1,4 +1,4 @@
-local function create(args)
+local function create()
   local self = {
     viewGroups = {}
   }
@@ -20,20 +20,32 @@ local function create(args)
   end
 
   local makeGroupActive = function(group)
-    for _,view in group.views do
+    for _,view in pairs(group.views) do
       view.makeActive()
     end
   end
 
   local makeGroupInactive = function(group)
-    for _,view in group.views do
+    for _,view in pairs(group.views) do
       view.makeActive()
+    end
+  end
+
+  local removeGroup = function(groupName)
+    for index,group in pairs(self.viewGroups) do
+      if group.name == groupName then
+        groupIndex = index
+      end
+    end
+    table.remove(self.viewGroups, groupIndex)
+    if #self.viewGroups > 0 then
+      makeGroupActive(self.viewGroups[1])
     end
   end
 
   local moveGroupToTop = function(groupName)
     local groupIndex = nil
-    for index,group in pairs(self.screenBufferGroups) do
+    for index,group in pairs(self.viewGroups) do
       if group.name == groupName then
         groupIndex = index
       else
@@ -43,13 +55,14 @@ local function create(args)
     if groupIndex == nil then
       error(string.format('groupName: "%s" is not present in the screen group', groupName))
     end
-    local group = table.remove(self.screenViewGroups, groupIndex)
-    table.insert(self.screenViewGroups, group, 1)
+    local group = table.remove(self.viewGroups, groupIndex)
+    table.insert(self.viewGroups, 1, group)
     makeGroupActive(group)
   end
 
   return {
     addView=addView,
+    removeGroup=removeGroup,
     moveGroupToTop=moveGroupToTop
   }
 

@@ -599,6 +599,18 @@ local function create(args)
     sendCallbackData(callbackData)
   end
 
+  local moveTo = function(x, y)
+    local callbackData = createCallbackData()
+    local offsetX = x - self.screenStartingPos.x
+    local offsetY = y - self.screenStartingPos.y
+    self.screenStartingPos.x = x
+    self.screenStartingPos.y = y
+    callbackData.screenMovementOffset.x = callbackData.screenMovementOffset.x + offsetX
+    callbackData.screenMovementOffset.y = callbackData.screenMovementOffset.y + offsetY
+    render()
+    sendCallbackData(callbackData)
+  end
+
   local moveBy = function(x, y)
     local callbackData = createCallbackData()
     self.screenStartingPos.x = self.screenStartingPos.x + x
@@ -606,7 +618,7 @@ local function create(args)
     callbackData.screenMovementOffset.x = callbackData.screenMovementOffset.x + x
     callbackData.screenMovementOffset.y = callbackData.screenMovementOffset.x + y
     render()
-    sendCallbackData()
+    sendCallbackData(callbackData)
   end
 
   local registerCallback = function(callback)
@@ -647,6 +659,7 @@ local function create(args)
     pageDown=pageDown,
     pageLeft=pageLeft,
     pageRight=pageRight,
+    moveTo=moveTo,
     moveBy=moveBy,
     registerCallback=registerCallback
   }

@@ -5,12 +5,14 @@ local ScrollView = dofile("./gitlib/turboCo/ui/scrollView.lua")
 local Button = dofile("./gitlib/turboCo/ui/button.lua")
 local View = dofile("./gitlib/turboCo/ui/view.lua")
 local PageManagerView = dofile("./gitlib/turboCo/ui/pageManagerView.lua")
+local WindowView = dofile("./gitlib/turboCo/ui/windowView.lua")
 local ScreenContent = dofile("./gitlib/turboCo/ui/screenContent.lua")
 local ExitHandler = dofile("./gitlib/turboCo/ui/exitHandler.lua")
 local httpManager = dofile("./gitlib/turboCo/httpManager.lua").create{eventHandler=eventHandler}
+local viewGroups = dofile('./gitlib/turboCo/ui/viewGroups.lua').create()
 local Logger = dofile("./gitlib/turboCo/logger.lua")
 local logger = Logger.new()
-local loggingLevel = "ERROR"
+local loggingLevel = "DEBUG"
 if LOGGING_LEVEL then
   loggingLevel = LOGGING_LEVEL
 end
@@ -135,6 +137,21 @@ function createFirstPage()
   }
   pageManagerView.switchToNextPage()
   screenBottomView.screenBuffer.render()
+  local windowView = WindowView.createFromOverrides{
+    screen=screen,
+    eventHandler=eventHandler,
+    viewGroups=viewGroups,
+    topOffset=4,
+    bottomOffset=4,
+    leftOffset=4,
+    rightOffset=4,
+    bgColor=colors.yellow,
+    textColor=colors.black
+  }
+  windowView.screenBuffer.writeCenterLn({text="Test"})
+  windowView.screenBuffer.ln()
+  windowView.screenBuffer.write({text="yooooo"})
+  windowView.screenBuffer.render()
 end
 
 function getFirstQuotes()
@@ -148,12 +165,14 @@ function getNextQuotes()
 end
 
 screenTopView = View.createFromOverrides{screen=screen, height=2, textColor=colors.lightBlue, bgColor=colors.gray}
+viewGroups.addView{groupName="main", view=screenTopView}
 screenTopView.screenBuffer.writeCenterLn{text="Quotes of the Day", textColor=colors.lightBlue, bgColor=colors.gray}
 screenTopView.screenBuffer.writeFullLineLn{text="-", textColor=colors.lightBlue, bgColor=colors.gray}
 screenTopView.screenBuffer.render()
 
 screenBottomView = View.createFromOverrides{screen=screen, topOffset=height-1, textColor=colors.lightBlue, bgColor=colors.gray}
-screenBottomView.screenBuffer.writeFullLineThenResetCursor{text=" ", }
+viewGroups.addView{groupName="main", view=screenBottomView}
+--screenBottomView.screenBuffer.writeFullLineThenResetCursor{text=" "}
 
 pageManagerView = PageManagerView.create{
   eventHandler = eventHandler,
@@ -174,6 +193,7 @@ pageManagerView = PageManagerView.create{
   },
   postPageChangeCallback = updatePageTracker
 }
+viewGroups.addView{groupName="main", view=pageManagerView}
 screenBottomView.screenBuffer.render()
 
 --Get the initial quote
